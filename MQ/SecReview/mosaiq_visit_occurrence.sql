@@ -85,28 +85,27 @@ EXECUTION CHECK SUCESSFUL 01/10/2022
 1/10/2022 -- using concatenation of Appt date and Mosaiq Patient ID as visit occurrence identifer
 */
 SET NOCOUNT ON;
-SELECT "IDENTITY_CONTEXT|SOURCE_PK|VISIT_OCCURRENCE_ID|PERSON_ID|VISIT_CONCEPT_ID|VISIT_START_DATE|VISIT_START_DATETIME|VISIT_END_DATE|VISIT_END_DATETIME|VISIT_TYPE_CONCEPT_ID|PROVIDER_ID|CARE_SITE_ID|VISIT_SOURCE_VALUE|VISIT_SOURCE_CONCEPT_ID|ADMITTED_FROM_CONCEPT_ID|ADMITTED_FROM_SOURCE_VALUE|DISCHARGE_TO_CONCEPT_ID|DISCHARGE_TO_SOURCE_VALUE|PRECEDING_VISIT_OCCURRENCE_ID|modified_dtTm";
 SELECT	DISTINCT
 		'MosaiqAdmin Ref_SchSets (OMOP_VISIT_OCCURRENCE)'	AS IDENTITY_CONTEXT
 	   ,Ref_SchSets.apptDt_PatID					AS SOURCE_PK					-- will be multiple Visit_Details for each apptDt_PatID
  	   ,Ref_SchSets.apptDt_PatID					AS VISIT_OCCURRENCE_ID  
        ,Ref_SchSets.Pat_ID1							AS PERSON_ID
 	   ,'Outpatient Visit'							AS VISIT_CONCEPT_ID
-	   ,FORMAT(Ref_SchSets.appt_date,'yyyy-MM-dd HH:mm:ss')	AS VISIT_START_DATE		-- Date only 
-	   ,NULL										AS VISIT_START_DATETIME			-- DateTime will be on the Visit Detail records
-	   ,NULL										AS VISIT_END_DATE
-	   ,NULL										AS VISIT_END_DATETIME
-	   ,'EHR RECORD'								AS VISIT_TYPE_CONCEPT_ID 
-	   ,NULL										AS PROVIDER_ID					-- Provider will be on the Visit Detail record
-	   ,5											AS CARE_SITE_ID
-	   ,Ref_SchSets.Sch_set_Id							AS VISIT_SOURCE_VALUE
-	   ,0											AS VISIT_SOURCE_CONCEPT_ID
-	   ,0											AS ADMITTED_FROM_CONCEPT_ID
- 	   ,0											AS ADMITTED_FROM_SOURCE_VALUE
-	   ,0											AS DISCHARGE_TO_CONCEPT_ID
-	   ,0											AS DISCHARGE_TO_SOURCE_VALUE
-	   ,NULL										AS PRECEDING_VISIT_OCCURRENCE_ID  -- Not tracked in MQ, but RS21 will calculate
-	   ,FORMAT(Ref_SchSets.run_date,'yyyy-MM-dd HH:mm:ss') as modified_dtTm 
+	   ,isNULL(FORMAT(Ref_SchSets.appt_date,'yyyy-MM-dd HH:mm:ss'), '')		AS VISIT_START_DATE		-- Date only 
+	   ,''										AS VISIT_START_DATETIME			-- DateTime will be on the Visit Detail records
+	   ,''										AS VISIT_END_DATE
+	   ,''										AS VISIT_END_DATETIME
+	   ,'EHR RECORD'							AS VISIT_TYPE_CONCEPT_ID 
+	   ,''										AS PROVIDER_ID					-- Provider will be on the Visit Detail record
+	   ,5										AS CARE_SITE_ID
+	   ,Ref_SchSets.Sch_set_Id					AS VISIT_SOURCE_VALUE
+	   ,0										AS VISIT_SOURCE_CONCEPT_ID
+	   ,0										AS ADMITTED_FROM_CONCEPT_ID
+ 	   ,0										AS ADMITTED_FROM_SOURCE_VALUE
+	   ,0										AS DISCHARGE_TO_CONCEPT_ID
+	   ,0										AS DISCHARGE_TO_SOURCE_VALUE
+	   ,''										AS PRECEDING_VISIT_OCCURRENCE_ID  -- Not tracked in MQ, but RS21 will calculate
+	   ,isNULL(FORMAT(Ref_SchSets.run_date,'yyyy-MM-dd HH:mm:ss'), '')	 as modified_dtTm 
 FROM MosaiqAdmin.dbo.Ref_SchSets
 INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on Ref_SchSets.pat_id1 = pat.pat_id1 -- subset 
 WHERE   Ref_SchSets.Pat_ID1 IS NOT NULL
