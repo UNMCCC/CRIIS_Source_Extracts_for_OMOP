@@ -55,25 +55,26 @@ Notes:
 
 CONFIDENCE LEVEL:  MEDIUM HIGH
 
-EXECUTION CHECK SUCCESSFUL DAH 01/10/2022
+EXECUTION CHECK SUCCESSFUL DAH 01/12/2022
+Addressed NULLS 01/12/2022
 */
 
 SET NOCOUNT ON;
 SELECT "IDENTIY_CONTEXT|SOURCE_PK|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|COUNTRY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|Modified_dTm";
 SELECT  --  Get Address for Valid Patients
-    'MOSAIQ ADMIN(OMOP_LOCATION)' AS IDENTIY_CONTEXT,
-    adm.ADM_ID			AS SOURCE_PK,
-    adm.Pat_Adr1		AS ADDRESS_1,
-    adm.Pat_Adr2		AS ADDRESS_2,
-    adm.Pat_City		AS CITY,
-    adm.Pat_State		AS STATE,
-    adm.Pat_Postal		AS ZIP,
-    adm.Pat_County		AS COUNTY,
-    adm.Pat_Country		AS COUNTRY,
-    adm.ADM_ID			AS LOCATION_SOURCE_VALUE,
-    NULL AS LATITUDE,
-    NULL AS LONGITUDE,
-	FORMAT(adm.edit_DtTm, 'yyyy-MM-dd HH:mm:ss')	AS Modified_dTm
+    'MOSAIQ ADMIN(OMOP_LOCATION)'	AS IDENTIY_CONTEXT,
+    adm.ADM_ID						AS SOURCE_PK,
+    adm.Pat_Adr1					AS ADDRESS_1,
+    isNull(adm.Pat_Adr2, ' ')		AS ADDRESS_2,
+    isNull(adm.Pat_City, ' ')		AS CITY,
+    isNull(adm.Pat_State, ' ')		AS STATE,
+    isNull(adm.Pat_Postal, ' ')		AS ZIP,
+    isNull(adm.Pat_County, ' ')		AS COUNTY,
+    isNull(adm.Pat_Country, ' ')	AS COUNTRY,
+    isNull(adm.ADM_ID, 0)			AS LOCATION_SOURCE_VALUE,
+    0 AS LATITUDE,
+    0 AS LONGITUDE,
+	isNull(FORMAT(adm.edit_DtTm, 'yyyy-MM-dd HH:mm:ss'), ' ')	AS Modified_dTm
 FROM
   Mosaiq.dbo.Admin as adm
   INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review Subset on adm.pat_id1 = Subset.pat_id1  -- Subset of patients for Security Review
@@ -84,18 +85,18 @@ WHERE
 UNION ALL
 SELECT
     'MOSAIQ FACILITY(OMOP_LOCATION)' AS IDENTIY_CONTEXT,
-    Fac.FAC_ID AS SOURCE_PK,
-    Fac.Adr1 as ADDRESS_1,
-    Fac.Adr2 as ADDRESS_2,
-    Fac.City as CITY,
-    Fac.State_Province as STATE,
-    Fac.postal as ZIP,
-    NULL as COUNTY,
-    Fac.Country AS COUNTRY,
-    Fac.FAC_ID as LOCATION_SOURCE_VALUE,
-    NULL as LATITUDE,
-    NULL AS LONGITUDE,
-	FORMAT(Fac.edit_DtTm, 'yyyy-MM-dd HH:mm:ss')	AS Modified_dTm
+    Fac.FAC_ID						AS SOURCE_PK,
+    isNull(Fac.Adr1, ' ')			AS ADDRESS_1,
+    isNull(Fac.Adr2, ' ')			AS ADDRESS_2,
+    isNull(Fac.City, ' ')			AS CITY,
+    isNull(Fac.State_Province, ' ') AS STATE,
+    isNull(Fac.postal, ' ')			AS ZIP,
+    ' '								AS COUNTY,
+    isNull(Fac.Country, ' ')		AS COUNTRY,
+    isNull(Fac.FAC_ID, ' ')			AS LOCATION_SOURCE_VALUE,
+    ' '								as LATITUDE,
+    ' '								AS LONGITUDE,
+	isNull(FORMAT(Fac.edit_DtTm, 'yyyy-MM-dd HH:mm:ss'), ' ')	AS Modified_dTm
 FROM
     Mosaiq.dbo.Facility as Fac
 WHERE

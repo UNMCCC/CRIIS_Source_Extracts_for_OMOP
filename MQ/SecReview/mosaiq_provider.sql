@@ -62,18 +62,18 @@ SELECT DISTINCT  -- added DH
 	  'MOSAIQ STAFF(OMOP_PROVIDER)' AS IDENTITY_CONTEXT,
        rsSource.Staff_ID	AS SOURCE_PK,
        rsSource.Staff_ID	AS PROVIDER_ID,
-	   ltrim(rtrim(rsSource.Last_name)) + ', ' + ltrim(rtrim(rsSource.First_name)) AS PROVIDER_NAME, -- DAH 11/4/21
-       (SELECT TOP 1 ID_Code FROM Mosaiq.dbo.EXT_ID rsTarget WHERE rsSource.Staff_ID = rsTarget.Staff_id AND rsTarget.Ext_Type = 'NPI') AS NPI,
-       (SELECT TOP 1 ID_Code FROM Mosaiq.dbo.EXT_ID rsTarget WHERE rsSource.Staff_ID = rsTarget.Staff_id AND rsTarget.Ext_Type = 'DEA') AS DEA,
-       rsSource.Other_Credentials	AS SPECIALTY_CONCEPT_ID,  -- Manually Maintained field in Mosaiq since 2015
+	   isNULL(ltrim(rtrim(rsSource.Last_name)) + ', ' + ltrim(rtrim(rsSource.First_name)),'' ) AS PROVIDER_NAME, -- DAH 11/4/21
+       (isNULL((SELECT TOP 1 ID_Code FROM Mosaiq.dbo.EXT_ID rsTarget WHERE rsSource.Staff_ID = rsTarget.Staff_id AND rsTarget.Ext_Type = 'NPI'),'')) AS NPI,
+       (isNULL((SELECT TOP 1 ID_Code FROM Mosaiq.dbo.EXT_ID rsTarget WHERE rsSource.Staff_ID = rsTarget.Staff_id AND rsTarget.Ext_Type = 'DEA'),''))  AS DEA,
+       isNULL(rsSource.Other_Credentials, '')	AS SPECIALTY_CONCEPT_ID,  -- Manually Maintained field in Mosaiq since 2015
 	   5							AS CARE_SITE_ID,		 
-	   YEAR(rsSource.Birth_DtTm)	AS YEAR_OF_BIRTH,
-       rsSource.Gender				AS GENDER_CONCEPT_ID,
-       rsSource.Staff_ID			AS PROVIDER_SOURCE_VALUE,
-	   rsSource.Other_Credentials	AS SPECIALTY_SOURCE_VALUE,     
-       0							AS SPECIALTY_SOURCE_CONCEPT_ID,
-       rsSource.Gender				AS GENDER_SOURCE_VALUE,
-       0							AS GENDER_SOURCE_CONCEPT_ID,
+	   isNULL(YEAR(rsSource.Birth_DtTm), '')	AS YEAR_OF_BIRTH,
+       isNULL(rsSource.Gender, '')				AS GENDER_CONCEPT_ID,
+       isNULL(rsSource.Staff_ID,0)				AS PROVIDER_SOURCE_VALUE,
+	   isNULL(rsSource.Other_Credentials, '')	AS SPECIALTY_SOURCE_VALUE,     
+       0										AS SPECIALTY_SOURCE_CONCEPT_ID,
+        isNULL(rsSource.Gender, '')				AS GENDER_SOURCE_VALUE,
+       0									AS GENDER_SOURCE_CONCEPT_ID,
 	   Format(rsSource.edit_DtTm,'yyyy-MM-dd HH:mm:ss') as modified_dtTm	
 FROM Mosaiq.dbo.Staff rsSource
 WHERE	rsSource.Type <> 'Location'				-- To select people and exclude places and machines

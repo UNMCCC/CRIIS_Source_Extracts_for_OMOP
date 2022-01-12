@@ -35,7 +35,7 @@ Notes:
 
 */
 /*
--- EXECUTION CHECK SUCCESSFUL -- DAH 01/10/2022
+-- EXECUTION CHECK SUCCESSFUL -- DAH 01/12/2022
 
 -- 12/14/21 -- Should we distinguish between RO and MO? -- ASK INIGO
 
@@ -46,20 +46,20 @@ Notes:
    When scheduling-department = 'UNMMO' and scheduling-location NOT 'UNM Santa Fe' then fac_id = 5 ('UNMCC 1201')
    otherwise fac_id = 5 ('UNMCC 1201') -- originally reporting all activity at fac_id = 5
 			--
-
+Addressed NULLS 01/12/2022
 */
 SET NOCOUNT ON;
 SELECT "IDENTITY_CONTEXT|SOURCE_PK|CARE_SITE_ID|CARE_SITE_NAME|PLACE_OF_SERVICE_CONCEPT_ID|LOCATION_ID|CARE_SITE_SOURCE_VALUE|PLACE_OF_SERVICE_SOURCE_VALUE|modified_dtTm";
 SELECT 'MOSAIQ FACILITY(OMOP_CARESITE)' AS IDENTITY_CONTEXT,
-       fac.FAC_ID as SOURCE_PK,
-       5 as CARE_SITE_ID,
-       fac.Name as CARE_SITE_NAME,
-       fac.Facility_Type as PLACE_OF_SERVICE_CONCEPT_ID,
-       fac.FAC_ID  as LOCATION_ID,
-       fac.FAC_ID as CARE_SITE_SOURCE_VALUE,
-       fac.Name as PLACE_OF_SERVICE_SOURCE_VALUE,
-	   FORMAT(fac.edit_dtTm,'yyyy-MM-dd HH:mm:ss') as modified_dtTm
- FROM Mosaiq.dbo.Facility as fac
+       fac.FAC_ID						AS SOURCE_PK,
+       5								AS CARE_SITE_ID,
+       isNULL(fac.Name, '')			AS CARE_SITE_NAME,
+       isNULL(fac.Facility_Type, '')	AS PLACE_OF_SERVICE_CONCEPT_ID,
+       fac.FAC_ID						AS LOCATION_ID,
+       fac.FAC_ID						AS CARE_SITE_SOURCE_VALUE,
+       isNULL(fac.Name, '')	  		AS PLACE_OF_SERVICE_SOURCE_VALUE,
+	   isNULL(FORMAT(fac.edit_dtTm,'yyyy-MM-dd HH:mm:ss'), '')  AS modified_dtTm
+ FROM Mosaiq.dbo.Facility AS fac
  WHERE fac.FAC_ID IS NOT NULL
  and   fac.FAC_ID in (5, 51, 77, 89, 102  ) -- 5=UNMCC 1201, 51='UNMCC 715', 77='UNMCC SF', 89='UNMMG Lovelace Medical Center OP',102='UNM CRTC II Radiation Oncology'
 ;

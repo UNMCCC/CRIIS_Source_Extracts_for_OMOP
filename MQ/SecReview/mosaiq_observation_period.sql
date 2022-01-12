@@ -36,19 +36,21 @@ Notes:
 */
  
 /* CONFIDENCE LEVEL 75% -- is this the correct interpretation?
-EXECUTION CHECK SUCCESSFUL -- DAH 01/10/2022
+addressed NULLS  -- DAH 01/12/2022
+EXECUTION CHECK SUCCESSFUL -- DAH 01/12/2022
 */
 SET NOCOUNT ON;
 SELECT "IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_PERIOD_ID|PERSON_ID|OBSERVATION_PERIOD_START_DATE|OBSERVATION_PERIOD_END_DATE|PERIOD_TYPE_CONCEPT_ID|Duration_HrMin|Activity";
 SELECT  'MosaiqAdmin Ref_SchSets (OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
-      ,rsource.sch_Set_Id AS SOURCE_PK
-      ,rsource.sch_Set_Id AS OBSERVATION_PERIOD_ID
-      ,rsource.Pat_ID1 AS PERSON_ID
-      ,Format(rsource.Appt_DtTm,'yyyy-MM-dd HH:mm:ss') AS OBSERVATION_PERIOD_START_DATE
-	  ,NULL AS OBSERVATION_PERIOD_END_DATE
+      ,rsource.sch_Set_Id	AS SOURCE_PK
+      ,rsource.sch_Set_Id	AS OBSERVATION_PERIOD_ID
+      ,rsource.Pat_ID1		AS PERSON_ID
+      ,isNULL(Format(rsource.Appt_DtTm,'yyyy-MM-dd HH:mm:ss'), '')  AS OBSERVATION_PERIOD_START_DATE
+	  ,''					AS OBSERVATION_PERIOD_END_DATE
 	  ,'EHR note' AS PERIOD_TYPE_CONCEPT_ID
-      ,rsource.Duration_HrMin   
-      ,rsource.Activity
+      ,isNULL(rsource.Duration_HrMin , '') 
+      ,isNULL(rsource.Activity, '')
   FROM MosaiqAdmin.dbo.Ref_SchSets rsource
   INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on rsource.pat_id1 = pat.pat_id1 -- subset 
+  WHERE sch_set_id is not null
   ;

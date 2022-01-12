@@ -47,47 +47,50 @@ Notes:
 
 12/16/21 -- Added mapping to Values for 2 standard vocabularies: RxNorm and CVX
 01/10/22 -- added RxNorm_CodeType and CVX_CodeType
-EXECUTION CHECK SUCESSFUL 01/10/2022
+
 1/10/2022 -- added modified_dtTm  for incremental add
 1/10/2022 -- using concatenation of Appt date and Mosaiq Patient ID as visit occurrence identifer
+Addressed NULLS 01/12/2022
+
+EXECUTION CHECK SUCESSFUL 01/12/2022
 */
 SET NOCOUNT ON;
 SELECT "IDENTITY_CONTEXT|SOURCE_PK|DRUG_EXPOSURE_ID|PERSON_ID|DRUG_CONCEPT_ID|DRUG_EXPOSURE_START_DATE|DRUG_EXPOSURE_START_DATETIME|DRUG_EXPOSURE_END_DATE|DRUG_EXPOSURE_END_DATETIME|VERBATIM_END_DATETIME|DRUG_TYPE_CONCEPT_ID|STOP_REASON|REFILLS|QUANTITY|DAYS_SUPPLY|SIG|ROUTE_CONCEPT_ID|LOT_NUMBER|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|DRUG_SOURCE_VALUE|DRUG_SOURCE_CONCEPT_ID|ROUTE_SOURCE_VALUE|DOSE_UNIT_SOURCE_VALUE|Adm_units|drug_label|drug_generic_name|drug_type|RxNorm_CodeValue|RxNorm_CodeType|CVX_CodeValue|CVX_CodeType|modified_DtTm";
 SELECT DISTINCT 'Mosaiq Ref_Patient_Drugs_Administered(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
-    ,rsource.RXA_SET_ID				AS SOURCE_PK
-    ,rsource.RXA_SET_ID				AS DRUG_EXPOSURE_ID
-    ,rsource.Pat_ID1				AS PERSON_ID
-	,0								AS DRUG_CONCEPT_ID
-    ,FORMAT(rsource.Adm_Date,		'yyyy-MM-dd HH:mm:ss')	AS DRUG_EXPOSURE_START_DATE
-    ,FORMAT(rsource.Adm_Start_DtTm,	'yyyy-MM-dd HH:mm:ss')	AS DRUG_EXPOSURE_START_DATETIME
-    ,FORMAT(rsource.Adm_Date,		'yyyy-MM-dd HH:mm:ss')	AS DRUG_EXPOSURE_END_DATE
-    ,FORMAT(rsource.Adm_End_DtTm,	'yyyy-MM-dd HH:mm:ss')	AS DRUG_EXPOSURE_END_DATETIME
-    ,FORMAT(rsource.Adm_End_DtTm,	'yyyy-MM-dd HH:mm:ss')	AS VERBATIM_END_DATETIME
-	,'EHR Administered Drugs'								AS DRUG_TYPE_CONCEPT_ID
-	,NULL							AS STOP_REASON
-	,NULL							AS REFILLS
-    ,rsource.Adm_Amount				AS QUANTITY  -- need units to describe quantity (added field)
-	,NULL							AS DAYS_SUPPLY
-	,NULL							AS SIG
-    ,rsource.Adm_Route				AS ROUTE_CONCEPT_ID
-	,NULL							AS LOT_NUMBER
-    ,rsource.Ordering_provider_id   AS PROVIDER_ID   
-	,rsource.ApptDt_PatID			AS VISIT_OCCURRENCE_ID   -- for multiple visits
-	,0								AS VISIT_DETAIL_ID
-	,0								AS DRUG_SOURCE_VALUE
-	,0								AS DRUG_SOURCE_CONCEPT_ID
-    ,rsource.Adm_Route				AS ROUTE_SOURCE_VALUE
-    ,rsource.Adm_Amount				AS DOSE_UNIT_SOURCE_VALUE
-	,rsource.Adm_units				-- units associated with Quantity (mg, mcg, ml, etc)
-	,rsource.drug_label				-- Mosaiq Drug Label
-	,rsource.drug_generic_name		-- Mosaiq Generic Name associated with Drug Label
-	,rsource.drug_type				-- Mosaiq Drug Classification
-	,rsource.RxNorm_CodeValue		-- RXNorm Standard Vocab Value -- set in 93% of records
-	,rsource.RxNorm_CodeType		-- such as SBD, SCD...
-	,rsource.CVX_CodeValue			-- CVX Standard Vocab Value Assigned to Drug  -- set in 1% of cases, a fraction of those do not also have RxNorm value
-	,rsource.CVX_CodeType
-	,FORMAT(rsource.run_date,		'yyyy-MM-dd HH:mm:ss') as modified_DtTm
+    ,rsource.RXA_SET_ID						AS SOURCE_PK
+    ,rsource.RXA_SET_ID						AS DRUG_EXPOSURE_ID
+    ,rsource.Pat_ID1						AS PERSON_ID
+	,0										AS DRUG_CONCEPT_ID
+    ,isNULL(FORMAT(rsource.Adm_Date,		'yyyy-MM-dd HH:mm:ss'),  '')	AS DRUG_EXPOSURE_START_DATE
+    ,isNULL(FORMAT(rsource.Adm_Start_DtTm,	'yyyy-MM-dd HH:mm:ss'),  '')	AS DRUG_EXPOSURE_START_DATETIME
+    ,isNULL(FORMAT(rsource.Adm_Date,		'yyyy-MM-dd HH:mm:ss'),  '')	AS DRUG_EXPOSURE_END_DATE
+    ,isNULL(FORMAT(rsource.Adm_End_DtTm,	'yyyy-MM-dd HH:mm:ss'),  '')	AS DRUG_EXPOSURE_END_DATETIME
+    ,isNULL(FORMAT(rsource.Adm_End_DtTm,	'yyyy-MM-dd HH:mm:ss'),  '')	AS VERBATIM_END_DATETIME
+	,'EHR Administered Drugs'				AS DRUG_TYPE_CONCEPT_ID
+	,''										AS STOP_REASON
+	,0										AS REFILLS
+    ,isNULL(rsource.Adm_Amount, 0)			AS QUANTITY  -- need units to describe quantity (added field)
+	,0										AS DAYS_SUPPLY
+	,''										AS SIG
+    ,isNULL(rsource.Adm_Route, 0)			AS ROUTE_CONCEPT_ID
+	,''										AS LOT_NUMBER
+    ,isNULL(rsource.Ordering_provider_id,0) AS PROVIDER_ID   
+	,isNULL(rsource.ApptDt_PatID, '')		AS VISIT_OCCURRENCE_ID   -- for multiple visits
+	,0										AS VISIT_DETAIL_ID
+	,''										AS DRUG_SOURCE_VALUE
+	,0										AS DRUG_SOURCE_CONCEPT_ID
+    ,isNULL(rsource.Adm_Route, '')			AS ROUTE_SOURCE_VALUE
+    ,isNULL(rsource.Adm_Amount,0)			AS DOSE_UNIT_SOURCE_VALUE
+	,isNULL(rsource.Adm_units, '')			AS Adm_Units			-- units associated with Quantity (mg, mcg, ml, etc)
+	,isNULL(rsource.drug_label, '')			AS drug_label			-- Mosaiq Drug Label
+	,isNULL(rsource.drug_generic_name, '')	AS drug_generic_name	-- Mosaiq Generic Name associated with Drug Label
+	,isNULL(rsource.drug_type, '')			AS drug_type			-- Mosaiq Drug Classification
+	,isNULL(rsource.RxNorm_CodeValue, 0)	AS RxNorm_CodeValue		-- RXNorm Standard Vocab Value -- set in 93% of records
+	,isNULL(rsource.RxNorm_CodeType, '')	AS RxNorm_CodeType		-- such as SBD, SCD...
+	,isNULL(rsource.CVX_CodeValue, 0)		AS CVX_CodeValue		-- CVX Standard Vocab Value Assigned to Drug  -- set in 1% of cases, a fraction of those do not also have RxNorm value
+	,isNULL(rsource.CVX_CodeType, '')		AS CVX_CodeType			
+	,isNULL(FORMAT(rsource.run_date, 'yyyy-MM-dd HH:mm:ss'), '') AS modified_DtTm
 FROM MosaiqAdmin.dbo.Ref_Patient_Drugs_Administered rsource
 INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on rsource.pat_id1 = pat.pat_id1 -- subset 
-WHERE rsource.Adm_Amount > 0  -- drug marked as adminstered but amount altered -- 
+WHERE rsource.Adm_Amount > 0  and rsource.Adm_Amount is not Null -- drug marked as adminstered but amount altered -- 
 ;
