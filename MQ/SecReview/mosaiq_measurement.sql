@@ -58,44 +58,45 @@ Notes:
  2:  Don't know how to map data to OMOP -- RS21 -- please examine data and advise
  3:  Lab and Vital Sign labels/descriptions are probably not standard
 Confidence Level MEDIUM 
-
-Execution Check 01/10/2022-- Successful DAH
+Addressed NULLS 01/12/2022
+Execution Check 01/12/2022-- Successful DAH
 */
 SET NOCOUNT ON;
 SELECT "IDENTITY_CONTEXT|SOURCE_PK|MEASUREMENT_ID|PERSON_ID|MEASUREMENT_CONCEPT_ID|MEASUREMENT_DATE|MEASUREMENT_DATETIME|MEASUREMENT_TIME|MEASUREMENT_TYPE_CONCEPT_ID|OPERATOR_CONCEPT_ID|VALUE_AS_NUMBER|VALUE_AS_CONCEPT_ID|UNIT_CONCEPT_ID|RANGE_LOW|RANGE_HIGH|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|UNIT_SOURCE_VALUE|VALUE_SOURCE_VALUE|MEASUREMENT_SOURCE_VALUE|MEASUREMENT_SOURCE_CONCEPT_ID|Obs_Results|Obs_Float|Obs_String|Observation_Bucket";
 SELECT DISTINCT 'MOSAIQ REF_PATIENT_MEASUREMENTS(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
-      ,rsource.obx_id AS SOURCE_PK
-      ,rsource.obx_id AS MEASUREMENT_ID
-      ,rsource.Pat_ID1 AS PERSON_ID
-	  ,NULL AS MEASUREMENT_CONCEPT_ID
-	  ,FORMAT(rsource.Obs_DtTm,'yyyy-MM-dd 00:00:00') AS MEASUREMENT_DATE
+      ,rsource.obx_id					AS SOURCE_PK
+      ,rsource.obx_id					AS MEASUREMENT_ID
+      ,isNULL(rsource.Pat_ID1, ' ')		AS PERSON_ID
+	  ,'' AS MEASUREMENT_CONCEPT_ID
+	  ,isNULL(FORMAT(rsource.Obs_DtTm,'yyyy-MM-dd 00:00:00'), '') AS MEASUREMENT_DATE
 	  ,CASE 
-			WHEN rsource.Observation_Bucket = 'Lab'			THEN FORMAT(rsource.Lab_Results_Populated_in_MQ_DtTm, 'yyyy-MM-dd HH:mm:ss')  
-			WHEN rsource.Observation_Bucket = 'Vital Sign'	THEN FORMAT(rsource.Vital_Signs_Taken_DtTm, 'yyyy-MM-dd HH:mm:ss') 
+			WHEN rsource.Observation_Bucket = 'Lab'			THEN isNULL(FORMAT(rsource.Lab_Results_Populated_in_MQ_DtTm, 'yyyy-MM-dd HH:mm:ss'), '') 
+			WHEN rsource.Observation_Bucket = 'Vital Sign'	THEN isNULL(FORMAT(rsource.Vital_Signs_Taken_DtTm, 'yyyy-MM-dd HH:mm:ss'), '')
 	   END AS MEASUREMENT_DATETIME
 	  ,CASE 
-			WHEN rsource.Observation_Bucket = 'Lab'			THEN FORMAT(rsource.Lab_Results_Populated_in_MQ_DtTm ,'HH:mm:ss')  
-			WHEN rsource.Observation_Bucket = 'Vital Sign'	THEN FORMAT(rsource.Vital_Signs_Taken_DtTm,'HH:mm:ss')  
+			WHEN rsource.Observation_Bucket = 'Lab'			THEN isNULL(FORMAT(rsource.Lab_Results_Populated_in_MQ_DtTm ,'HH:mm:ss'), '')  
+			WHEN rsource.Observation_Bucket = 'Vital Sign'	THEN isNULL(FORMAT(rsource.Vital_Signs_Taken_DtTm,'HH:mm:ss'), '')  
 			ELSE NULL
 	   END AS MEASUREMENT_TIME
-	  ,'EHR observations' AS MEASUREMENT_TYPE_CONCEPT_ID
+	  ,'EHR observations'				AS MEASUREMENT_TYPE_CONCEPT_ID
 	  ,'=' AS OPERATOR_CONCEPT_ID 
 	  ,0 AS VALUE_AS_NUMBER
 	  ,0 AS VALUE_AS_CONCEPT_ID 
-	  ,rsource.obs_Units AS UNIT_CONCEPT_ID   -- examples: gm/dL,secs, RATIO, %, 
-	  ,rsource.reference_range AS RANGE_LOW   -- stored in a combined string:  Range for "Total Protein" is "6.1-8.2"
-	  ,rsource.reference_range AS RANGE_HIGH  -- stored in a combined string:  Range for "Total Protein" is "6.1-8.2"
-	  ,NULL AS PROVIDER_ID		 
-	  ,ApptDt_PatID AS VISIT_OCCURRENCE_ID  -- Populate? Only if we can map to a key value in VISIT_OCCURRENCE MM -- since we are setting visit_occurrence to the 1st appt of day -- we can map
+	  ,isNULL(rsource.obs_Units, '')		AS UNIT_CONCEPT_ID   -- examples: gm/dL,secs, RATIO, %, 
+	  ,isNULL(rsource.reference_range, '')	AS RANGE_LOW   -- stored in a combined string:  Range for "Total Protein" is "6.1-8.2"
+	  ,isNULL(rsource.reference_range, '')	AS RANGE_HIGH  -- stored in a combined string:  Range for "Total Protein" is "6.1-8.2"
+	  ,'' AS PROVIDER_ID		 
+	  ,isNULL(ApptDt_PatID, '') AS VISIT_OCCURRENCE_ID  -- Populate? Only if we can map to a key value in VISIT_OCCURRENCE MM -- since we are setting visit_occurrence to the 1st appt of day -- we can map
 								-- starting to wonder if visit Occurrence is set in a way that will be meaningful...hmmm.  
-	  ,0 AS VISIT_DETAIL_ID      -- Only if we can map to a key value in VISIT_DETAIL MM  -- can't map to detail -- labs and vitals are not appt specific if there are multiple appts in a day
-	  ,0 AS UNIT_SOURCE_VALUE
-      ,0 AS VALUE_SOURCE_VALUE --store the verbatim value that was mapped to VALUE_AS_CONCEPT_ID here MM  
-	  ,rsource.obs_desc  AS MEASUREMENT_SOURCE_VALUE		--  EXAMPLE1: Temp.Tympanic (C); EXAMPLE2 :Pulse;          EXAMPLE3: Percentage of O2 Sat in Blood From Atlas the verbatim value from the source data representing the Measurement that occurred. For example, this could be an ICD10 or Read code. MM  
-	  ,rsource.obs_label AS MEASUREMENT_SOURCE_CONCEPT_ID	--- EXAMPLE1: Temperature (C);   EXAMPLE2 :P / Heart Rate; EXAMPLE3: Oxygen Saturation  
-      ,rsource.Obs_Results  -- result returned from function that populates value with either the float or string value for the measurement  -- REMOVE THIS FIELD
-	  ,rsource.Obs_Float	-- Each observation will be expressed as either a Float or a String-- in 
-	  ,rsource.Obs_String	-- Each observation will be expressed as either a Float or a String  
-	  ,rsource.Observation_Bucket
+	  ,0				AS VISIT_DETAIL_ID      -- Only if we can map to a key value in VISIT_DETAIL MM  -- can't map to detail -- labs and vitals are not appt specific if there are multiple appts in a day
+	  ,''				AS UNIT_SOURCE_VALUE
+      ,''				AS VALUE_SOURCE_VALUE --store the verbatim value that was mapped to VALUE_AS_CONCEPT_ID here MM  
+	  ,isNULL(rsource.obs_desc, '')			AS MEASUREMENT_SOURCE_VALUE		--  EXAMPLE1: Temp.Tympanic (C); EXAMPLE2 :Pulse;          EXAMPLE3: Percentage of O2 Sat in Blood From Atlas the verbatim value from the source data representing the Measurement that occurred. For example, this could be an ICD10 or Read code. MM  
+	  ,isNULL(rsource.obs_label, '')		AS MEASUREMENT_SOURCE_CONCEPT_ID	--- EXAMPLE1: Temperature (C);   EXAMPLE2 :P / Heart Rate; EXAMPLE3: Oxygen Saturation  
+      ,isNULL(rsource.Obs_Results, '')		AS Obs_Results -- result returned from function that populates value with either the float or string value for the measurement  -- REMOVE THIS FIELD
+	  ,isNULL(rsource.Obs_Float, '')			AS Obs_Float -- Each observation will be expressed as either a Float or a String-- if null, will set to zero which may be mistaken as a results ?
+	  ,isNULL(rsource.Obs_String, '')		AS Obs_String -- Each observation will be expressed as either a Float or a String  
+	  ,isNULL(rsource.Observation_Bucket, '') AS Observation_Bucket
   FROM MosaiqAdmin.dbo.Ref_Patient_Measurements rsource
-  INNER JOIN MosaiqAdmin.dbo.RS21_Patient_list_for_Security_review subset on rsource.pat_id1 = subset.pat_id1
+  INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on rsource.pat_id1 = pat.pat_id1 -- subset 
+  WHERE rsource.obx_id is NOT NULL
