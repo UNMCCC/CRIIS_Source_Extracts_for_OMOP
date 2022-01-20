@@ -53,28 +53,38 @@ Notes:
 		else 'other'
 	end machine_type_desc
 
+Note that Mosaiq.dbo.Facility is free-text entry -- there are multiple entries for MO (fac=5) and RO (fac= 102) so I picked the "best" one
+
 CONFIDENCE LEVEL:  MEDIUM HIGH
 
 EXECUTION CHECK SUCCESSFUL DAH 01/12/2022
-Addressed NULLS 01/12/2022
+
+ARE ALL THESE FACILITIES NEEDED FOR OMOP_LOCATION?:  5=UNMCC 1201, 51='UNMCC 715', 77='UNMCC SF', 89='UNMMG Lovelace Medical Center OP',102='UNM CRTC II Radiation Oncology'
+ 
+CHECKED NULLS  DAH 01/12/2022
+ADDED MISSING FIELD Location_ID  DAH 01/12/2022
+1/20/22 -- OMOP_LOCATION: changed Source_PK/Location_ID from ADM_ID (original code) to Pat_ID1 so that patient addresses could be linked to other patient data.
+
 */
 
 SET NOCOUNT ON;
-SELECT "IDENTIY_CONTEXT|SOURCE_PK|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|COUNTRY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|Modified_dTm";
+SELECT "IDENTIY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|COUNTRY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|Modified_dTm";
+
 SELECT  --  Get Address for Valid Patients
-    'MOSAIQ ADMIN(OMOP_LOCATION)'	AS IDENTIY_CONTEXT,
-    adm.ADM_ID						AS SOURCE_PK,
+    'MOSAIQ ADMIN(OMOP_LOCATION)'	AS IDENTITY_CONTEXT,
+    adm.Pat_ID1						AS SOURCE_PK,    -- Using Pat_ID1 instead of Adm.Adm_ID 
+	adm.Pat_ID1						AS LOCATION_ID, -- Field #1 in DD
     adm.Pat_Adr1					AS ADDRESS_1,
-    isNull(adm.Pat_Adr2, ' ')		AS ADDRESS_2,
-    isNull(adm.Pat_City, ' ')		AS CITY,
-    isNull(adm.Pat_State, ' ')		AS STATE,
-    isNull(adm.Pat_Postal, ' ')		AS ZIP,
-    isNull(adm.Pat_County, ' ')		AS COUNTY,
-    isNull(adm.Pat_Country, ' ')	AS COUNTRY,
-    isNull(adm.ADM_ID, 0)			AS LOCATION_SOURCE_VALUE,
-    0 AS LATITUDE,
-    0 AS LONGITUDE,
-	isNull(FORMAT(adm.edit_DtTm, 'yyyy-MM-dd HH:mm:ss'), ' ')	AS Modified_dTm
+    adm.Pat_Adr2					AS ADDRESS_2,
+    adm.Pat_City					AS CITY,
+    adm.Pat_State					AS STATE,
+    adm.Pat_Postal					AS ZIP,
+    adm.Pat_County					AS COUNTY,
+    adm.Pat_Country					AS COUNTRY,
+    adm.ADM_ID						AS LOCATION_SOURCE_VALUE,
+    NULL AS LATITUDE,
+    NULL AS LONGITUDE,
+	FORMAT(adm.edit_DtTm, 'yyyy-MM-dd HH:mm:ss')	AS Modified_dTm
 FROM
   Mosaiq.dbo.Admin as adm
   INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review Subset on adm.pat_id1 = Subset.pat_id1  -- Subset of patients for Security Review
@@ -84,19 +94,20 @@ WHERE
     AND adm.Pat_Adr1 <> ''
 UNION ALL
 SELECT
-    'MOSAIQ FACILITY(OMOP_LOCATION)' AS IDENTIY_CONTEXT,
-    Fac.FAC_ID						AS SOURCE_PK,
-    isNull(Fac.Adr1, ' ')			AS ADDRESS_1,
-    isNull(Fac.Adr2, ' ')			AS ADDRESS_2,
-    isNull(Fac.City, ' ')			AS CITY,
-    isNull(Fac.State_Province, ' ') AS STATE,
-    isNull(Fac.postal, ' ')			AS ZIP,
-    ' '								AS COUNTY,
-    isNull(Fac.Country, ' ')		AS COUNTRY,
-    isNull(Fac.FAC_ID, ' ')			AS LOCATION_SOURCE_VALUE,
-    ' '								as LATITUDE,
-    ' '								AS LONGITUDE,
-	isNull(FORMAT(Fac.edit_DtTm, 'yyyy-MM-dd HH:mm:ss'), ' ')	AS Modified_dTm
+    'MOSAIQ FACILITY(OMOP_LOCATION)' AS IDENTITY_CONTEXT,
+    Fac.FAC_ID					AS SOURCE_PK,
+	Fac.FAC_ID					AS LOCATION_ID, -- Field #1 in DD
+    Fac.Adr1					AS ADDRESS_1,
+    Fac.Adr2					AS ADDRESS_2,
+    Fac.City					AS CITY,
+    Fac.State_Province			AS STATE,
+    Fac.postal					AS ZIP,
+    NULL						AS COUNTY,
+    Fac.Country					AS COUNTRY,
+    Fac.FAC_ID					AS LOCATION_SOURCE_VALUE,
+    NULL						AS LATITUDE,
+    NULL						AS LONGITUDE,
+	FORMAT(Fac.edit_DtTm, 'yyyy-MM-dd HH:mm:ss') AS Modified_dTm
 FROM
     Mosaiq.dbo.Facility as Fac
 WHERE
@@ -107,4 +118,5 @@ WHERE
   -- Note that this table is free-text entry -- there are multiple entries for MO (fac=5) and RO (fac= 102) so I picked the "best" one
 
 ;
+
 
