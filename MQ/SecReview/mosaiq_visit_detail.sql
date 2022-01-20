@@ -88,33 +88,34 @@ EXECUTION CHECK SUCESSFUL -- DAH 01/12/2022
 1/10/2022 -- added modified_dtTm  for incremental add
 1/10/2022 -- using concatenation of Appt date and Mosaiq Patient ID as visit occurrence identifer
 1/12/22 -- handled NULLS
+1/19/22 CHANGED From Activity ("RCLnp") TO ACTivity_Desc "Lauer New Patient Appt"
+1/20/22 -- changed format of apptDt_PatID (yyyymmdd-nnnnnn)
 */
 SET NOCOUNT ON;
 SELECT "IDENTITY_CONTEXT|SOURCE_PK|VISIT_DETAIL_ID|PERSON_ID|VISIT_DETAIL_CONCEPT_ID|VISIT_DETAIL_START_DATE|VISIT_DETAIL_START_DATETIME|VISIT_DETAIL_END_DATE|VISIT_END_DETAIL_DATETIME|VISIT_DETAIL_TYPE_CONCEPT_ID|PROVIDER_ID|CARE_SITE_ID|VISIT_DETAIL_SOURCE_VALUE|VISIT_DETAIL_SOURCE_CONCEPT_ID|ADMITTED_FROM_SOURCE_VALUE|ADMITTED_FROM_CONCEPT_ID|DISCHARGE_TO_SOURCE_VALUE|DISCHARGE_TO_CONCEPT_ID|PRECEDING_VISIT_DETAIL_ID|VISIT_DETAIL_PARENT_ID|VISIT_OCCURRENCE_ID|modified_dtTm";
 SELECT DISTINCT
 	  'MOSAIQ MosaiqAdmin Ref_SchSets(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT,
-       Ref_SchSets.SCH_SET_ID			AS SOURCE_PK,
-       Ref_SchSets.SCH_SET_ID			AS VISIT_DETAIL_ID,
-       Ref_SchSets.Pat_ID1				AS PERSON_ID,
-       'Outpatient Visit'			AS VISIT_DETAIL_CONCEPT_ID,
-       isNULL(FORMAT(Ref_SchSets.Appt_Date,'yyyy-MM-dd'),'') AS VISIT_DETAIL_START_DATE,
-       isNULL(FORMAT(Ref_SchSets.appt_DtTm,'yyyy-MM-dd HH:mm:ss') ,'')	AS VISIT_DETAIL_START_DATETIME,
-       ''							AS VISIT_DETAIL_END_DATE,
-       ''							AS VISIT_END_DETAIL_DATETIME,
+       Ref_SchSets.SCH_SET_ID						AS SOURCE_PK,
+       Ref_SchSets.SCH_SET_ID						AS VISIT_DETAIL_ID,
+       Ref_SchSets.Pat_ID1							AS PERSON_ID,
+       'Outpatient Visit'							AS VISIT_DETAIL_CONCEPT_ID,
+       FORMAT(Ref_SchSets.Appt_Date,'yyyy-MM-dd')	AS VISIT_DETAIL_START_DATE,
+       FORMAT(Ref_SchSets.appt_DtTm,'yyyy-MM-dd HH:mm:ss')	AS VISIT_DETAIL_START_DATETIME,
+       NULL							AS VISIT_DETAIL_END_DATE,
+       NULL							AS VISIT_END_DETAIL_DATETIME,
        'EHR RECORD'					AS VISIT_DETAIL_TYPE_CONCEPT_ID,
-       Ref_SchSets.provider_id		AS PROVIDER_ID,  -- changed from Admin provider
-       --sch.Location AS CARE_SITE_ID,  -- still uncertain as to how to set Care_site_id 01/10/22 -- differential between MO/CRTC? 
-	   5							AS CARE_SITE_ID,  --?
-       Ref_SchSets.Activity			AS VISIT_DETAIL_SOURCE_VALUE,  -- "Lauer New Patient Appt", "8-hour Chemo"  -- gets translated into CPT after Code Capture
+       Ref_SchSets.provider_id		AS PROVIDER_ID,   
+	   Ref_SchSets.facility_id 		AS CARE_SITE_ID,   -- 5=UNMCC 1201, 51='UNMCC 715', 77='UNMCC SF', 89='UNMMG Lovelace Medical Center OP',102='UNM CRTC II Radiation Oncology'
+       Ref_SchSets.Activity_desc	AS VISIT_DETAIL_SOURCE_VALUE,  -- -- CHANGE TO ACT DESCRIPTION "Lauer New Patient Appt", "8-hour Chemo"  -- gets translated into CPT after Code Capture
        NULL							AS VISIT_DETAIL_SOURCE_CONCEPT_ID,
        NULL							AS ADMITTED_FROM_SOURCE_VALUE, -- changed
        NULL							AS ADMITTED_FROM_CONCEPT_ID,
        NULL							AS DISCHARGE_TO_SOURCE_VALUE,
        NULL							AS DISCHARGE_TO_CONCEPT_ID,
        NULL							AS PRECEDING_VISIT_DETAIL_ID, -- RS21 will programmatically set this
-       ''							AS VISIT_DETAIL_PARENT_ID,      
+       NULL							AS VISIT_DETAIL_PARENT_ID,      
        Ref_SchSets.apptDt_PatID		AS VISIT_OCCURRENCE_ID,  -- sch_set_ID of 1st patient appt of the day 
-	   isNULL(FORMAT(Ref_SchSets.run_date,'yyyy-MM-dd HH:mm:ss'),'') as modified_dtTm 
+	   FORMAT(Ref_SchSets.run_date,'yyyy-MM-dd HH:mm:ss') as modified_dtTm 
 FROM MosaiqAdmin.dbo.Ref_SchSets 
 INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on Ref_SchSets.pat_id1 = pat.pat_id1 -- subset 
 WHERE Ref_SchSets.Pat_ID1 IS NOT NULL  
