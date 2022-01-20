@@ -53,12 +53,13 @@ SELECT "IDENTITY_CONTEXT|SOURCE_PK|CARE_SITE_ID|CARE_SITE_NAME|PLACE_OF_SERVICE_
 SELECT 'MOSAIQ FACILITY(OMOP_CARESITE)' AS IDENTITY_CONTEXT,
        fac.FAC_ID						AS SOURCE_PK,
        5								AS CARE_SITE_ID,
-       isNULL(fac.Name, '')			AS CARE_SITE_NAME,
-       isNULL(fac.Facility_Type, '')	AS PLACE_OF_SERVICE_CONCEPT_ID,
+       fac.FAC_ID						AS CARE_SITE_ID,
+       fac.Name							AS CARE_SITE_NAME,
+       fac.Facility_Type				AS PLACE_OF_SERVICE_CONCEPT_ID,
        fac.FAC_ID						AS LOCATION_ID,
        fac.FAC_ID						AS CARE_SITE_SOURCE_VALUE,
-       isNULL(fac.Name, '')	  		AS PLACE_OF_SERVICE_SOURCE_VALUE,
-	   isNULL(FORMAT(fac.edit_dtTm,'yyyy-MM-dd HH:mm:ss'), '')  AS modified_dtTm
+       fac.Name				  		    AS PLACE_OF_SERVICE_SOURCE_VALUE,
+	   FORMAT(fac.edit_dtTm,'yyyy-MM-dd HH:mm:ss')  AS modified_dtTm
  FROM Mosaiq.dbo.Facility AS fac
  WHERE fac.FAC_ID IS NOT NULL
  and   fac.FAC_ID in (5, 51, 77, 89, 102  ) -- 5=UNMCC 1201, 51='UNMCC 715', 77='UNMCC SF', 89='UNMMG Lovelace Medical Center OP',102='UNM CRTC II Radiation Oncology'
