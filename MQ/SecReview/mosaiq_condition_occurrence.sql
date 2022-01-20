@@ -18,29 +18,31 @@ Debbie Healy 10/11/21
 CONFIDENCE LEVEL -- MEDIUM
 
 Addressed NULLS 01/12/2022
-EXECUTION CHECK SUCCESSFUL 01/12/2022
-1/10/2022 -- using concatenation of Appt date and Mosaiq Patient ID as  source_PK, Condition_OCcurrence_ID -- ask Inigo about creating key
+EXECUTION CHECK SUCCESSFUL 01/20/2022
+1/10/2022 -- using concatenation of Appt date and Mosaiq Patient ID as  source_PK, Condition_OCcurrence_ID  
+1/20/2022 added Modified DtTm
 */
 SET NOCOUNT ON;
 SELECT "IDENTITY_CONTEXT|SOURCE_PK|CONDITION_OCCURRENCE_ID|PERSON_ID|CONDITION_CONCEPT_ID|CONDITION_START_DATE|CONDITION_START_DATETIME|CONDITION_END_DATE|CONDITION_END_DATETIME|CONDITION_TYPE_CONCEPT_ID|CONDITION_STATUS_CONCEPT_ID|STOP_REASON|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|CONDITION_SOURCE_VALUE|CONDITION_SOURCE_CONCEPT_ID|CONDITION_STATUS_SOURCE_VALUE";
 SELECT DISTINCT   'MosaiqAdmin Ref_Patient_Diagnoses(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT  -- 1st Diag on charge
-  		    ,ISNULL(DX.apptDt_PatID, '')		AS SOURCE_PK  -- need to populate with GROUP_CHG_ID ?
-            ,ISNULL(DX.apptDt_PatID, '')		AS CONDITION_OCCURRENCE_ID  -- need to populate with GROUP_CHG_ID ?
-            ,ISNULL(DX.Pat_ID1, '')				AS PERSON_ID
-			,ISNULL(DX.Diag_Code, '')			AS CONDITION_CONCEPT_ID  
-			,ISNULL(FORMAT(DX.appt_date,'yyyy-MM-dd 00:00:00'),'') AS CONDITION_START_DATE
-			,ISNULL(FORMAT(DX.appt_date,'yyyy-MM-dd HH:mm:ss'),'') AS CONDITION_START_DATETIME   
-			,ISNULL(FORMAT(DX.appt_date,'yyyy-MM-dd 00:00:00'),'')	AS CONDITION_END_DATE
-			,ISNULL(FORMAT(DX.appt_date,'yyyy-MM-dd HH:mm:ss'),'')	AS CONDITION_END_DATETIME
-		    ,0									AS CONDITION_TYPE_CONCEPT_ID -- what should this be? --original query set it to Account-status -- not sure what that is
-            ,0									AS CONDITION_STATUS_CONCEPT_ID
-			,''									AS STOP_REASON 
-            ,''									AS PROVIDER_ID    
-	        ,ISNULL(DX.apptDt_PatID, '')		AS VISIT_OCCURRENCE_ID -- link to visit_occurrence visit_id
-            ,0									AS VISIT_DETAIL_ID  
-			,ISNULL(DX.Diag_Code, '')			AS CONDITION_SOURCE_VALUE
-            ,'Outpatient'						AS CONDITION_SOURCE_CONCEPT_ID
-            ,''									AS CONDITION_STATUS_SOURCE_VALUE
+  		    ,DX.apptDt_PatID			AS SOURCE_PK  -- need to populate with GROUP_CHG_ID ?
+            ,DX.apptDt_PatID			AS CONDITION_OCCURRENCE_ID  
+            ,DX.Pat_ID1					AS PERSON_ID
+			,DX.Diag_Code				AS CONDITION_CONCEPT_ID  -- DD has this typed as Number(22) -- but Diag isn't numeric -- diag was used in origional code
+			,FORMAT(DX.appt_date,'yyyy-MM-dd 00:00:00') AS CONDITION_START_DATE
+			,FORMAT(DX.appt_date,'yyyy-MM-dd HH:mm:ss') AS CONDITION_START_DATETIME   
+			,NULL						AS CONDITION_END_DATE
+			,NULL						AS CONDITION_END_DATETIME
+		    ,NULL						AS CONDITION_TYPE_CONCEPT_ID -- what should this be? --original query set it to Account-status -- not sure what that is
+            ,NULL						AS CONDITION_STATUS_CONCEPT_ID -- set to top 1 schedule activity in origional query
+			,NULL						AS STOP_REASON 
+            ,NULL						AS PROVIDER_ID    
+	        ,DX.apptDt_PatID			AS VISIT_OCCURRENCE_ID 
+            ,NULL						AS VISIT_DETAIL_ID				
+			,DX.Diag_Code				AS CONDITION_SOURCE_VALUE		-- should this be ICD-code 
+            ,'Outpatient'				AS CONDITION_SOURCE_CONCEPT_ID  -- why is this outpatient --see DD
+            ,NULL						AS CONDITION_STATUS_SOURCE_VALUE  
+			,FORMAT(run_date, 'yyyy-MM-dd HH:mm:ss') AS Modified_DtTm
 FROM MosaiqAdmin.dbo.Ref_Patient_Diagnoses DX	
 INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on DX.pat_id1 = pat.pat_id1 -- subset 
 WHERE DX.Diag_Code is not null
