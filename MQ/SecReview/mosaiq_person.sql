@@ -116,33 +116,27 @@ CONFIDENCE LEVEL:  MEDIUM HIGH
 
 EXECUTION CHECK SUCCESSFUL -- DAH 01/12/2022
 */
-
-
-
 SET NOCOUNT ON;
-SELECT "IDENTITY_CONTEXT|SOURCE_PK|PERSON_ID|GENDER_CONCEPT_ID|YEAR_OF_BIRTH|MONTH_OF_BIRTH|DAY_OF_BIRTH|BIRTH_DATETIME|DEATH_DATETIME|RACE_CONCEPT_ID|ETHNICITY_CONCEPT_ID|LOCATION_ID|PROVIDER_ID|CARE_SITE_ID|PERSON_SOURCE_VALUE|GENDER_SOURCE_VALUE|GENDER_SOURCE_CONCEPT_ID|RACE_SOURCE_VALUE|RACE_SOURCE_CONCEPT_ID|ETHNICITY_SOURCE_VALUE|ETHNICITY_SOURCE_CONCEPT_ID|MRN";
-SELECT 'MOSAIQ PATIENT(OMOP_PERSON)'	AS IDENTITY_CONTEXT
-       ,pat.Pat_ID1						AS SOURCE_PK
-       ,pat.Pat_ID1						AS PERSON_ID
-	   ,isNULL(adm.Gender, '')  		AS GENDER_CONCEPT_ID
-	   ,isNULL(YEAR (pat.Birth_DtTm),'')							AS YEAR_OF_BIRTH
-	   ,isNULL(MONTH(pat.Birth_DtTm),'')							AS MONTH_OF_BIRTH
-	   ,isNULL(DAY  (pat.Birth_DtTm),'')							AS DAY_OF_BIRTH
-	   ,isNULL(FORMAT(pat.Birth_DtTm,'yyyy-MM-dd HH:mm:ss'),'')		AS BIRTH_DATETIME
-       ,isNULL(FORMAT(adm.Expired_DtTm,'yyyy-MM-dd HH:mm:ss'),'')	AS DEATH_DATETIME
-	   ,ISNULL(Mosaiq.dbo.fn_GetPatientRaces(pat.Pat_ID1,0,0),'')	AS RACE_CONCEPT_ID
-	   ,ISNULL(proEth.Description,'')	AS ETHNICITY_CONCEPT_ID
-	   ,adm.adm_id						AS LOCATION_ID  -- this points to admin with physical address. 
-	   ,0								AS PROVIDER_ID  -- may need to revisit per Mark
-	   ,5								as CARE_SITE_ID
-       ,pat.Pat_ID1						AS PERSON_SOURCE_VALUE
-	   ,isNULL(adm.Gender, '') 			AS GENDER_SOURCE_VALUE
-	   ,''								AS GENDER_SOURCE_CONCEPT_ID
-	   ,ISNULL(Mosaiq.dbo.fn_GetPatientRaces(pat.Pat_ID1,0,0),'')	AS RACE_SOURCE_VALUE
-	   ,''								AS RACE_SOURCE_CONCEPT_ID
-	   ,ISNULL(proEth.Description,'')	AS ETHNICITY_SOURCE_VALUE
-	   ,''								AS ETHNICITY_SOURCE_CONCEPT_ID
-	   ,isNULL(Ref_Patients.ida,'')		AS MRN			-- Kevin is building MRN mapping
+SELECT "IDENTITY_CONTEXT|SOURCE_PK|PERSON_ID|GENDER_CONCEPT_ID|YEAR_OF_BIRTH|MONTH_OF_BIRTH|DAY_OF_BIRTH|BIRTH_DATETIME|DEATH_DATETIME|RACE_CONCEPT_ID|ETHNICITY_CONCEPT_ID|LOCATION_ID|PROVIDER_ID|CARE_SITE_ID|PERSON_SOURCE_VALUE|GENDER_SOURCE_VALUE|GENDER_SOURCE_CONCEPT_ID|RACE_SOURCE_VALUE|RACE_SOURCE_CONCEPT_ID|ETHNICITY_SOURCE_VALUE|ETHNICITY_SOURCE_CONCEPT_ID|MRN|Modified_DtTm";
+SELECT 'MOSAIQ PATIENT(OMOP_PERSON)'			AS IDENTITY_CONTEXT
+       ,pat.Pat_ID1								AS SOURCE_PK
+       ,pat.Pat_ID1								AS PERSON_ID
+	   ,adm.Gender				  				AS GENDER_CONCEPT_ID
+	   ,YEAR(pat.Birth_DtTm)					AS YEAR_OF_BIRTH
+	   ,MONTH(pat.Birth_DtTm)					AS MONTH_OF_BIRTH
+	   ,DAY  (pat.Birth_DtTm)					AS DAY_OF_BIRTH
+	   ,FORMAT(pat.Birth_DtTm,'yyyy-MM-dd HH:mm:ss')	AS BIRTH_DATETIME
+       ,FORMAT(adm.Expired_DtTm,'yyyy-MM-dd HH:mm:ss')	AS DEATH_DATETIME
+	   ,Mosaiq.dbo.fn_GetPatientRaces(pat.Pat_ID1,0,0)	AS RACE_CONCEPT_ID
+	   ,proEth.Description								AS ETHNICITY_CONCEPT_ID
+	   ,adm.adm_id										AS LOCATION_ID  -- this points to admin with physical address. 
+	   ,0												AS PROVIDER_ID  -- may need to revisit per Mark
+	   ,5												AS CARE_SITE_ID  -- DEFAULT VALUE FOR UNMCCC
+       ,pat.Pat_ID1										AS PERSON_SOURCE_VALUE
+	   ,adm.Gender										AS GENDER_SOURCE_VALUE
+	   ,NULL											AS GENDER_SOURCE_CONCEPT_ID
+	   ,Mosaiq.dbo.fn_GetPatientRaces(pat.Pat_ID1,0,0)	AS RACE_SOURCE_VALUE
+	   ,NULL											AS RACE_SOURCE_CONCEPT_ID
 	   ,proEth.Description								AS ETHNICITY_SOURCE_VALUE
 	   ,NULL											AS ETHNICITY_SOURCE_CONCEPT_ID
 	   ,Ref_Patients.ida								AS MRN			-- Kevin is building MRN mapping
