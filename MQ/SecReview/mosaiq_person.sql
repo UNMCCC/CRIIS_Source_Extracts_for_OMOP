@@ -143,6 +143,10 @@ SELECT 'MOSAIQ PATIENT(OMOP_PERSON)'	AS IDENTITY_CONTEXT
 	   ,ISNULL(proEth.Description,'')	AS ETHNICITY_SOURCE_VALUE
 	   ,''								AS ETHNICITY_SOURCE_CONCEPT_ID
 	   ,isNULL(Ref_Patients.ida,'')		AS MRN			-- Kevin is building MRN mapping
+	   ,proEth.Description								AS ETHNICITY_SOURCE_VALUE
+	   ,NULL											AS ETHNICITY_SOURCE_CONCEPT_ID
+	   ,Ref_Patients.ida								AS MRN			-- Kevin is building MRN mapping
+	   ,FORMAT(pat.Edit_DtTm,'yyyy-MM-dd HH:mm:ss')		AS Modified_DtTm
   FROM Mosaiq.dbo.Patient pat
   INNER JOIN mosaiqAdmin.dbo.Ref_Patients on pat.pat_id1 = Ref_Patients.pat_id1 and Ref_Patients.is_valid <> 'N'  -- eliminate sample patients 
   INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review Subset on pat.pat_id1 = Subset.pat_id1			-- Subset of patients for Security Review
