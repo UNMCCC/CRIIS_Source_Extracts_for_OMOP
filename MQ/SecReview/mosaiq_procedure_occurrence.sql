@@ -56,30 +56,32 @@ Questions:
 					AND these are not CPT codes, these are the in-house alpha scheduling/ordering activitie
 --
 Using Charges to get Procedure Codes associated with each appt.  What about visits that don't have a charge?
+-- REMOVED AND code_type = 0 (from select top 1) -- this was from original RS21 code and the intention was to pull only "Procedures" not labs or drugs, but field not set consistently
 12/20/21 -- Need to check Charge-Review Dt-- DONE
-Addressed NULLS 01/12/22
-EXECUTION CHECK SUCCESSFUL -- DAH 01/12/22
+EXECUTION CHECK SUCCESSFUL -- DAH 01/20/22
 01/10/22 -- Need to check into identifying DEVICES
 
 */
-SELECT "IDENTITY_CONTEXT|SOURCE_PK|PROCEDURE_OCCURRENCE_ID|PERSON_ID|PROCEDURE_CONCEPT_ID|PROCEDURE_DATE|PROCEDURE_DATE_DATETIME|PROCEDURE_TYPE_CONCEPT_ID|MODIFIER_CONCEPT_ID|QUANTITY|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|PROCEDURE_SOURCE_VALUE|PROCEDURE_SOURCE_CONCEPT_ID|MODIFIER_SOURCE_VALUE";
+SET NOCOUNT ON;
+SELECT "IDENTITY_CONTEXT|SOURCE_PK|PROCEDURE_OCCURRENCE_ID|PERSON_ID|PROCEDURE_CONCEPT_ID|PROCEDURE_DATE|PROCEDURE_DATE_DATETIME|PROCEDURE_TYPE_CONCEPT_ID|MODIFIER_CONCEPT_ID|QUANTITY|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|PROCEDURE_SOURCE_VALUE|PROCEDURE_SOURCE_CONCEPT_ID|MODIFIER_SOURCE_VALUE|Modified_DtTm";
 
 SELECT distinct  'Mosaiq Ref_SchSet_Charges(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
             ,chg.CHG_ID				AS SOURCE_PK
             ,chg.CHG_ID				AS PROCEDURE_OCCURRENCE_ID
             ,chg.Pat_ID1			AS PERSON_ID
-            ,isNULL(chg.cpt_code,'')		AS PROCEDURE_CONCEPT_ID   -- AND code_type = 0 (from select top 1)
-            ,isNULL(FORMAT(chg.Appt_DtTm,'yyyy-MM-dd HH:mm:ss')	,'')	AS PROCEDURE_DATE  -- should this be date only?
-            ,isNULL(FORMAT(chg.Appt_DtTm,'yyyy-MM-dd HH:mm:ss')	,'')	AS PROCEDURE_DATE_DATETIME 
+            ,chg.cpt_code			AS PROCEDURE_CONCEPT_ID   
+            ,FORMAT(chg.Appt_DtTm,'yyyy-MM-dd HH:mm:ss')	AS PROCEDURE_DATE  
+            ,FORMAT(chg.Appt_DtTm,'yyyy-MM-dd HH:mm:ss')	AS PROCEDURE_DATE_DATETIME 
 		 	,'EHR RECORD'						AS PROCEDURE_TYPE_CONCEPT_ID
-			,isNULL(chg.Modifier1,'')			AS MODIFIER_CONCEPT_ID
-			,isNULL(chg.days_units,'')			AS QUANTITY  -- compare with Adm quantity
-			,isNULL(chg.Chg_Provider_Id,0)		AS PROVIDER_ID
-	        ,isNULL(apptDt_PatID,'')			AS VISIT_OCCURRENCE_ID
-	        ,isNULL(sch_set_id	,'')			AS VISIT_DETAIL_ID
-			,isNULL(chg.cpt_code,'')			AS PROCEDURE_SOURCE_VALUE -- AND code_type = 0
-		 	,''									AS PROCEDURE_SOURCE_CONCEPT_ID 
-			,isNULL(chg.Modifier1,'')			AS MODIFIER_SOURCE_VALUE
+			,chg.Modifier1			AS MODIFIER_CONCEPT_ID
+			,chg.days_units			AS QUANTITY  -- 1/20/22 - Need to ask Teri if this is correct
+			,chg.Chg_Provider_Id	AS PROVIDER_ID
+	        ,apptDt_PatID			AS VISIT_OCCURRENCE_ID
+	        ,sch_set_id				AS VISIT_DETAIL_ID
+			,chg.cpt_code			AS PROCEDURE_SOURCE_VALUE 
+		 	,NULL					AS PROCEDURE_SOURCE_CONCEPT_ID 
+			,chg.Modifier1			AS MODIFIER_SOURCE_VALUE
+			,FORMAT(chg.run_date,'yyyy-MM-dd HH:mm:ss')			AS Modified_DtTm
 FROM  MosaiqAdmin.dbo.Ref_SchSet_Charges chg
 INNER JOIN MosaiqAdmin.dbo.Ref_CPTs_and_Activities cpt on chg.cpt_code = cpt.cpt_code 
 INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on chg.pat_id1 = pat.pat_id1 -- subset 
