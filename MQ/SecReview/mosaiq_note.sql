@@ -45,7 +45,7 @@ or nte.text in ('Chemotherapy Tx', 'Chemo Teaching','Clinical Trial','Clinical T
 or nte.text in ('Clinical-General', 'Clinical-Past Hx', 'Clinical-Pharmacy', 'Clinical-Onc Hx', 'Clinical-Prev Rad','Clinical-RO MD no','Clinical-Fam Hx')
 or nte.text in ('Code Link Component','Code Link Component','Code Link Name','CrossOvr')   -- empty
 or nte.text in ('Diagnosis','Dose','Dose Action Point', 'Dose Site','Dosimetry')
-or nte.text in ('eChart Check','HSC-Billing','MQ App Support notes')
+or nte.text in ('eChart Check','MQ App Support notes')
 or nte.text in ('Nursing','Observation','Patient Care Plan','Patient Education','Physician','Physics','Prescription', 'Protocol')
 or nte.text in ('RT Plan','Screen MSG', 'Structure Set','Transfusion','Transfusion Reaction')
 )
@@ -56,6 +56,7 @@ EXECUTION CHECK SUCCESSFUL DAH 01/12/2022
 */
 SET NOCOUNT ON;
 SELECT "IDENTITY_CONTEXT|SOURCE_PK|NOTE_ID|PERSON_ID|NOTE_EVENT_ID|NOTE_EVENT_FIELD_CONCEPT_ID|NOTE_DATE|NOTE_DATETIME|NOTE_TYPE_CONCEPT_ID|NOTE_CLASS_CONCEPT_ID|NOTE_TITLE|NOTE_TEXT|ENCODING_CONCEPT_ID|LANGUAGE_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|NOTE_SOURCE_VALUE";
+
 SELECT 'MOSAIQ NOTES(OMOP_OBSERVATION)' AS IDENTITY_CONTEXT 
  	   ,NTE.NOTE_ID AS SOURCE_PK 
  	   ,NTE.NOTE_ID AS NOTE_ID
@@ -71,12 +72,13 @@ SELECT 'MOSAIQ NOTES(OMOP_OBSERVATION)' AS IDENTITY_CONTEXT
 			ELSE isNULL(RTRIM(PRO.TEXT), '')
 		END NOTE_TITLE
 	   ,isNULL(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)) , '') AS NOTE_TEXT
-	   ,''	AS ENCODING_CONCEPT_ID -- 'UTF-8 (32678)' AS ENCODING_CONCEPT_ID (?)
-	   ,''	AS LANGUAGE_CONCEPT_ID -- '4182347' AS LANGUAGE_CONCEPT_ID (?)
-	   ,''  AS PROVIDER_ID
-	   ,''  AS VISIT_OCCURRENCE_ID  -- can set to 1st visit of the day
-	   ,''  AS VISIT_DETAIL_ID      -- don't set
+	   ,NULL	AS ENCODING_CONCEPT_ID -- 'UTF-8 (32678)' AS ENCODING_CONCEPT_ID (?)
+	   ,NULL	AS LANGUAGE_CONCEPT_ID -- '4182347' AS LANGUAGE_CONCEPT_ID (?)
+	   ,NULL  AS PROVIDER_ID
+	   ,NULL  AS VISIT_OCCURRENCE_ID   -- ??
+	   ,NULL  AS VISIT_DETAIL_ID      -- don't set
        ,'MOSAIQ.dbo.NOTES' AS NOTE_SOURCE_VALUE
+	   ,nte.Edit_DtTm as Modified_DtTm
 FROM MOSAIQ.dbo.NOTES nte
 LEFT JOIN Mosaiq.dbo.Prompt pro on  pro.enum = nte.note_type 
 INNER JOIN MosaiqAdmin.dbo.Ref_Patients pat on nte.pat_id1 = pat.pat_id1 and is_valid = 'Y'
@@ -86,7 +88,7 @@ WHERE nte.status_enum <> 1 -- exclude voided notes
 -- EXCLUDING NOTE-TYPES (some of these note types (pro.text) are not in use)
 and pro.text not in ('Admin-General','Admission/Referral','Authorization', 'Batch Payments', 'BatchPay Audit')
 and pro.text not in ('Bill Cfg Assign','Billing Benchmarks','Billing Config','Billing RCF','Billing RVU','Billing RVU Componen','Billing Trend Info','CDS','Claim Charge','Claim Config','Claim Config Assign','Claim Delivery Name','Collections')
-and pro.text not in ('Document','DNR Note', 'EDI_Def', 'EDI_DST','EDI_Log','EDI_WS', 'Ext Lab Comp', 'Ext Lab Name', 'Facility', 'Filter Charges','Financial Class','Follow-Up')
+and pro.text not in ('Document','DNR Note', 'EDI_Def', 'EDI_DST','EDI_Log','EDI_WS', 'Ext Lab Comp', 'Ext Lab Name', 'Facility', 'Filter Charges','Financial Class','Follow-Up','HSC-Billing')
 and pro.text not in ('Image', 'Image Registration', 'IMPAC','Lab','Lab/Vitals','LabComp','LabOrder','Ledger Archive','Ledger Audit','Ledger names','Ledger transactions')
 and pro.text not in ('GPC','GPC Component','HSC-FC')
 and pro.text not in ('Medical Records','Medication Admin','Name/I.D.','OCI-Billing','OCI-FC','Old Ledger', 'Old Progress','Order')
