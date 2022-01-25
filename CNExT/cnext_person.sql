@@ -61,7 +61,7 @@ SELECT  'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
 	  ,'160@' + PatExtended.F00021 AS RACE_SOURCE_CONCEPT_ID
 	  ,PatExtended.F00138 AS ETHNICITY_SOURCE_VALUE                          /*190*/
 	  ,'190@' + PatExtended.F00138 AS ETHNICITY_SOURCE_CONCEPT_ID
-       ,Hospital.F00006 AS MRN  -- adds mrn
+     
   FROM UNM_CNExTCases.dbo.Patient rsSource
   JOIN UNM_CNExTCases.dbo.PatExtended on PatExtended.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Tumor on rsSource.uk = Tumor.fk1
