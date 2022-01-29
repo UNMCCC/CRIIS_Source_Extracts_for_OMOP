@@ -65,12 +65,12 @@ SELECT DISTINCT  -- added DH
 	   isNULL(ltrim(rtrim(rsSource.Last_name)) + ', ' + ltrim(rtrim(rsSource.First_name)),'' ) AS PROVIDER_NAME, -- DAH 11/4/21
         (SELECT TOP 1 ID_Code FROM Mosaiq.dbo.EXT_ID rsTarget WHERE rsSource.Staff_ID = rsTarget.Staff_id AND rsTarget.Ext_Type = 'NPI') AS NPI,
         (SELECT TOP 1 ID_Code FROM Mosaiq.dbo.EXT_ID rsTarget WHERE rsSource.Staff_ID = rsTarget.Staff_id AND rsTarget.Ext_Type = 'DEA')  AS DEA,
-       rsSource.Other_Credentials 			AS SPECIALTY_CONCEPT_ID,  -- Manually Maintained field in Mosaiq since 2015
+       TRIM(rsSource.Other_Credentials) 			AS SPECIALTY_CONCEPT_ID,  -- Manually Maintained field in Mosaiq since 2015
 	   5									AS CARE_SITE_ID,	 ---UNMCCC Default Facility	 
 	   YEAR(rsSource.Birth_DtTm) 			AS YEAR_OF_BIRTH,
        rsSource.Gender 						AS GENDER_CONCEPT_ID,
        rsSource.Staff_ID					AS PROVIDER_SOURCE_VALUE,
-	   rsSource.Other_Credentials			AS SPECIALTY_SOURCE_VALUE,     
+	   TRIM(rsSource.Other_Credentials)			AS SPECIALTY_SOURCE_VALUE,     
        NULL									AS SPECIALTY_SOURCE_CONCEPT_ID,
        rsSource.Gender						AS GENDER_SOURCE_VALUE,
        NULL									AS GENDER_SOURCE_CONCEPT_ID,
