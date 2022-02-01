@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
@@ -56,7 +58,9 @@ SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
 		,NULL AS UNIT_SOURCE_VALUE
 		,NULL AS ANATOMIC_SITE_SOURCE_VALUE
 		,NULL AS DISEASE_STATUS_SOURCE_VALUE
+		,HSP.F00006 AS MRN
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.DxStg rsTarget ON rsTarget.FK2 = rsSource.uk
   JOIN UNM_CNExTCases.dbo.FollowUp FU ON FU.uk = rsSource.uk
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   WHERE F05084 NOT IN ( '00','09')

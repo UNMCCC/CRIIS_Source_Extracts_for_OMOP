@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
@@ -45,4 +47,5 @@ SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
 	  ,(SELECT TOP 1 TRY_CAST(F00427 AS DATETIME) FROM dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_START_DATE     /*590*/
       ,(SELECT TOP 1 TRY_CAST(F00128 AS DATETIME) FROM dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_END_DATE       /*600*/
 	  ,'1791@32' AS PERIOD_TYPE_CONCEPT_ID
+	  ,rsSource.F00006 AS MRN
   FROM UNM_CNExTCases.dbo.Hospital rsSource

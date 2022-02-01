@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
@@ -56,6 +58,7 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
 		,TUM.uk AS VISIT_DETAIL_ID
         ,RAD.F07799 AS DEVICE_SOURCE_VALUE                                               /*1502*/
 	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID
+		,HSP.F00006 AS MRN
   FROM UNM_CNExTCases.dbo.Radiation RAD
   INNER JOIN UNM_CNExTCases.dbo.Tumor TUM ON RAD.fk2 = TUM.uk
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON TUM.uk = HSP.fk2

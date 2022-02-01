@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT DISTINCT  'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
@@ -60,6 +62,7 @@ SELECT DISTINCT  'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,HSP.fk2 AS PRECEDING_VISIT_DETAIL_ID
 	    ,NULL AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                                                      /*10*/
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
@@ -88,6 +91,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,HSP.fk2 AS PRECEDING_VISIT_DETAIL_ID
 	    ,NULL AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                                                      /*10*/
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
   INNER JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
@@ -115,6 +119,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,HSP.fk2 AS PRECEDING_VISIT_DETAIL_ID
 	    ,NULL AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                                                      /*10*/
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
@@ -143,6 +148,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,HSP.fk2 AS PRECEDING_VISIT_DETAIL_ID
 	    ,NULL AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                                                      /*10*/
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
@@ -170,6 +176,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,HSP.fk2 AS PRECEDING_VISIT_DETAIL_ID
 	    ,NULL AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                                                      /*10*/
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
@@ -197,6 +204,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,HSP.fk2 AS PRECEDING_VISIT_DETAIL_ID
 	    ,NULL AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                                                      /*10*/
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK

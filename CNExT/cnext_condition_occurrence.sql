@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT
@@ -60,6 +62,8 @@ SELECT  'CNEXT TUMOR(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,CASE WHEN rsSource.F00129 <> 9 THEN '490@'  + rsSource.F00129
 		      ELSE '' END AS CONDITION_SOURCE_CONCEPT_ID                                                                                                    /*490*/ 
         ,rsSource.F00129 AS CONDITION_STATUS_SOURCE_VALUE                                                                                                    /*490*/ 
+		,HSP.F00006 AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
 JOIN UNM_CNExTCases.dbo.Stage rsTarget ON rsTarget.uk = rsSource.uk
+JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
   ORDER BY rsSource.uk DESC
