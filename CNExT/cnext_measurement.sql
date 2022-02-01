@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
@@ -62,7 +64,9 @@ SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
         ,rsTarget.F07625 AS MEASUREMENT_SOURCE_VALUE                                                                                                    /*3844*/ 
 		,'3844@' + rsTarget.F07625 AS MEASUREMENT_SOURCE_CONCEPT_ID
         ,0 AS UNIT_SOURCE_VALUE
-        ,STUFF(rsSource.F02503,5,0,'/') AS VALUE_SOURCE_VALUE                                                                                            /*521*/ 
+        ,STUFF(rsSource.F02503,5,0,'/') AS VALUE_SOURCE_VALUE                                                                                           /*521*/
+		,HSP.F00006 AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
 JOIN UNM_CNExTCases.dbo.Stage rsTarget ON rsTarget.uk = rsSource.uk
+JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
 order by rsSource.uk desc

@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                              /*'UNMTR DX/STG RECORD'*/
@@ -55,8 +57,10 @@ SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT        
          ,TRT.F00420 AS PROCEDURE_SOURCE_VALUE                                                                                                                                                                                                /*740*/
          ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
          ,0 AS MODIFIER_SOURCE_VALUE
+		 ,HSP.F00006 AS MRN
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.fk1 = rsSource.UK
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   where TRT.F00420 NOT IN ('00','09')
 UNION ALL
 SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                              /*'UNMTR SURGICAL RECORD'*/
@@ -75,9 +79,11 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,SRG.F03488 AS PROCEDURE_SOURCE_VALUE                                                                                                                                                                                                /*740*/
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.fk1 = rsSource.UK
    JOIN UNM_CNExTCases.dbo.Surg SRG ON SRG.fk2 = rsSource.uk
+   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
 WHERE SRG.F03488 != '00' 
     AND SRG.F03488 < '98'
 UNION ALL
@@ -97,9 +103,11 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,RAD.F07799 AS PROCEDURE_SOURCE_VALUE                                                                                                                                                                                                /*740*/
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.fk1 = rsSource.UK
   INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   WHERE F07799 > '00'
 UNION ALL
 SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                               /*'UNMTR OTHER RECORD'*/
@@ -118,7 +126,9 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,OTH.F05069 AS PROCEDURE_SOURCE_VALUE                                                                                                                                                                                                /*740*/
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.fk1 = rsSource.UK
    JOIN UNM_CNExTCases.dbo.Other OTH ON OTH.fk2 = rsSource.uk
+   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
 WHERE OTH.F05069 in ( '1','2','3','6')

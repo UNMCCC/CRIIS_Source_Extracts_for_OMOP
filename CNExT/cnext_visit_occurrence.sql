@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
@@ -58,6 +60,7 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
 	,(SELECT TOP 1 rsTarget.F01685  FROM dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS REFERRED_TO_CONCEPT_ID                /*2420*/
 	,(SELECT TOP 1 rsTarget.F03716  FROM dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
 	,HSP.fk2 AS PRECEDING_VISIT_OCCURRENCE_ID
+	,HSP.F00006 AS MRN
 FROM UNM_CNExTCases.dbo.Patient rsSource
 JOIN UNM_CNExTCases.dbo.PatExtended PEX ON PEX.uk = rsSource.UK
 JOIN UNM_CNExTCases.dbo.Tumor TUM ON rsSource.uk = TUM.fk1

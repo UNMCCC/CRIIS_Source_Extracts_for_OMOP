@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
@@ -51,7 +53,9 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
       ,rsSource.FK1  AS LOCATION_SOURCE_VALUE
       ,NULL AS LATITUDE
       ,NULL AS LONGITUDE
+	  ,HSP.F00006 AS MRN
   FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   UNION ALL
  SELECT TOP 1000 'CNEXT PATEXTENDED(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*current location*/
          ,rsSource.uk AS SOURCE_PK
@@ -65,5 +69,8 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
          ,rsSource.F00004 AS LOCATION_SOURCE_VALUE
          ,NULL AS LATITUDE
          ,NULL AS LONGITUDE
+		 ,HSP.F00006 AS MRN
     FROM UNM_CNExTCases.dbo.PatExtended rsSource
+	JOIN UNM_CNExTCases.dbo.Tumor ON Tumor.fk1 = rsSource.UK
+    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = Tumor.uk
 ORDER BY 2,3,1

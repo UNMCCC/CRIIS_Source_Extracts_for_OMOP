@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*Family History*/
@@ -75,7 +77,9 @@ SELECT  'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                    
 	    ,rsSource.FK1 AS OBSERVATION_EVENT_ID
 	    ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	    ,NULL AS VALUE_AS_DATETIME
+		,HSP.F00006 AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   WHERE F06433 IS NOT NULL
 UNION ALL
 SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY COMORBIDITY RECORD'*/
@@ -113,8 +117,10 @@ SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT            
 	       ,F03442 AS QUALIFIER_SOURCE_VALUE
 	       ,rsSource.FK1 AS OBSERVATION_EVENT_ID
 	       ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
-	       ,NULL AS VALUE_AS_DATETIME 
+	       ,NULL AS VALUE_AS_DATETIME
+           ,HSP.F00006 AS MRN		   
 FROM UNM_CNExTCases.dbo.Tumor rsSource
+JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
  WHERE F03442 IS NOT NULL
     AND F03442 <> '00000'
     AND F03442 <> ''
@@ -155,8 +161,10 @@ SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT            
 	    ,rsSource.FK1 AS OBSERVATION_EVENT_ID
 	    ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	    ,NULL AS VALUE_AS_DATETIME
+		,HSP.F00006 AS MRN
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   WHERE F00070 IS NOT NULL
     AND F00070 != ''
 UNION ALL
@@ -196,10 +204,12 @@ SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT            
 	       ,rsSource.FK1 AS OBSERVATION_EVENT_ID
 	       ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	       ,NULL AS VALUE_AS_DATETIME
+		   ,HSP.F00006 AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
  WHERE F06117 IS NOT NULL
     AND F06117 <> '0000000'
     AND F06117 <> ''
 ORDER BY OBSERVATION_TYPE_CONCEPT_ID
-         ,UK DESC
+         ,rsSource.UK DESC

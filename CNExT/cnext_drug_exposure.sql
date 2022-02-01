@@ -37,6 +37,8 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+
 */
 
 SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
@@ -64,10 +66,12 @@ SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
 	   ,'700@' + CHM.F05037 AS DRUG_SOURCE_CONCEPT_ID
        ,0 AS ROUTE_SOURCE_VALUE
        ,0 AS DOSE_UNIT_SOURCE_VALUE
+	   ,HSP.F00006 AS MRN
       -- ,(SELECT TOP 1 rsTarget.F00016 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
       -- ,(SELECT TOP 1 rsTarget.F00006 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN  
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Chemo CHM on CHM.fk2 = rsSource.UK
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.UK
  WHERE CHM.F05037 IN ('01', '02', '03')
    AND CHM.F05669 > '00'
    AND CHM.F04755 is not null
