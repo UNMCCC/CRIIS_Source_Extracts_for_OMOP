@@ -57,13 +57,13 @@ Note that Mosaiq.dbo.Facility is free-text entry -- there are multiple entries f
 
 CONFIDENCE LEVEL:  MEDIUM HIGH
 
-EXECUTION CHECK SUCCESSFUL DAH 01/12/2022
-
 ARE ALL THESE FACILITIES NEEDED FOR OMOP_LOCATION?:  5=UNMCC 1201, 51='UNMCC 715', 77='UNMCC SF', 89='UNMMG Lovelace Medical Center OP',102='UNM CRTC II Radiation Oncology'
  
 CHECKED NULLS  DAH 01/12/2022
 ADDED MISSING FIELD Location_ID  DAH 01/12/2022
-1/20/22 -- OMOP_LOCATION: changed Source_PK/Location_ID from ADM_ID (original code) to Pat_ID1 so that patient addresses could be linked to other patient data.
+2/3/22 --  "Mosaiq Admin" -changed Source_PK/Location_ID to ADM_ID from Pat_ID1 to link Patient Address via Location_ID field
+2/3/22 -- Wrapped all address fields in REPLACE statements to handle potential CRLF characters since these are free text entry fields
+2/3/22 -- Removed criteria limiting admin-location to sample patients
 
 */
 
@@ -72,22 +72,22 @@ SELECT 'IDENTIY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP
 
 SELECT  --  Get Address for Valid Patients
     'MOSAIQ ADMIN(OMOP_LOCATION)'	AS IDENTITY_CONTEXT,
-    adm.Pat_ID1						AS SOURCE_PK,    -- Using Pat_ID1 instead of Adm.Adm_ID 
-	adm.Pat_ID1						AS LOCATION_ID, -- Field #1 in DD
-    adm.Pat_Adr1					AS ADDRESS_1,
-    isNULL(adm.Pat_Adr2,'')			AS ADDRESS_2,
-    isNULL(adm.Pat_City,'')			AS CITY,
-    isNULL(adm.Pat_State,'')		AS STATE,
-    isNULL(adm.Pat_Postal,'')		AS ZIP,
-   CASE WHEN adm.Pat_County = 0 or adm.Pat_County IS NULL THEN  '' ELSE adm.Pat_County		END COUNTY,
-    isNULL(adm.Pat_Country,'')		AS COUNTRY,
-    adm.ADM_ID						AS LOCATION_SOURCE_VALUE,
-    '' AS LATITUDE,
-    '' AS LONGITUDE,
+    adm.ADM_ID						AS SOURCE_PK,    -- Using Adm.Adm_ID instead of pat_id because OMOP_Location will link to PERSON table via Adm_id
+	adm.ADM_ID						AS LOCATION_ID,  -- Field #1 in DD
+    isNULL(REPLACE(REPLACE(adm.Pat_Adr1,	CHAR(13), ''), CHAR(10), '') ,'')	AS ADDRESS_1,
+    isNULL(REPLACE(REPLACE(adm.Pat_Adr2,	CHAR(13), ''), CHAR(10), '') ,'')	AS ADDRESS_2,
+    isNULL(REPLACE(REPLACE(adm.Pat_City,	CHAR(13), ''), CHAR(10), '') ,'')	AS CITY,
+    isNULL(REPLACE(REPLACE(adm.Pat_State,	CHAR(13), ''), CHAR(10), '') ,'')	AS STATE,
+    isNULL(REPLACE(REPLACE(adm.Pat_Postal,	CHAR(13), ''), CHAR(10), '') ,'')	AS ZIP,
+	isNULL(REPLACE(REPLACE(REPLACE(adm.Pat_County, CHAR(13),''), CHAR(10),''),'0',''),'') AS COUNTY,
+    isNULL(REPLACE(REPLACE(adm.Pat_Country,	CHAR(13), ''), CHAR(10), '') ,'')	AS COUNTRY,
+    adm.ADM_ID		AS LOCATION_SOURCE_VALUE,
+    ''				AS LATITUDE,
+    ''				AS LONGITUDE,
 	isNULL(FORMAT(adm.edit_DtTm, 'yyyy-MM-dd HH:mm:ss'),'')	AS Modified_dTm
 FROM
   Mosaiq.dbo.Admin as adm
-  INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review Subset on adm.pat_id1 = Subset.pat_id1  -- Subset of patients for Security Review
+ -- INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review Subset on adm.pat_id1 = Subset.pat_id1  -- Subset of patients for Security Review
   INNER join mosaiqAdmin.dbo.Ref_Patients on adm.pat_id1 = Ref_Patients.pat_id1 and Ref_Patients.is_valid <> 'N' -- eliminate sample patients 
 WHERE
     adm.Pat_Adr1 IS NOT NULL
@@ -95,18 +95,18 @@ WHERE
 UNION ALL
 SELECT
     'MOSAIQ FACILITY(OMOP_LOCATION)' AS IDENTITY_CONTEXT,
-    Fac.FAC_ID					AS SOURCE_PK,
-	Fac.FAC_ID					AS LOCATION_ID, -- Field #1 in DD
-    Fac.Adr1					AS ADDRESS_1,
-    isNULL(Fac.Adr2,'')			AS ADDRESS_2,
-    isNULL(Fac.City,'')					AS CITY,
-    isNULL(Fac.State_Province,'')		AS STATE,
-    isNULL(Fac.postal,'')				AS ZIP,
-    ''							AS COUNTY,
-    isNULL(Fac.Country,'')		AS COUNTRY,
-    Fac.FAC_ID					AS LOCATION_SOURCE_VALUE,
-    ''							AS LATITUDE,
-    ''							AS LONGITUDE,
+    Fac.FAC_ID	AS SOURCE_PK,
+	Fac.FAC_ID	AS LOCATION_ID, -- Field #1 in DD
+    isNULL(REPLACE(REPLACE(Fac.Adr1, CHAR(13), ''), CHAR(10), '') ,'')		AS ADDRESS_1,
+    isNULL(REPLACE(REPLACE(Fac.Adr2, CHAR(13), ''), CHAR(10), '') ,'')		AS ADDRESS_2,
+    isNULL(REPLACE(REPLACE(Fac.City, CHAR(13), ''), CHAR(10), '') ,'')		AS CITY,
+    isNULL(REPLACE(REPLACE(Fac.State_Province, CHAR(13), ''), CHAR(10), '') ,'')	AS STATE,
+    isNULL(REPLACE(REPLACE(Fac.postal, CHAR(13), ''), CHAR(10), '') ,'')	AS ZIP,
+    ''			AS COUNTY,
+    isNULL(REPLACE(REPLACE(Fac.Country, CHAR(13), ''), CHAR(10), '') ,'')	AS COUNTRY,
+    Fac.FAC_ID	AS LOCATION_SOURCE_VALUE,
+    ''			AS LATITUDE,
+    ''			AS LONGITUDE,
 	isNULL(FORMAT(Fac.edit_DtTm, 'yyyy-MM-dd HH:mm:ss'),'') AS Modified_dTm
 FROM
     Mosaiq.dbo.Facility as Fac
@@ -119,4 +119,4 @@ WHERE
 
 ;
 
-
+ 
