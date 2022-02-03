@@ -115,6 +115,9 @@ To Do:	Found potential home in Mosaiq.Admin table to identify "Testing" patients
 CONFIDENCE LEVEL:  MEDIUM HIGH
 
 EXECUTION CHECK SUCCESSFUL -- DAH 01/12/2022
+2/3/2020 -- Wrapped Ethnicity_Source_Value and Race_Source value in these Replace statements to remove CRLF
+			REPLACE(REPLACE(column, CHAR(13), ''), CHAR(10), '')
+		 -- Added Adm.Adm_ID as Location_ID
 */
 SET NOCOUNT ON;
 
@@ -129,17 +132,17 @@ SELECT 'MOSAIQ PATIENT(OMOP_PERSON)'								AS IDENTITY_CONTEXT
 	   ,isNULL(DAY  (pat.Birth_DtTm),'')							AS DAY_OF_BIRTH
 	   ,isNULL(FORMAT(pat.Birth_DtTm,  'yyyy-MM-dd HH:mm:ss'),'')	AS BIRTH_DATETIME
        ,isNULL(FORMAT(adm.Expired_DtTm,'yyyy-MM-dd HH:mm:ss'),'')	AS DEATH_DATETIME
-	   ,isNULL(Mosaiq.dbo.fn_GetPatientRaces(pat.Pat_ID1,0,0),'')	AS RACE_CONCEPT_ID
-	   ,isNULL(proEth.Description,'')								AS ETHNICITY_CONCEPT_ID
+	   ,isNULL(REPLACE(REPLACE(Mosaiq.dbo.fn_GetPatientRaces(pat.Pat_ID1,0,0), CHAR(13), ''), CHAR(10), ''),'')	AS RACE_CONCEPT_ID
+	   ,isNULL(REPLACE(REPLACE(proEth.Description, CHAR(13), ''), CHAR(10), '') ,'')	AS ETHNICITY_CONCEPT_ID
 	   ,isNULL(adm.adm_id,'')										AS LOCATION_ID  -- this points to admin with physical address. 
 	   ,''															AS PROVIDER_ID  -- may need to revisit per Mark
 	   ,5															AS CARE_SITE_ID  -- DEFAULT VALUE FOR UNMCCC
        ,pat.Pat_ID1													AS PERSON_SOURCE_VALUE
 	   ,isNULL(adm.Gender,'')										AS GENDER_SOURCE_VALUE
 	   ,''															AS GENDER_SOURCE_CONCEPT_ID
-	   ,isNULL(Mosaiq.dbo.fn_GetPatientRaces(pat.Pat_ID1,0,0),'')	AS RACE_SOURCE_VALUE
+	   ,isNULL(REPLACE(REPLACE(Mosaiq.dbo.fn_GetPatientRaces(pat.Pat_ID1,0,0), CHAR(13), ''), CHAR(10), ''),'')	AS RACE_SOURCE_VALUE
 	   ,''															AS RACE_SOURCE_CONCEPT_ID
-	   ,isNULL(proEth.Description ,'')								AS ETHNICITY_SOURCE_VALUE
+	   ,isNULL(REPLACE(REPLACE(proEth.Description, CHAR(13), ''), CHAR(10), '') ,'')	AS ETHNICITY_SOURCE_VALUE
 	   ,''															AS ETHNICITY_SOURCE_CONCEPT_ID
 	   ,isNULL(Ref_Patients.ida,'')									AS MRN			-- Kevin is building MRN mapping
 	   ,isNULL(FORMAT(pat.Edit_DtTm,'yyyy-MM-dd HH:mm:ss'),'')		AS Modified_DtTm
