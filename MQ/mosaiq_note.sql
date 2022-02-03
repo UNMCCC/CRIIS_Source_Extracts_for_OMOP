@@ -53,6 +53,8 @@ Confidence Level 60% -- are the included note types useful?  And have I included
 
 01/12/22 -- addressed NULLs
 EXECUTION CHECK SUCCESSFUL DAH 01/12/2022
+02/03/22 -- Fixed formatting on Modified_DtTm 
+		-- Wrapped NTE.SUBJECT and PRO.TEXT in Replace statements to remove CRLF characters per KG request
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|NOTE_ID|PERSON_ID|NOTE_EVENT_ID|NOTE_EVENT_FIELD_CONCEPT_ID|NOTE_DATE|NOTE_DATETIME|NOTE_TYPE_CONCEPT_ID|NOTE_CLASS_CONCEPT_ID|NOTE_TITLE|NOTE_TEXT|ENCODING_CONCEPT_ID|LANGUAGE_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|NOTE_SOURCE_VALUE|Modified_DtTm';
@@ -67,8 +69,8 @@ SELECT 'MOSAIQ NOTES(OMOP_OBSERVATION)' AS IDENTITY_CONTEXT
 	   ,isNULL(RTRIM(PRO.TEXT), '')		AS NOTE_TYPE_CONCEPT_ID
 	   ,''							 AS NOTE_CLASS_CONCEPT_ID
 	   ,case when NTE.SUBJECT <> ' ' 
-			THEN isNULL(RTRIM(NTE.SUBJECT), '') 
-			ELSE isNULL(RTRIM(PRO.TEXT), '')
+			THEN isNULL(RTRIM( REPLACE(REPLACE(NTE.SUBJECT, CHAR(13), ''), CHAR(10), '')), '') 
+			ELSE isNULL(RTRIM( REPLACE(REPLACE(PRO.TEXT, CHAR(13), ''), CHAR(10), '')), '') 
 		END NOTE_TITLE
 	   ,isNULL(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),'') , '') AS NOTE_TEXT
 	   ,''	AS ENCODING_CONCEPT_ID -- 'UTF-8 (32678)' AS ENCODING_CONCEPT_ID (?)
@@ -77,11 +79,11 @@ SELECT 'MOSAIQ NOTES(OMOP_OBSERVATION)' AS IDENTITY_CONTEXT
 	   ,''  AS VISIT_OCCURRENCE_ID   -- ??
 	   ,''  AS VISIT_DETAIL_ID      -- don't set
        ,'MOSAIQ.dbo.NOTES' AS NOTE_SOURCE_VALUE
-	   ,isNULL(nte.Edit_DtTm, '') as Modified_DtTm
+	   ,isNULL(FORMAT(nte.Edit_DtTm,'yyyy-MM-dd HH:mm:ss'), '') as Modified_DtTm
 FROM MOSAIQ.dbo.NOTES nte
 LEFT JOIN Mosaiq.dbo.Prompt pro on  pro.enum = nte.note_type 
 INNER JOIN MosaiqAdmin.dbo.Ref_Patients pat on nte.pat_id1 = pat.pat_id1 and is_valid = 'Y'
-INNER JOIN MosaiqAdmin.dbo.RS21_Patient_list_for_Security_review subset on nte.pat_id1 = subset.pat_id1
+--INNER JOIN MosaiqAdmin.dbo.RS21_Patient_list_for_Security_review subset on nte.pat_id1 = subset.pat_id1
 WHERE nte.status_enum <> 1 -- exclude voided notes
  AND  pro.pgroup = '#NT1' -- Note_ID not unique -- Use combo of Pgroup and Note_id where pgroup = #NT1 --> Notes
 -- EXCLUDING NOTE-TYPES (some of these note types (pro.text) are not in use)
