@@ -55,10 +55,11 @@ Confidence Level 60% -- are the included note types useful?  And have I included
 EXECUTION CHECK SUCCESSFUL DAH 01/12/2022
 02/03/22 -- Fixed formatting on Modified_DtTm 
 		-- Wrapped NTE.SUBJECT and PRO.TEXT in Replace statements to remove CRLF characters per KG request
+02/03/22 -- Added nte.Edit_DtTm >= '2010-01-01' -- start date 
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|NOTE_ID|PERSON_ID|NOTE_EVENT_ID|NOTE_EVENT_FIELD_CONCEPT_ID|NOTE_DATE|NOTE_DATETIME|NOTE_TYPE_CONCEPT_ID|NOTE_CLASS_CONCEPT_ID|NOTE_TITLE|NOTE_TEXT|ENCODING_CONCEPT_ID|LANGUAGE_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|NOTE_SOURCE_VALUE|Modified_DtTm';
-SELECT 'MOSAIQ NOTES(OMOP_OBSERVATION)' AS IDENTITY_CONTEXT 
+SELECT 'MOSAIQ NOTES(OMOP_NOTE)' AS IDENTITY_CONTEXT 
  	   ,NTE.NOTE_ID AS SOURCE_PK 
  	   ,NTE.NOTE_ID AS NOTE_ID
        ,NTE.pat_id1 AS PERSON_ID
@@ -83,9 +84,10 @@ SELECT 'MOSAIQ NOTES(OMOP_OBSERVATION)' AS IDENTITY_CONTEXT
 FROM MOSAIQ.dbo.NOTES nte
 LEFT JOIN Mosaiq.dbo.Prompt pro on  pro.enum = nte.note_type 
 INNER JOIN MosaiqAdmin.dbo.Ref_Patients pat on nte.pat_id1 = pat.pat_id1 and is_valid = 'Y'
---INNER JOIN MosaiqAdmin.dbo.RS21_Patient_list_for_Security_review subset on nte.pat_id1 = subset.pat_id1
-WHERE nte.status_enum <> 1 -- exclude voided notes
- AND  pro.pgroup = '#NT1' -- Note_ID not unique -- Use combo of Pgroup and Note_id where pgroup = #NT1 --> Notes
+INNER JOIN MosaiqAdmin.dbo.RS21_Patient_list_for_Security_review subset on nte.pat_id1 = subset.pat_id1
+WHERE nte.Edit_DtTm >= '2010-01-01' -- start date 
+AND	nte.status_enum <> 1 -- exclude voided notes
+AND  pro.pgroup = '#NT1' -- Note_ID not unique -- Use combo of Pgroup and Note_id where pgroup = #NT1 --> Notes
 -- EXCLUDING NOTE-TYPES (some of these note types (pro.text) are not in use)
 and pro.text not in ('Admin-General','Admission/Referral','Authorization', 'Batch Payments', 'BatchPay Audit')
 and pro.text not in ('Bill Cfg Assign','Billing Benchmarks','Billing Config','Billing RCF','Billing RVU','Billing RVU Componen','Billing Trend Info','CDS','Claim Charge','Claim Config','Claim Config Assign','Claim Delivery Name','Collections')
@@ -95,5 +97,6 @@ and pro.text not in ('GPC','GPC Component','HSC-FC')
 and pro.text not in ('Medical Records','Medication Admin','Name/I.D.','OCI-Billing','OCI-FC','Old Ledger', 'Old Progress','Order')
 and pro.text not in ('Patient Payer','Pat Statement Dtl','Pat Statement Hdr','Patient Charge', 'Patient Trial', 'People / Places')
 and pro.text not in ('Print/Transmit Claim','PSDA Note','Quality Check List','Returned Mail','Rx Check/Waste','Schedule','SCP','Shape', 'Site Simulation','Trial Sponsor','XA Image')
+AND nte.Edit_DtTm >= '2010-01-01' 
 ;
 

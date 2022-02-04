@@ -118,6 +118,9 @@ EXECUTION CHECK SUCCESSFUL -- DAH 01/12/2022
 2/3/2020 -- Wrapped Ethnicity_Source_Value and Race_Source value in these Replace statements to remove CRLF
 			REPLACE(REPLACE(column, CHAR(13), ''), CHAR(10), '')
 		 -- Added Adm.Adm_ID as Location_ID
+2/4/2020 -- Changed pat.Edit_DtTm as Modified_DtTm to the greater of pat.Edit_DtTm and adm.Edit_dtTm
+		 -- Concerned that we would miss updates to death_DateTime because it is in the Admin Table.
+		 -- Although it appears that the Patient Table and the Admin table get updated at the same time -- so may not be an issue.  Look into further
 */
 SET NOCOUNT ON;
 
@@ -145,13 +148,19 @@ SELECT 'MOSAIQ PATIENT(OMOP_PERSON)'								AS IDENTITY_CONTEXT
 	   ,isNULL(REPLACE(REPLACE(proEth.Description, CHAR(13), ''), CHAR(10), '') ,'')	AS ETHNICITY_SOURCE_VALUE
 	   ,''															AS ETHNICITY_SOURCE_CONCEPT_ID
 	   ,isNULL(Ref_Patients.ida,'')									AS MRN			-- Kevin is building MRN mapping
-	   ,isNULL(FORMAT(pat.Edit_DtTm,'yyyy-MM-dd HH:mm:ss'),'')		AS Modified_DtTm
+	   ,CASE 
+			WHEN Adm.Edit_DtTm > pat.Edit_DtTm and Adm.Edit_DtTm is not null 
+			THEN isNULL(FORMAT(Adm.Edit_DtTm,'yyyy-MM-dd HH:mm:ss'),'')
+			ELSE isNULL(FORMAT(pat.Edit_DtTm,'yyyy-MM-dd HH:mm:ss'),'')
+		END Modified_DtTm
   FROM Mosaiq.dbo.Patient pat
   INNER JOIN mosaiqAdmin.dbo.Ref_Patients on pat.pat_id1 = Ref_Patients.pat_id1 and Ref_Patients.is_valid <> 'N'  -- eliminate sample patients 
   --INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review Subset on pat.pat_id1 = Subset.pat_id1			-- Subset of patients for Security Review
   LEFT JOIN Mosaiq.dbo.admin adm on pat.pat_id1 = adm.pat_id1
   LEFT JOIN Mosaiq.dbo.Prompt proEth on adm.Ethnicity_PRO_ID = proEth.Pro_ID
   WHERE pat.Pat_ID1 IS NOT NULL
+  order by Expired_DtTm desc
+ 
   ;
  
 
