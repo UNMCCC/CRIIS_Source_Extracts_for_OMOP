@@ -39,30 +39,32 @@ Notes:
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 
+LTV - 2/4/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS CONDITION_OCCURRENCE_ID
-    	,(SELECT TOP 1 rsTarget.F00016 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsSource.uk = rsTarget.fk2  Order By rsTarget.UK ASC) AS PERSON_ID  /*545*/ 
-		,STUFF(rsSource.F00152,4,0,'.') AS CONDITION_CONCEPT_ID_SITE                                                                                                      /*400*/ 
-        ,STUFF(rsSource.F02503,5,0,'/') AS CONDITION_CONCEPT_ID_MORPH                                                                                                     /*521*/ 
-        ,TRY_CAST(rsSource.F00029 AS DATE) AS CONDITION_START_DATE                                                                                         /*390*/ 
-        ,TRY_CAST(rsSource.F00029 AS DATETIME) AS CONDITION_START_DATETIME                                                                                 /*390*/ 
-	    ,NULL AS CONDITION_END_DATE
-		,NULL AS CONDITION_END_DATETIME
+    	,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsSource.uk = rsTarget.fk2  Order By rsTarget.UK ASC) AS PERSON_ID  /*545*/ 
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE                                                                                       /*400*/ 
+        ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS CONDITION_CONCEPT_ID_MORPH                                                                                      /*521*/ 
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS CONDITION_START_DATE                              /*390*/ 
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS CONDITION_START_DATETIME              /*390*/ 
+	    ,'' AS CONDITION_END_DATE
+		,'' AS CONDITION_END_DATETIME
     	,'1791@32' AS CONDITION_TYPE_CONCEPT_ID
         ,CASE WHEN rsSource.F00129 <> 9 THEN 'Confirmed diagnosis'
-		      ELSE '' END AS CONDITION_STATUS_CONCEPT_ID                                                                     /*490*/ 
-		,NULL AS STOP_REASON
-		,(SELECT TOP 1 rsTarget.F05162 FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
+		      ELSE '' END AS CONDITION_STATUS_CONCEPT_ID                                                                          /*490*/ 
+		,'' AS STOP_REASON
+		,(SELECT TOP 1 ISNULL(rsTarget.F05162, '') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
 	    ,(SELECT TOP 1 rsTarget.UK FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS VISIT_OCCURRENCE_ID
 	    ,rsSource.uk AS VISIT_DETAIL_ID
-		,STUFF(rsSource.F02503,5,0,'/') + '-'+ STUFF(rsSource.F00152,4,0,'.') AS CONDITION_SOURCE_VALUE                                                                                                          /*764*/
+		,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') + '-'+ ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_SOURCE_VALUE   /*764*/
         ,CASE WHEN rsSource.F00129 <> 9 THEN '490@'  + rsSource.F00129
-		      ELSE '' END AS CONDITION_SOURCE_CONCEPT_ID                                                                                                    /*490*/ 
-        ,rsSource.F00129 AS CONDITION_STATUS_SOURCE_VALUE                                                                                                    /*490*/ 
-		,HSP.F00006 AS MRN
+		      ELSE '' END AS CONDITION_SOURCE_CONCEPT_ID                                                                          /*490*/ 
+        ,ISNULL(rsSource.F00129, '') AS CONDITION_STATUS_SOURCE_VALUE                                                             /*490*/ 
+		,ISNULL(HSP.F00006, '') AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
 JOIN UNM_CNExTCases.dbo.Stage rsTarget ON rsTarget.uk = rsSource.uk
 JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2

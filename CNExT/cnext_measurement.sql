@@ -39,33 +39,35 @@ Notes:
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 
+LTV - 2/4/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS MEASUREMENT_ID
-    	,(SELECT TOP 1 rsTarget.F00004 FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
-		,STUFF(rsSource.F00152,4,0,'.') AS MEASUREMENT_CONCEPT_ID_SITE                                                                                                      /*400*/ 
-        ,STUFF(rsSource.F02503,5,0,'/') AS MEASUREMENT_CONCEPT_ID_MORPH                                                                                                     /*521*/ 
-        ,rsTarget.F07625 AS MEASUREMENT_CONCEPT_ID_GRADE_PATHOLOGICAL                                                                                                    /*3844*/ 
-        ,TRY_CAST(rsSource.F00029 AS DATE) AS MEASUREMENT_DATE                                                                                         /*390*/ 
-        ,TRY_CAST(rsSource.F00029 AS DATETIME) AS MEASUREMENT_DATETIME                                                                                 /*390*/
-        ,TRY_CAST(rsSource.F00029 AS TIME) AS MEASUREMENT_TIME                                                                                         /*390*/  
+    	,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS MEASUREMENT_CONCEPT_ID_SITE                                                                                        /*400*/ 
+        ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS MEASUREMENT_CONCEPT_ID_MORPH                                                                                       /*521*/ 
+        ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_CONCEPT_ID_GRADE_PATHOLOGICAL                                                                                         /*3844*/ 
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS MEASUREMENT_DATE                                                                          /*390*/ 
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS MEASUREMENT_DATETIME                                                          /*390*/
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS TIME),'HH:mm:ss'), '') AS MEASUREMENT_TIME                                                                                                            /*390*/  
 	    ,'1791@32' AS MEASUREMENT_TYPE_CONCEPT_ID
-	    ,NULL AS OPERATOR_CONCEPT_ID
-		,rsSource.F02503 AS VALUE_AS_NUMBER                                                                                                                         /*521*/ 
-        ,STUFF(rsSource.F02503,5,0,'/') AS VALUE_AS_CONCEPT_ID                                                                                            /*521*/ 
-		,NULL AS UNIT_CONCEPT_ID
-		,NULL AS RANGE_LOW
-		,NULL AS RANGE_HIGH
-		,(SELECT TOP 1 rsTarget.F05162 FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
-		,rsSource.fk1 AS VISIT_OCCURRENCE_ID
+	    ,'' AS OPERATOR_CONCEPT_ID
+		,ISNULL(rsSource.F02503, '') AS VALUE_AS_NUMBER                                                                                                               /*521*/ 
+        ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS VALUE_AS_CONCEPT_ID                                                                                            /*521*/ 
+		,'' AS UNIT_CONCEPT_ID
+		,'' AS RANGE_LOW
+		,'' AS RANGE_HIGH
+		,(SELECT TOP 1 ISNULL(rsTarget.F05162, '') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
+		,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
-        ,rsTarget.F07625 AS MEASUREMENT_SOURCE_VALUE                                                                                                    /*3844*/ 
-		,'3844@' + rsTarget.F07625 AS MEASUREMENT_SOURCE_CONCEPT_ID
+        ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_SOURCE_VALUE                                                                                                        /*3844*/ 
+		,'3844@' + ISNULL(rsTarget.F07625, '') AS MEASUREMENT_SOURCE_CONCEPT_ID
         ,0 AS UNIT_SOURCE_VALUE
-        ,STUFF(rsSource.F02503,5,0,'/') AS VALUE_SOURCE_VALUE                                                                                           /*521*/
-		,HSP.F00006 AS MRN
+        ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS VALUE_SOURCE_VALUE                                                                                               /*521*/
+		,ISNULL(HSP.F00006, '') AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
 JOIN UNM_CNExTCases.dbo.Stage rsTarget ON rsTarget.uk = rsSource.uk
 JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk

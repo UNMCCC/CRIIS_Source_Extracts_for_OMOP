@@ -39,26 +39,28 @@ Notes:
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 
+LTV - 2/4/2022 - handled NULL values with the ISNULL function.
+
 */
 
 SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.uk AS SOURCE_PK
         ,RAD.uk AS DEVICE_EXPOSURE_ID
-    	,HSP.F00016 AS PERSON_ID
-        ,RAD.F07799 AS DEVICE_CONCEPT_ID                                                 /*1506*/
-		,TRY_CAST(F05187 AS DATE) AS Radiation_Date_Started                              /*1210*/
-        ,TRY_CAST(F05187 AS DATETIME) AS Radiation_Datetime_Started                      /*1210*/
-        ,TRY_CAST(F05212 AS DATE) AS Radiation_Date_Ended                                /*3220*/
-        ,TRY_CAST(F05212 AS DATETIME) AS Radiation_Datetime_Ended                        /*3220*/
+    	,ISNULL(HSP.F00016, '') AS PERSON_ID
+        ,RAD.F07799 AS DEVICE_CONCEPT_ID   --nulls handled by the predicate                                        /*1506*/
+		,ISNULL(FORMAT(TRY_CAST(F05187 AS DATE), 'yyyy-MM-dd'), '') AS Radiation_Date_Started                      /*1210*/
+        ,ISNULL(FORMAT(TRY_CAST(F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS Radiation_Datetime_Started      /*1210*/
+        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATE), 'yyyy-MM-dd'), '') AS Radiation_Date_Ended                        /*3220*/
+        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS Radiation_Datetime_Ended        /*3220*/
 	    ,'EHR dispensing record' AS DEVICE_TYPE_CONCEPT_ID
-        ,RAD.F05259 AS UNIQUE_DEVICE_ID                                                  /*1570*/
-        ,RAD.F07797 AS QUANTITY                                                          /*1533*/
-        ,RAD.F05156 AS PROVIDER_ID                                                       /*2480*/
+        ,ISNULL(RAD.F05259, '') AS UNIQUE_DEVICE_ID                                                                /*1570*/
+        ,ISNULL(RAD.F07797, '') AS QUANTITY                                                                        /*1533*/
+        ,ISNULL(RAD.F05156, '') AS PROVIDER_ID                                                                     /*2480*/
         ,HSP.UK AS VISIT_OCCURRENCE_ID
 		,TUM.uk AS VISIT_DETAIL_ID
-        ,RAD.F07799 AS DEVICE_SOURCE_VALUE                                               /*1502*/
-	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID
-		,HSP.F00006 AS MRN
+        ,RAD.F07799 AS DEVICE_SOURCE_VALUE   --nulls handled by the predicate                                      /*1502*/
+	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID   --nulls handled by the predicate
+		,ISNULL(HSP.F00006, '') AS MRN
   FROM UNM_CNExTCases.dbo.Radiation RAD
   INNER JOIN UNM_CNExTCases.dbo.Tumor TUM ON RAD.fk2 = TUM.uk
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON TUM.uk = HSP.fk2

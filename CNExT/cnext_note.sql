@@ -37,18 +37,20 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 2/7/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT TOP 1 rsTarget.F00004 FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
         ,rsSource.uk AS NOTE_EVENT_ID
-		,NULL AS NOTE_EVENT_FIELD_CONCEPT_ID
-        ,TRY_CAST(F00029 AS DATE) AS NOTE_DATE                                                                                               /*443*/ 
-        ,TRY_CAST(F00029 AS DATETIME) AS NOTE_DATETIME                                                                                /*443*/ 
+		,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
+        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd'), '') AS NOTE_DATE                                                                                               /*443*/ 
+        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME                                                                                /*443*/ 
 		,'1791@32' AS NOTE_TYPE_CONCEPT_ID
-		,NULL AS NOTE_CLASS_CONCEPT_ID
+		,'' AS NOTE_CLASS_CONCEPT_ID
 	    ,CASE WHEN F01220 IS NOT NULL THEN 'Text_Follow_Up_Notes' 
 		          ELSE '' END AS NOTE_TITLE_1
         ,CASE WHEN F01220 IS NOT NULL THEN F01220 
@@ -57,43 +59,43 @@ SELECT  'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
 		          ELSE '' END AS NOTE_TITLE_2
         ,CASE WHEN F01506 IS NOT NULL THEN F01506 
 		          ELSE '' END AS  NOTE_TEXT_2                                                                                                /*2580*/
-		,NULL AS NOTE_TITLE_3
-        ,NULL  NOTE_TEXT_3
-		,NULL AS NOTE_TITLE_4
-        ,NULL  NOTE_TEXT_4
-		,NULL AS NOTE_TITLE_5
-        ,NULL  NOTE_TEXT_5
-		,NULL AS NOTE_TITLE_6
-        ,NULL  NOTE_TEXT_6
-		,NULL AS NOTE_TITLE_7
-        ,NULL  NOTE_TEXT_7
-		,NULL AS NOTE_TITLE_8
-        ,NULL  NOTE_TEXT_8
-		,NULL AS NOTE_TITLE_9
-        ,NULL  NOTE_TEXT_9
+		,'' AS NOTE_TITLE_3
+        ,''  NOTE_TEXT_3
+		,'' AS NOTE_TITLE_4
+        ,''  NOTE_TEXT_4
+		,'' AS NOTE_TITLE_5
+        ,''  NOTE_TEXT_5
+		,'' AS NOTE_TITLE_6
+        ,''  NOTE_TEXT_6
+		,'' AS NOTE_TITLE_7
+        ,''  NOTE_TEXT_7
+		,'' AS NOTE_TITLE_8
+        ,''  NOTE_TEXT_8
+		,'' AS NOTE_TITLE_9
+        ,''  NOTE_TEXT_9
 		,'UTF-8 (32678)' AS ENCODING_CONCEPT_ID
 	    ,'4182347' AS LANGUAGE_CONCEPT_ID
-        ,(SELECT TOP 1 HEX.F00675 FROM UNM_CNExTCases.dbo.Hospital HSP
+        ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
                                   JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK 
 								 WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID                                              /*2460*/
-		,rsSource.fk1 AS VISIT_OCCURRENCE_ID
+		,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
-        ,(SELECT TOP 1 rsTarget.F00016 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
-        ,(SELECT TOP 1 rsTarget.F00006 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
   union all
   SELECT TOP 1000 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT TOP 1 rsTarget.F00004 FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
         ,rsSource.uk AS NOTE_EVENT_ID
-		,NULL AS NOTE_EVENT_FIELD_CONCEPT_ID
-        ,TRY_CAST(F00029 AS DATE) AS NOTE_DATE                                                                                               /*443*/ 
-        ,TRY_CAST(F00029 AS DATETIME) AS NOTE_DATETIME                                                                                       /*443*/ 
+		,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
+        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd'), '') AS NOTE_DATE                                                                                               /*443*/ 
+        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME                                                                                       /*443*/ 
 		,'1791@32' AS NOTE_TYPE_CONCEPT_ID
-		,NULL AS NOTE_CLASS_CONCEPT_ID
+		,'' AS NOTE_CLASS_CONCEPT_ID
 	    ,CASE WHEN F00030 IS NOT NULL THEN 'Text_Final_Dx' 
 		          ELSE '' END AS NOTE_TITLE_1
         ,CASE WHEN F00030 IS NOT NULL THEN F00030 
@@ -132,31 +134,31 @@ SELECT  'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
 		          ELSE '' END AS  NOTE_TEXT_9                                                                                                /*2560*/
 	    ,'UTF-8 (32678)' AS ENCODING_CONCEPT_ID
 	    ,'4182347' AS LANGUAGE_CONCEPT_ID
-        ,(SELECT TOP 1 HEX.F00675 FROM UNM_CNExTCases.dbo.Hospital HSP
+        ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
                                   JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK 
 								 WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID                                              /*2460*/
-		,rsSource.fk1 AS VISIT_OCCURRENCE_ID
+		,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
-        ,(SELECT TOP 1 rsTarget.F00016 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
-        ,(SELECT TOP 1 rsTarget.F00006 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
  UNION ALL
 SELECT TOP 1000 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT TOP 1 rsTarget.F00004 FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
         ,rsSource.uk AS NOTE_EVENT_ID
-		,NULL AS NOTE_EVENT_FIELD_CONCEPT_ID
-        ,TRY_CAST(F00029 AS DATE) AS NOTE_DATE                                                                                                                                                                                     /*443*/ 
-        ,TRY_CAST(F00029 AS DATETIME) AS NOTE_DATETIME                                                                                                                                                                      /*443*/ 
+		,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
+        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd'), '') AS NOTE_DATE                                                                                                                       /*443*/ 
+        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME                                                                                                               /*443*/ 
 		,'1791@32' AS NOTE_TYPE_CONCEPT_ID
-		,NULL AS NOTE_CLASS_CONCEPT_ID
+		,'' AS NOTE_CLASS_CONCEPT_ID
         ,CASE WHEN CAST(F01215 AS VARCHAR(100)) IS NOT NULL AND CAST(F01215 AS VARCHAR(100)) !=  ' ' THEN 'Text_Radiation_Beam_Summary' 
 		          ELSE '' END AS NOTE_TITLE_1
         ,CASE WHEN F01215 IS NOT NULL THEN F01215 
 		          ELSE '' END AS  NOTE_TEXT_1
-        ,CASE WHEN F01216 IS NOT NULL  AND CAST(F01216 AS VARCHAR(100)) !=  ' ' THEN 'Text_Chemotherapy_Summary' 
+        ,CASE WHEN F01216 IS NOT NULL AND CAST(F01216 AS VARCHAR(100)) !=  ' ' THEN 'Text_Chemotherapy_Summary' 
 		          ELSE '' END AS NOTE_TITLE_2
         ,CASE WHEN F01216 IS NOT NULL THEN F01216 
 		          ELSE '' END AS  NOTE_TEXT_2
@@ -190,15 +192,15 @@ SELECT TOP 1000 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
 		          ELSE '' END AS  NOTE_TEXT_9
 	    ,'UTF-8 (32678)' AS ENCODING_CONCEPT_ID
 	    ,'4182347' AS LANGUAGE_CONCEPT_ID
-        ,(SELECT TOP 1 HEX.F00675 FROM UNM_CNExTCases.dbo.Hospital HSP
+        ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
                                JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID    /*2460*/
-		,rsSource.fk1 AS VISIT_OCCURRENCE_ID
+		,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
-        ,(SELECT TOP 1 rsTarget.F00016 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
-        ,(SELECT TOP 1 rsTarget.F00006 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
-  JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.fk1 = rsSource.UK
+  JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.UK = rsSource.UK--TRT.fk1 = rsSource.UK
 WHERE TRT.F00420 NOT IN ('00','09')
    ORDER BY NOTE_TYPE_CONCEPT_ID
            ,rsSource.UK DESC

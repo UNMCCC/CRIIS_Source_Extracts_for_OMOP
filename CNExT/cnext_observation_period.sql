@@ -37,15 +37,17 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
-LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark. MRN is also listed as the PERSON_ID in this query.
+
+LTV - 2/4/2022 - handled NULL values with the ISNULL function. I am removing the added MRN field because the PERSON_ID field is the
+                 MRN in this case.
 
 */
 
 SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
       ,rsSource.UK  AS SOURCE_PK
-      ,rsSource.F00006 AS PERSON_ID                                                                                                                       /*10*/
-	  ,(SELECT TOP 1 TRY_CAST(F00427 AS DATETIME) FROM dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_START_DATE     /*590*/
-      ,(SELECT TOP 1 TRY_CAST(F00128 AS DATETIME) FROM dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_END_DATE       /*600*/
+      ,ISNULL(rsSource.F00006, '') AS PERSON_ID                                                                                                                       /*10*/
+	  ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00427 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_START_DATE     /*590*/
+      ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00128 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_END_DATE       /*600*/
 	  ,'1791@32' AS PERIOD_TYPE_CONCEPT_ID
-	  ,rsSource.F00006 AS MRN
   FROM UNM_CNExTCases.dbo.Hospital rsSource
