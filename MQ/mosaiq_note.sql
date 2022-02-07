@@ -73,13 +73,13 @@ SELECT 'MOSAIQ NOTES(OMOP_NOTE)' AS IDENTITY_CONTEXT
 			THEN isNULL(RTRIM( REPLACE(REPLACE(REPLACE(NTE.SUBJECT, CHAR(13), ''), CHAR(10), ''), '|','-' )), '') 
 			ELSE isNULL(RTRIM( REPLACE(REPLACE(REPLACE(PRO.TEXT, CHAR(13), ''), CHAR(10), ''), '|','-' )), '') 
 		END NOTE_TITLE
-	   ,isNULL(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),'') , '') AS NOTE_TEXT
+	   ,isNULL(REPLACE(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),''), '|','-' ) , '') AS NOTE_TEXT
 	   ,''	AS ENCODING_CONCEPT_ID -- 'UTF-8 (32678)' AS ENCODING_CONCEPT_ID (?)
 	   ,''	AS LANGUAGE_CONCEPT_ID -- '4182347' AS LANGUAGE_CONCEPT_ID (?)
 	   ,''  AS PROVIDER_ID
 	   ,''  AS VISIT_OCCURRENCE_ID   -- ??
 	   ,''  AS VISIT_DETAIL_ID      -- don't set
-       ,'MOSAIQ.dbo.NOTES' AS NOTE_SOURCE_VALUE
+       ,isNULL(REPLACE(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),''), '|','-' ) , '')  AS NOTE_SOURCE_VALUE
 	   ,isNULL(FORMAT(nte.Edit_DtTm,'yyyy-MM-dd HH:mm:ss'), '') as Modified_DtTm
 FROM MOSAIQ.dbo.NOTES nte
 LEFT JOIN Mosaiq.dbo.Prompt pro on  pro.enum = nte.note_type 
