@@ -110,15 +110,16 @@ SELECT  'MOSAIQ REF_PATIENT_MEASUREMENTS(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
 	  ,''			AS PROVIDER_ID		 
 	  ,''			AS VISIT_OCCURRENCE_ID  -- Vitals are taken on a day of a VISIT, but Labs may not be
 	  ,''			AS VISIT_DETAIL_ID     
-	  ,rsource.obs_desc							AS MEASUREMENT_SOURCE_VALUE		--  EXAMPLE1: Temp.Tympanic (C); EXAMPLE2 :Pulse;          EXAMPLE3: Percentage of O2 Sat in Blood From Atlas the verbatim value from the source data representing the Measurement that occurred. For example, this could be an ICD10 or Read code. MM  
-	  ,rsource.obs_label						AS MEASUREMENT_SOURCE_CONCEPT_ID	--- EXAMPLE1: Temperature (C);   EXAMPLE2 :P / Heart Rate; EXAMPLE3: Oxygen Saturation  
-	  ,isNULL(rsource.obs_Units	,'')			AS UNIT_SOURCE_VALUE -- examples: gm/dL,secs, RATIO, %
-      ,''										AS VALUE_SOURCE_VALUE --store the verbatim value that was mapped to VALUE_AS_CONCEPT_ID here MM  -- DAH: But results can be string or float or both
-	  ,''										AS Obs_Results -- REMOVE THIS FIELD -- result returned from function that populates value with either the float or string value for the measurement  
-	  ,rsource.Obs_Float						AS Obs_Float -- Each observation will be expressed as either a Float or a String-- if null, will set to zero which may be mistaken as a results ?
-	  ,rsource.Obs_String 						AS Obs_String -- Each observation will be expressed as either a Float or a String  
+	  ,REPLACE(rsource.obs_desc,'|','-' )	AS MEASUREMENT_SOURCE_VALUE	--  EXAMPLE1: Temp.Tympanic (C); EXAMPLE2 :Pulse;  EXAMPLE3: Percentage of O2 Sat in Blood From Atlas the verbatim value from the source data representing the Measurement that occurred. For example, this could be an ICD10 or Read code. MM  
+	  ,REPLACE(rsource.obs_label,'|','-' )			AS MEASUREMENT_SOURCE_CONCEPT_ID --- EXAMPLE1: Temperature (C);   EXAMPLE2 :P / Heart Rate; EXAMPLE3: Oxygen Saturation  
+	  ,isNULL(REPLACE(rsource.obs_Units,'|','-' ),'')	AS UNIT_SOURCE_VALUE -- examples: gm/dL,secs, RATIO, %
+          ,''							AS VALUE_SOURCE_VALUE --store the verbatim value that was mapped to VALUE_AS_CONCEPT_ID here MM  -- DAH: But results can be string or float or both
+	  ,''							AS Obs_Results -- REMOVE THIS FIELD -- result returned from function that populates value with either the float or string value for the measurement  
+	  ,rsource.Obs_Float					AS Obs_Float -- Each observation will be expressed as either a Float or a String-- if null, will set to zero which may be mistaken as a results ?
+	  ,REPLACE(rsource.Obs_String,'|','-' )			AS Obs_String -- Each observation will be expressed as either a Float or a String  
 	  ,rsource.Observation_Bucket				AS Observation_Bucket  -- 'LAB RESULTS' or 'VITAL SIGNS'
 	  ,isNULL(FORMAT(run_date,'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm
   FROM MosaiqAdmin.dbo.Ref_Observation_Measurements rsource
   --INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on rsource.pat_id1 = pat.pat_id1 -- subset 
   WHERE rsource.obx_id is NOT NULL
+  AND rsource.measurement_DtTm >= '2010-01-01'
