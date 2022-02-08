@@ -117,7 +117,7 @@ SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT            
            ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE                               /*400*/
 		   ,0 AS OBSERVATION_SOURCE_CONCEPT_ID
            ,0 AS UNIT_SOURCE_VALUE	   
-	       ,F03442 AS QUALIFIER_SOURCE_VALUE
+	       ,F03442 AS QUALIFIER_SOURCE_VALUE    --this field cannot be null per predicate
 	       ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID
 	       ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	       ,'' AS VALUE_AS_DATETIME

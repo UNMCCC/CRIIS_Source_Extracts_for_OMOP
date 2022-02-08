@@ -41,6 +41,8 @@ LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 
 LTV - 2/7/2022 - handled NULL values with the ISNULL function. Added formatting to the DEATH_DATETIME field so that it would look like all the other DATETIME fields.
 
+LTV - 2/8/2022 - wrapped the hard-coded values + a table column (i.e., '160@' +  PatExtended.F00021) in the ISNULL function so nothing will be returned when the table column is NULL.
+
 */
 
 SELECT  'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
@@ -60,11 +62,11 @@ SELECT  'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
       ,ISNULL(PatExtended.F00003, '') AS CARE_SITE_ID                                    /*21*/
 	  ,ISNULL(PatExtended.F00004, '') AS PERSON_SOURCE_VALUE                             /*20*/
       ,ISNULL(rsSource.F00022, '') AS GENDER_SOURCE_VALUE                                /*220*/
-      ,'220@' + ISNULL(rsSource.F00022, '') AS GENDER_SOURCE_CONCEPT_ID                  /*220*/
+      ,ISNULL('220@' + rsSource.F00022, '') AS GENDER_SOURCE_CONCEPT_ID                  /*220*/
 	  ,ISNULL(PatExtended.F00021, '') AS RACE_SOURCE_VALUE                               /*160*/
-	  ,'160@' + ISNULL(PatExtended.F00021, '') AS RACE_SOURCE_CONCEPT_ID
+	  ,ISNULL('160@' + PatExtended.F00021, '') AS RACE_SOURCE_CONCEPT_ID
 	  ,ISNULL(PatExtended.F00138, '') AS ETHNICITY_SOURCE_VALUE                          /*190*/
-	  ,'190@' + ISNULL(PatExtended.F00138, '') AS ETHNICITY_SOURCE_CONCEPT_ID
+	  ,ISNULL('190@' + PatExtended.F00138, '') AS ETHNICITY_SOURCE_CONCEPT_ID
       ,ISNULL(Hospital.F00006, '') AS MRN
   FROM UNM_CNExTCases.dbo.Patient rsSource
   JOIN UNM_CNExTCases.dbo.PatExtended on PatExtended.uk = rsSource.uk

@@ -60,7 +60,7 @@ SELECT  'CNEXT TUMOR(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT
 		,(SELECT TOP 1 ISNULL(rsTarget.F05162, '') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
 	    ,(SELECT TOP 1 rsTarget.UK FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS VISIT_OCCURRENCE_ID
 	    ,rsSource.uk AS VISIT_DETAIL_ID
-		,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') + '-'+ ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_SOURCE_VALUE   /*764*/
+		,ISNULL(STUFF(rsSource.F02503,5,0,'/') + '-'+ STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_SOURCE_VALUE               /*764*/
         ,CASE WHEN rsSource.F00129 <> 9 THEN '490@'  + rsSource.F00129
 		      ELSE '' END AS CONDITION_SOURCE_CONCEPT_ID                                                                          /*490*/ 
         ,ISNULL(rsSource.F00129, '') AS CONDITION_STATUS_SOURCE_VALUE                                                             /*490*/ 

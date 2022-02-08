@@ -41,6 +41,8 @@ LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 
 LTV - 2/7/2022 - handled NULL values with the ISNULL function. Join from Treatment table to Tumor corrected in 1st select statement and removed
                  from all others. 
+				 
+LTV - 2/8/2022 - handled empty column values where a hardcoded string is added to them so that nothing would be returned. The hardcoded string was being returned previously. 
 
 */
 
@@ -48,8 +50,8 @@ SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT        
          ,rsSource.uk  AS SOURCE_PK
          ,rsSource.uk AS PROCEDURE_OCCURRENCE_ID
          ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
-         ,'740@'  + TRT.F00420 AS PROCEDURE_CONCEPT_ID   --nulls handeled by predicate                       /*740*/
-         ,ISNULL(FORMAT(TRY_CAST(F00422 AS DATE), 'yyyy-MM-dd'), '') AS PROCEDURE_DATE                       /*1280*/
+         ,'740@'  + TRT.F00420 AS PROCEDURE_CONCEPT_ID   --nulls handled by predicate; no empty space values  /*740*/
+         ,ISNULL(FORMAT(TRY_CAST(F00422 AS DATE), 'yyyy-MM-dd'), '') AS PROCEDURE_DATE                        /*1280*/
          ,ISNULL(FORMAT(TRY_CAST(F00422 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME
     	 ,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
          ,0 AS MODIFIER_CONCEPT_ID
@@ -57,7 +59,7 @@ SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT        
          ,(SELECT TOP 1 ISNULL(rsTarget.F05162, '') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
          ,(SELECT TOP 1 rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS VISIT_OCCURRENCE_ID
          ,rsSource.uk AS VISIT_DETAIL_ID
-         ,TRT.F00420 AS PROCEDURE_SOURCE_VALUE   --nulls handeled by predicate                               /*740*/
+         ,TRT.F00420 AS PROCEDURE_SOURCE_VALUE   --nulls handled by predicate; no empty space values      /*740*/
          ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
          ,0 AS MODIFIER_SOURCE_VALUE
 		 ,ISNULL(HSP.F00006, '') AS MRN
@@ -70,16 +72,20 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
-        ,'670@'  + ISNULL(SRG.F03488, '') AS PROCEDURE_CONCEPT_ID                                                                                                         /*670*/
+        ,CASE                                  --no nulls, but empty space values to handle
+			WHEN SRG.F03488 <> ''
+			THEN '670@'  + SRG.F03488
+			ELSE ''
+		 END AS PROCEDURE_CONCEPT_ID                                                                          /*670*/
         ,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATE), 'yyyy-MM-dd'), '')  AS PROCEDURE_DATE                    /*1200*/ 
     	,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME     /*1200*/
     	,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
 	    ,0 AS MODIFIER_CONCEPT_ID
 		,1 AS QUANTITY
-    	,ISNULL(SRG.F05161, '') AS PROVIDER_ID                          /*2480*/
+    	,ISNULL(SRG.F05161, '') AS PROVIDER_ID                                            /*2480*/
         ,(SELECT TOP 1 rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID
-        ,SRG.F03488 AS PROCEDURE_SOURCE_VALUE    --nulls handeled by predicate                              /*740*/
+        ,SRG.F03488 AS PROCEDURE_SOURCE_VALUE    --nulls handled by predicate             /*740*/
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
 		,ISNULL(HSP.F00006, '') AS MRN
@@ -93,16 +99,20 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
-        ,'1506@'  + RAD.F07799 AS PROCEDURE_CONCEPT_ID    --nulls handeled by predicate                                 /*1506*/
-        ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE),'yyyy-MM-dd'), '') AS PROCEDURE_DATE                                /*1210*/ 
-    	,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME               /*1210*/
+       	,CASE
+			WHEN RAD.F07799 <> ''
+			THEN '1506@'  + RAD.F07799
+            ELSE ''
+         END AS PROCEDURE_CONCEPT_ID   --nulls handled by predicate; changed to a case statement to handle empty space values             /*1506*/
+        ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE),'yyyy-MM-dd'), '') AS PROCEDURE_DATE                                                  /*1210*/ 
+    	,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME                                 /*1210*/
     	,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
 	    ,0 AS MODIFIER_CONCEPT_ID
 		,1 AS QUANTITY
-    	,ISNULL(RAD.F05156, '') AS PROVIDER_ID                          /*2480*/
+    	,ISNULL(RAD.F05156, '') AS PROVIDER_ID                                             /*2480*/
         ,(SELECT TOP 1 rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID
-        ,RAD.F07799 AS PROCEDURE_SOURCE_VALUE    --nulls handeled by predicate              /*740*/
+        ,RAD.F07799 AS PROCEDURE_SOURCE_VALUE    --nulls handled by predicate              /*740*/
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
 		,ISNULL(HSP.F00006, '') AS MRN
@@ -115,16 +125,16 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.uk SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
-        ,'730@'  + OTH.F05069 AS PROCEDURE_CONCEPT_ID    --nulls handeled by predicate                        /*730*/
-        ,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd'), '')  AS PROCEDURE_DATE                    /*1250*/ 
-    	,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME     /*1250*/
+        ,'730@'  + OTH.F05069 AS PROCEDURE_CONCEPT_ID    --empty spaces and null values handled by predicate          /*730*/
+        ,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd'), '')  AS PROCEDURE_DATE                            /*1250*/ 
+    	,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME             /*1250*/
     	,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
 	    ,0 AS MODIFIER_CONCEPT_ID
 		,1 AS QUANTITY
-    	,ISNULL(OTH.F05160, '') AS PROVIDER_ID                          /*2460*/
+    	,ISNULL(OTH.F05160, '') AS PROVIDER_ID                                      /*2460*/
         ,(SELECT TOP 1 rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID
-        ,OTH.F05069 AS PROCEDURE_SOURCE_VALUE   --nulls handeled by predicate        /*740*/
+        ,OTH.F05069 AS PROCEDURE_SOURCE_VALUE   --nulls handled by predicate        /*740*/
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
 		,ISNULL(HSP.F00006, '') AS MRN

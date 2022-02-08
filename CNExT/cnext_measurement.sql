@@ -41,6 +41,8 @@ LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 
 LTV - 2/4/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks.
 
+LTV - 2/8/2022 - added case statement for MEASUREMENT_SOURCE_CONCEPT_ID so 3844@ alone would not be returned.
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
@@ -63,8 +65,12 @@ SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
 		,(SELECT TOP 1 ISNULL(rsTarget.F05162, '') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
 		,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
-        ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_SOURCE_VALUE                                                                                                        /*3844*/ 
-		,'3844@' + ISNULL(rsTarget.F07625, '') AS MEASUREMENT_SOURCE_CONCEPT_ID
+        ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_SOURCE_VALUE  		/*3844*/ 
+		,CASE 
+			WHEN rsTarget.F07625 <> ''
+			THEN '3844@' + F07625
+			ELSE ''
+		 END AS MEASUREMENT_SOURCE_CONCEPT_ID		
         ,0 AS UNIT_SOURCE_VALUE
         ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS VALUE_SOURCE_VALUE                                                                                               /*521*/
 		,ISNULL(HSP.F00006, '') AS MRN

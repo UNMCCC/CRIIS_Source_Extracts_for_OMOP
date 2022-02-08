@@ -55,8 +55,12 @@ SELECT DISTINCT  'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(SRG.F05161, '') AS PROVIDER_ID                            /*2480*/
         ,ISNULL(SRG.F01689, '') AS CARE_SITE_ID                           /*540*/
-    	,SRG.F03488 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null per the predicate                          /*670*/
-	    ,'605@' + SRG.F03488 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null per the predicate
+    	,SRG.F03488 AS VISIT_DETAIL_SOURCE_VALUE    --no nulls            /*670*/
+	    ,CASE                                       --no nulls, but empty space values to handle
+			WHEN SRG.F03488 <> ''
+			THEN '605@'  + SRG.F03488
+			ELSE ''
+		 END AS VISIT_DETAIL_SOURCE_CONCEPT_ID         
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
@@ -84,8 +88,8 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(RAD.F05156, '') AS PROVIDER_ID                            /*2480*/
         ,ISNULL(RAD.F03478, '') AS CARE_SITE_ID                           /*1550*/
-    	,RAD.F05257 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null per the predicate                                                                                                  /*1360*/
-	    ,'1360@' + RAD.F05257 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null per the predicate
+    	,RAD.F05257 AS VISIT_DETAIL_SOURCE_VALUE    --null values not selected per predicate                                                                                                  /*1360*/
+	    ,'1360@' + RAD.F05257 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --null and empty values not selected per predicate
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE         /*2410*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID    /*2415*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE      /*2420*/
@@ -112,8 +116,8 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(CHM.F05157, '') AS PROVIDER_ID                            /*2460*/
         ,ISNULL(CHM.F03479, '') AS CARE_SITE_ID                           /*540*/
-    	,CHM.F05037 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null per the predicate                                                                                           /*700*/
-	    ,'700@' + CHM.F05037 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null per the predicate
+    	,CHM.F05037 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null or empty per the predicate                                                                                              /*700*/
+	    ,'700@' + CHM.F05037 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null or empty per the predicate
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
@@ -141,8 +145,8 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(HOR.F05158, '') AS PROVIDER_ID                            /*2460*/
         ,ISNULL(HOR.F03480, '') AS CARE_SITE_ID                           /*540*/                                                                                                             /*710*/
-		,HOR.F05063 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null per the predicate  
-	    ,'710@' + HOR.F05063 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null per the predicate
+		,HOR.F05063 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null or empty per the predicate  
+	    ,'710@' + HOR.F05063 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null or empty per the predicate
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
@@ -169,8 +173,8 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(BRM.F05159, '') AS PROVIDER_ID                            /*2460*/
         ,ISNULL(BRM.F03481, '') AS CARE_SITE_ID                           /*540*/
-    	,BRM.F05066 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null per the predicate                                                                                                  /*720*/
-	    ,'720@' + BRM.F05066 AS VISIT_DETAIL_SOURCE_CONCEPT_ID   --value cannot be null per the predicate
+    	,BRM.F05066 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null or empty per the predicate                                                                                              /*720*/
+	    ,'720@' + BRM.F05066 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null or empty per the predicate
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
@@ -197,8 +201,8 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(OTH.F05160, '') AS PROVIDER_ID                            /*2460*/
         ,ISNULL(OTH.F05067, '') AS CARE_SITE_ID                           /*540*/
-    	,OTH.F05069 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null per the predicate                                                                                                  /*730*/
-	    ,'730@' + OTH.F05069 AS VISIT_DETAIL_SOURCE_CONCEPT_ID   --value cannot be null per the predicate
+    	,OTH.F05069 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null or empty per the predicate                                                                                              /*730*/
+	    ,'730@' + OTH.F05069 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null or empty per the predicate
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
 	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
