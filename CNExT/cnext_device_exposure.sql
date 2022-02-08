@@ -58,15 +58,11 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,HSP.UK AS VISIT_OCCURRENCE_ID
 		,TUM.uk AS VISIT_DETAIL_ID
         ,RAD.F07799 AS DEVICE_SOURCE_VALUE   --nulls handled by the predicate                                      /*1502*/
-	    ,CASE
-			WHEN RAD.F07799 <> ''
-			THEN '1506@'  + RAD.F07799
-            ELSE ''
-         END AS DEVICE_SOURCE_CONCEPT_ID   --nulls handled by predicate; changed to a case statement to handle empty space values
-		,ISNULL(HSP.F00006, '') AS MRN
+	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID --nulls and empty spaces handled in predicate
+        ,ISNULL(HSP.F00006, '') AS MRN
   FROM UNM_CNExTCases.dbo.Radiation RAD
   INNER JOIN UNM_CNExTCases.dbo.Tumor TUM ON RAD.fk2 = TUM.uk
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON TUM.uk = HSP.fk2
   WHERE F05257 > '000'
-    AND RAD.F07799 NOT IN ('00','99')
+    AND RAD.F07799 NOT IN ('','00','99')
   order by F05212 desc
