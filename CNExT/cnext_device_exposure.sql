@@ -40,6 +40,8 @@ Notes:
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 
 LTV - 2/4/2022 - handled NULL values with the ISNULL function. Handled empty space in F07799 with a case statement.
+
+LTV - 2/8/2022 - handled NULL and empty values for RAD.F07799 in predicate
 */
 
 SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
@@ -64,5 +66,6 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
   INNER JOIN UNM_CNExTCases.dbo.Tumor TUM ON RAD.fk2 = TUM.uk
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON TUM.uk = HSP.fk2
   WHERE F05257 > '000'
-    AND RAD.F07799 NOT IN ('','00','99')
+    AND RAD.F07799 > '00'
+	AND RAD.F07799 < '99'
   order by F05212 desc

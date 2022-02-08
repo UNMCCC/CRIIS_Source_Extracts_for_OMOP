@@ -42,7 +42,8 @@ LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 LTV - 2/7/2022 - handled NULL values with the ISNULL function. Join from Treatment table to Tumor corrected in 1st select statement and removed
                  from all others. 
 				 
-LTV - 2/8/2022 - handled empty column values where a hardcoded string is added to them so that nothing would be returned. The hardcoded string was being returned previously. 
+LTV - 2/8/2022 - handled empty column values where a satic value is added to them so that nothing would be returned. Change predicate for 3rd unioned select statement to 
+	             exclude rows where RAD.F07799 would be NULL, empty, '00', or '99'.
 
 */
 
@@ -99,12 +100,8 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
-       	,CASE
-			WHEN RAD.F07799 <> ''
-			THEN '1506@'  + RAD.F07799
-            ELSE ''
-         END AS PROCEDURE_CONCEPT_ID   --nulls handled by predicate; changed to a case statement to handle empty space values             /*1506*/
-        ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE),'yyyy-MM-dd'), '') AS PROCEDURE_DATE                                                  /*1210*/ 
+       	,'1506@'  + RAD.F07799 AS PROCEDURE_CONCEPT_ID   --handled nulls, empty spaces, and values '00' and '99' in predicate             /*1506*/
+		,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE),'yyyy-MM-dd'), '') AS PROCEDURE_DATE                                                  /*1210*/ 
     	,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME                                 /*1210*/
     	,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
 	    ,0 AS MODIFIER_CONCEPT_ID
@@ -120,6 +117,7 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
   INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   WHERE F07799 > '00'
+    AND F07799 < '99'
 UNION ALL
 SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                 /*'UNMTR OTHER RECORD'*/
         ,rsSource.uk SOURCE_PK
