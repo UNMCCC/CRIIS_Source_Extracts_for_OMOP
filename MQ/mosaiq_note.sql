@@ -79,7 +79,8 @@ SELECT 'MOSAIQ NOTES(OMOP_NOTE)' AS IDENTITY_CONTEXT
 	   ,''  AS PROVIDER_ID
 	   ,''  AS VISIT_OCCURRENCE_ID   -- ??
 	   ,''  AS VISIT_DETAIL_ID      -- don't set
-       ,isNULL(REPLACE(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),''), '|','-' ) , '')  AS NOTE_SOURCE_VALUE
+      --   ,isNULL(REPLACE(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),''), '|','-' ) , '')  AS NOTE_SOURCE_VALUE
+           ,''   AS NOTE_SOURCE_VALUE   -- per #51 (github): too big extract, remove this dupe of NOTE_TEXT
 	   ,isNULL(FORMAT(nte.Edit_DtTm,'yyyy-MM-dd HH:mm:ss'), '') as Modified_DtTm
 FROM MOSAIQ.dbo.NOTES nte
 LEFT JOIN Mosaiq.dbo.Prompt pro on  pro.enum = nte.note_type 
