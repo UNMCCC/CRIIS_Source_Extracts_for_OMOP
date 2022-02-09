@@ -76,7 +76,7 @@ SELECT DISTINCT  'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 WHERE SRG.F03488 != '00' 
     AND SRG.F03488 < '98'
 UNION ALL
-SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                              /*190*/
@@ -104,7 +104,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
   INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
   WHERE F05257 > '000'
 UNION ALL
-SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                              /*190*/
@@ -133,7 +133,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 WHERE CHM.F05037 IN ('01', '02', '03')
     AND CHM.F05669 > '00'
 UNION ALL
-SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                               /*190*/
@@ -161,7 +161,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN UNM_CNExTCases.dbo.Hormone HOR ON HOR.fk2 = rsSource.uk
 WHERE HOR.F05063 = '01'
 UNION ALL
-SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                                /*190*/
@@ -189,7 +189,7 @@ SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN UNM_CNExTCases.dbo.Immuno BRM ON BRM.fk2 = rsSource.uk
 WHERE BRM.F05066 = '01'
 UNION ALL
-SELECT DISTINCT TOP 1000 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                               /*190*/
