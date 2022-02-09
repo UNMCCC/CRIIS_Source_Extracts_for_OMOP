@@ -38,35 +38,36 @@ Notes:
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+LTV - 2/4/2022 - handled NULL values with the ISNULL function. Note: there are some provider_id's that contain all 9's. I don't know if this is equivilant to an unknown value and whether or not it should be converted to a null.
 
 */
 
 SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
        ,CHM.uk AS SOURCE_PK
        ,CHM.uk AS DRUG_EXPOSURE_ID
-       ,(SELECT TOP 1 rsTarget.F00004 FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
-       ,CHM.F05037 AS DRUG_CONCEPT_ID                                      /*700*/
-       ,TRY_CAST(CHM.F05189 AS DATE) AS DRUG_EXPOSURE_START_DATE           /*1220*/
-       ,TRY_CAST(CHM.F05189 AS DATETIME) AS DRUG_EXPOSURE_START_DATETIME   /*1220*/
-       ,TRY_CAST(CHM.F05214 AS DATE) AS DRUG_EXPOSURE_END_DATE             /*1220*/
-       ,TRY_CAST(CHM.F05214 AS DATETIME) AS DRUG_EXPOSURE_END_DATETIME     /*1220*/
-       ,TRY_CAST(CHM.F05214 AS DATE) AS VERBATIM_END_DATE                        /*3220*/
+       ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
+       ,CHM.F05037 AS DRUG_CONCEPT_ID  --nulls handled by predicate                                                  /*700*/
+       ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd'), '') AS DRUG_EXPOSURE_START_DATE                   /*1220*/
+       ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATETIME   /*1220*/
+       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd'), '') AS DRUG_EXPOSURE_END_DATE                     /*1220*/
+       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATETIME     /*1220*/
+       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd'), '') AS VERBATIM_END_DATE                          /*3220*/
 	   ,'EHR dispensing record' AS DRUG_TYPE_CONCEPT_ID
-	   ,NULL AS STOP_REASON
-	   ,NULL AS REFILLS
-       ,CHM.F04760 AS QUANTITY
-	   ,NULL AS DAYS_SUPPLY
-	   ,NULL AS SIG
-       ,NULL AS ROUTE_CONCEPT_ID
-	   ,NULL AS LOT_NUMBER
-       ,CHM.F05157 AS PROVIDER_ID                                          /*2460*/
+	   ,''  AS STOP_REASON
+	   ,''  AS REFILLS
+       ,ISNULL(CHM.F04760, '') AS QUANTITY
+	   ,''  AS DAYS_SUPPLY
+	   ,''  AS SIG
+       ,''  AS ROUTE_CONCEPT_ID
+	   ,''  AS LOT_NUMBER
+       ,ISNULL(CHM.F05157, '') AS PROVIDER_ID                                          /*2460*/
        ,(SELECT TOP 1 rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS VISIT_OCCURRENCE_ID
        ,rsSource.uk AS VISIT_DETAIL_ID
 	   ,0 AS DRUG_SOURCE_VALUE
-	   ,'700@' + CHM.F05037 AS DRUG_SOURCE_CONCEPT_ID
+	   ,'700@' + CHM.F05037 AS DRUG_SOURCE_CONCEPT_ID  --nulls handled by predicate 
        ,0 AS ROUTE_SOURCE_VALUE
        ,0 AS DOSE_UNIT_SOURCE_VALUE
-	   ,HSP.F00006 AS MRN
+	   ,ISNULL(HSP.F00006, '') AS MRN
       -- ,(SELECT TOP 1 rsTarget.F00016 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
       -- ,(SELECT TOP 1 rsTarget.F00006 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN  
   FROM UNM_CNExTCases.dbo.Tumor rsSource

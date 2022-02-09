@@ -39,26 +39,38 @@ Notes:
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 
+LTV - 2/4/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks.
+
+LTV - 2/8/2022 - handled empty fields appended to static values with case statements
+
 */
 
 SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
-        ,rsSource.uk AS SPECIMEN_ID                                                                                                                                  /*1772*/
-        ,(SELECT TOP 1 rsTarget.F00004 FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
-        ,'740@' + rsTarget.F05084 AS SPECIMEN_CONCEPT_ID 
+        ,rsSource.uk AS SPECIMEN_ID                                                                                                                                       /*1772*/
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,CASE                         --no null values; changed to a case statement to handle empty space values
+			WHEN F05084 <> '' 
+			THEN '740@' + F05084
+            ELSE ''
+         END AS SPECIMEN_CONCEPT_ID
 		,'1791@32' AS SPECIMEN_TYPE_CONCEPT_ID
-        ,TRY_CAST(rsTarget.F05175 AS DATE) AS SPECIMEN_DATE                                                                                                     /*1280*/
-        ,TRY_CAST(rsTarget.F05175 AS DATETIME) AS SPECIMEN_DATETIME                                                                                      /*1280*/
-		,NULL AS QUANTITY
-		,NULL AS UNIT_CONCEPT_ID
-		,STUFF(rsSource.F00152,4,0,'.') AS ANATOMIC_SITE_CONCEPT_ID                                                                              /*400*/
-		,'1770@' + FU.F00070 AS DISEASE_STATUS_CONCEPT_ID                                                                                                                 /*1770*/
-        ,rsTarget.F05084 AS SPECIMEN_SOURCE_ID                                                                                                                         /*740*/
-		,NULL AS SPECIMEN_SOURCE_VALUE
-		,NULL AS UNIT_SOURCE_VALUE
-		,NULL AS ANATOMIC_SITE_SOURCE_VALUE
-		,NULL AS DISEASE_STATUS_SOURCE_VALUE
-		,HSP.F00006 AS MRN
+        ,ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATE), 'yyyy-MM-dd'), '') AS SPECIMEN_DATE                             /*1280*/
+        ,ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS SPECIMEN_DATETIME             /*1280*/
+		,'' AS QUANTITY
+		,'' AS UNIT_CONCEPT_ID
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS ANATOMIC_SITE_CONCEPT_ID                                            /*400*/
+		,CASE                         --no null values; changed to a case statement to handle empty space values                         
+			WHEN F00070 <> ''
+			THEN '1770@' + F00070
+			ELSE ''
+		END AS DISEASE_STATUS_CONCEPT_ID                                                                                  /*1770*/
+        ,rsTarget.F05084 AS SPECIMEN_SOURCE_ID   --no null values                                                         /*740*/
+		,'' AS SPECIMEN_SOURCE_VALUE
+		,'' AS UNIT_SOURCE_VALUE
+		,'' AS ANATOMIC_SITE_SOURCE_VALUE
+		,'' AS DISEASE_STATUS_SOURCE_VALUE
+		,ISNULL(HSP.F00006, '') AS MRN
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.DxStg rsTarget ON rsTarget.FK2 = rsSource.uk
   JOIN UNM_CNExTCases.dbo.FollowUp FU ON FU.uk = rsSource.uk

@@ -1,4 +1,4 @@
-/* 
+ /* 
 Notes:
 1)  First 2 attributes are included so lineage tracing and source primary key 
     identification is clearly contained in the prospective extract file. 
@@ -38,38 +38,39 @@ Notes:
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
+LTV - 2/4/2022 - handled NULL values with the ISNULL function.
 
 */
 
 SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
-      ,rsSource.FK1  AS SOURCE_PK
-      ,rsSource.FK1  AS  LOCATION_ID
-      ,rsSource.F00012 AS ADDRESS_1                /*2330*/
-      ,NULL AS ADDRESS_2                           /*2355*/
-      ,rsSource.F00013 AS CITY                     /*70*/
-      ,rsSource.F00014 AS STATE                    /*80*/
-      ,rsSource.F00015 AS ZIP                      /*100*/
-      ,rsSource.F00017 AS COUNTY                   /*90*/
-      ,rsSource.FK1  AS LOCATION_SOURCE_VALUE
-      ,NULL AS LATITUDE
-      ,NULL AS LONGITUDE
-	  ,HSP.F00006 AS MRN
+      ,ISNULL(rsSource.FK1, '')  AS SOURCE_PK
+      ,ISNULL(rsSource.FK1, '')  AS  LOCATION_ID
+      ,ISNULL(rsSource.F00012, '') AS ADDRESS_1                /*2330*/
+      ,'' AS ADDRESS_2                                         /*2355*/
+      ,ISNULL(rsSource.F00013, '') AS CITY                     /*70*/
+      ,ISNULL(rsSource.F00014, '') AS STATE                    /*80*/
+      ,ISNULL(rsSource.F00015, '') AS ZIP                      /*100*/
+      ,ISNULL(rsSource.F00017, '') AS COUNTY                   /*90*/
+      ,ISNULL(rsSource.FK1, '')  AS LOCATION_SOURCE_VALUE
+      ,'' AS LATITUDE
+      ,'' AS LONGITUDE
+	  ,ISNULL(HSP.F00006, '') AS MRN
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   UNION ALL
  SELECT TOP 1000 'CNEXT PATEXTENDED(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*current location*/
-         ,rsSource.uk AS SOURCE_PK
-         ,rsSource.uk AS LOCATION_ID
-         ,rsSource.F05296 AS ADDRESS_1                  /*2350*/
-         ,rsSource.F05297 AS ADDRESS_2                  /*2355*/
-         ,rsSource.F05269 AS CITY                       /*1810*/
-         ,rsSource.F05270 AS STATE                      /*1820*/
-         ,rsSource.F05271 AS ZIP                        /*1830*/
-         ,rsSource.F05272 AS COUNTY                     /*1840*/
-         ,rsSource.F00004 AS LOCATION_SOURCE_VALUE
-         ,NULL AS LATITUDE
-         ,NULL AS LONGITUDE
-		 ,HSP.F00006 AS MRN
+         ,ISNULL(rsSource.uk, '') AS SOURCE_PK
+         ,ISNULL(rsSource.uk, '') AS LOCATION_ID
+         ,ISNULL(rsSource.F05296, '') AS ADDRESS_1                  /*2350*/
+         ,ISNULL(rsSource.F05297, '') AS ADDRESS_2                  /*2355*/
+         ,ISNULL(rsSource.F05269, '') AS CITY                       /*1810*/
+         ,ISNULL(rsSource.F05270, '') AS STATE                      /*1820*/
+         ,ISNULL(rsSource.F05271, '') AS ZIP                        /*1830*/
+         ,ISNULL(rsSource.F05272, '') AS COUNTY                     /*1840*/
+         ,ISNULL(rsSource.F00004, '') AS LOCATION_SOURCE_VALUE
+         ,'' AS LATITUDE
+         ,'' AS LONGITUDE
+		 ,ISNULL(HSP.F00006, '') AS MRN
     FROM UNM_CNExTCases.dbo.PatExtended rsSource
 	JOIN UNM_CNExTCases.dbo.Tumor ON Tumor.fk1 = rsSource.UK
     JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = Tumor.uk

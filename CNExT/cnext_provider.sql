@@ -37,22 +37,26 @@ Notes:
 
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
+LTV - 2/7/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks. Added conditions to predicate to prevent non-provider data from being returned.
+
 */
 
 SELECT 'CNEXT PATIENT (OMOP_PROVIDER)' AS IDENTITY_CONTEXT
-       ,LBL_CODE AS SOURCE_PK
-       ,LBL_CODE AS  PROVIDER_ID
-       ,CONCAT (MD_LAST ,', ', MD_FIRST)AS PROVIDER_NAME
-       ,NPI_ID AS NPI
-       ,NULL AS DEA
-       ,NULL AS SPECIALTY_CONCEPT_ID
-       ,NULL AS CARE_SITE_ID
-       ,NULL AS YEAR_OF_BIRTH
-       ,NULL AS GENDER_CONCEPT_ID
-       ,NULL AS PROVIDER_SOURCE_VALUE
-       ,MD_SPEC AS SPECIALTY_SOURCE_VALUE
-       ,NULL AS SPECIALTY_SOURCE_CONCEPT_ID
-       ,NULL AS GENDER_SOURCE_VALUE
-       ,NULL AS GENDER_SOURCE_CONCEPT_ID
+       ,ISNULL(LBL_CODE, '') AS SOURCE_PK
+       ,ISNULL(LBL_CODE, '') AS  PROVIDER_ID
+       ,CONCAT (ISNULL(MD_LAST, '') ,', ', ISNULL(MD_FIRST, ''))AS PROVIDER_NAME
+       ,ISNULL(NPI_ID, '') AS NPI
+       ,'' AS DEA
+       ,'' AS SPECIALTY_CONCEPT_ID
+       ,'' AS CARE_SITE_ID
+       ,'' AS YEAR_OF_BIRTH
+       ,'' AS GENDER_CONCEPT_ID
+       ,'' AS PROVIDER_SOURCE_VALUE
+       ,ISNULL(MD_SPEC, '') AS SPECIALTY_SOURCE_VALUE
+       ,'' AS SPECIALTY_SOURCE_CONCEPT_ID
+       ,'' AS GENDER_SOURCE_VALUE
+       ,'' AS GENDER_SOURCE_CONCEPT_ID
        /*MD_INST AS CARE_SITE_DESC*/
   FROM UNMPHYSICIANS.DBO.DOCTORS
+  where LBL_CODE not like 'Z999%'
+    and LBL_CODE <> '99999999'
