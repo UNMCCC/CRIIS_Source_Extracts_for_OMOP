@@ -85,7 +85,7 @@ SELECT  'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                    
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   WHERE F06433 IS NOT NULL
 UNION ALL
-SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                     /*'TUMOR REGISTRY COMORBIDITY RECORD'*/
+SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                     /*'TUMOR REGISTRY COMORBIDITY RECORD'*/
            ,rsSource.uk AS SOURCE_PK
            ,rsSource.uk AS OBSERVATION_ID
            ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
@@ -128,7 +128,7 @@ JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
     AND F03442 <> '00000'
     AND F03442 <> ''
 UNION ALL
-SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY FOLLOWUP RECURRENCE'*/
+SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY FOLLOWUP RECURRENCE'*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS OBSERVATION_ID                                                                                                                                  /*1772*/
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
@@ -171,7 +171,7 @@ SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT            
   WHERE F00070 IS NOT NULL
     AND F00070 != ''
 UNION ALL
-SELECT TOP 1000 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY SECONDARY DX RECORD'*/
+SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY SECONDARY DX RECORD'*/
            ,rsSource.uk AS SOURCE_PK
            ,rsSource.uk AS OBSERVATION_ID
            ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 

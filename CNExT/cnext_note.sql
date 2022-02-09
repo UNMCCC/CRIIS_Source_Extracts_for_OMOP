@@ -86,7 +86,7 @@ SELECT  'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
  FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
   union all
-  SELECT TOP 1000 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
+  SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
@@ -144,7 +144,7 @@ SELECT  'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
  FROM UNM_CNExTCases.dbo.Tumor rsSource
  UNION ALL
-SELECT TOP 1000 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
+SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 

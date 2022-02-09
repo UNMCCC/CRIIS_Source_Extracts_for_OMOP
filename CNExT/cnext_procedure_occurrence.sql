@@ -69,7 +69,7 @@ SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT        
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   where TRT.F00420 NOT IN ('00','09')
 UNION ALL
-SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                   /*'UNMTR SURGICAL RECORD'*/
+SELECT 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                   /*'UNMTR SURGICAL RECORD'*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
@@ -96,7 +96,7 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
 WHERE SRG.F03488 != '00' 
     AND SRG.F03488 < '98'
 UNION ALL
-SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                  /*'UNMTR RADIATION RECORD'*/
+SELECT 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                  /*'UNMTR RADIATION RECORD'*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
@@ -119,7 +119,7 @@ SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
   WHERE F07799 > '00'
     AND F07799 < '99'
 UNION ALL
-SELECT TOP 1000 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                 /*'UNMTR OTHER RECORD'*/
+SELECT 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                 /*'UNMTR OTHER RECORD'*/
         ,rsSource.uk SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/

@@ -58,7 +58,7 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   UNION ALL
- SELECT TOP 1000 'CNEXT PATEXTENDED(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*current location*/
+ SELECT 'CNEXT PATEXTENDED(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*current location*/
          ,ISNULL(rsSource.uk, '') AS SOURCE_PK
          ,ISNULL(rsSource.uk, '') AS LOCATION_ID
          ,ISNULL(rsSource.F05296, '') AS ADDRESS_1                  /*2350*/
