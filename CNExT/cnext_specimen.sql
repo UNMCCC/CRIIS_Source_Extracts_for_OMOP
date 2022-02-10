@@ -44,7 +44,8 @@ LTV - 2/4/2022 - handled NULL values with the ISNULL function. Replaced NULL sel
 LTV - 2/8/2022 - handled empty fields appended to static values with case statements
 
 */
-
+SET NOCOUNT ON;
+SELECT 'IDENTITY_CONTEXT|SOURCE_PK|SPECIMEN_ID|PERSON_ID|SPECIMEN_CONCEPT_ID|SPECIMEN_TYPE_CONCEPT_ID|SPECIMEN_DATE|SPECIMEN_DATETIME|QUANTITY|UNIT_CONCEPT_ID|ANATOMIC_SITE_CONCEPT_ID|DISEASE_STATUS_CONCEPT_ID|SPECIMEN_SOURCE_ID|SPECIMEN_SOURCE_VALUE|UNIT_SOURCE_VALUE|ANATOMIC_SITE_SOURCE_VALUE|DISEASE_STATUS_SOURCE_VALUE|MRN';
 SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS SPECIMEN_ID                                                                                                                                       /*1772*/

@@ -41,17 +41,18 @@ LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 LTV - 2/4/2022 - handled NULL values with the ISNULL function.
 
 */
-
+SET NOCOUNT ON;
+SELECT 'IDENTITY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|MRN';
 SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
       ,ISNULL(rsSource.FK1, '')  AS SOURCE_PK
       ,ISNULL(rsSource.FK1, '')  AS  LOCATION_ID
-      ,ISNULL(rsSource.F00012, '') AS ADDRESS_1                /*2330*/
+      ,ISNULL(RTRIM(rsSource.F00012), '') AS ADDRESS_1                /*2330*/
       ,'' AS ADDRESS_2                                         /*2355*/
-      ,ISNULL(rsSource.F00013, '') AS CITY                     /*70*/
+      ,ISNULL(RTRIM(rsSource.F00013), '') AS CITY                     /*70*/
       ,ISNULL(rsSource.F00014, '') AS STATE                    /*80*/
-      ,ISNULL(rsSource.F00015, '') AS ZIP                      /*100*/
-      ,ISNULL(rsSource.F00017, '') AS COUNTY                   /*90*/
-      ,ISNULL(rsSource.FK1, '')  AS LOCATION_SOURCE_VALUE
+      ,ISNULL(RTRIM(rsSource.F00015), '') AS ZIP                      /*100*/
+      ,ISNULL(RTRIM(rsSource.F00017), '') AS COUNTY                   /*90*/
+      ,ISNULL(RTRIM(rsSource.FK1), '')  AS LOCATION_SOURCE_VALUE
       ,'' AS LATITUDE
       ,'' AS LONGITUDE
 	  ,ISNULL(HSP.F00006, '') AS MRN
@@ -61,13 +62,13 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
  SELECT 'CNEXT PATEXTENDED(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*current location*/
          ,ISNULL(rsSource.uk, '') AS SOURCE_PK
          ,ISNULL(rsSource.uk, '') AS LOCATION_ID
-         ,ISNULL(rsSource.F05296, '') AS ADDRESS_1                  /*2350*/
-         ,ISNULL(rsSource.F05297, '') AS ADDRESS_2                  /*2355*/
-         ,ISNULL(rsSource.F05269, '') AS CITY                       /*1810*/
-         ,ISNULL(rsSource.F05270, '') AS STATE                      /*1820*/
-         ,ISNULL(rsSource.F05271, '') AS ZIP                        /*1830*/
-         ,ISNULL(rsSource.F05272, '') AS COUNTY                     /*1840*/
-         ,ISNULL(rsSource.F00004, '') AS LOCATION_SOURCE_VALUE
+         ,ISNULL(RTRIM(rsSource.F05296), '') AS ADDRESS_1                  /*2350*/
+         ,ISNULL(RTRIM(rsSource.F05297), '') AS ADDRESS_2                  /*2355*/
+         ,ISNULL(RTRIM(rsSource.F05269), '') AS CITY                       /*1810*/
+         ,ISNULL(RTRIM(rsSource.F05270), '') AS STATE                      /*1820*/
+         ,ISNULL(RTRIM(rsSource.F05271), '') AS ZIP                        /*1830*/
+         ,ISNULL(RTRIM(rsSource.F05272), '') AS COUNTY                     /*1840*/
+         ,ISNULL(RTRIM(rsSource.F00004), '') AS LOCATION_SOURCE_VALUE
          ,'' AS LATITUDE
          ,'' AS LONGITUDE
 		 ,ISNULL(HSP.F00006, '') AS MRN
