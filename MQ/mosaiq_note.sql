@@ -78,7 +78,6 @@ INNER JOIN MosaiqAdmin.dbo.RS21_Patient_list_for_Security_review subset on nte.p
 WHERE nte.Edit_DtTm >= '2010-01-01' -- start date 
 AND	nte.status_enum <> 1 -- exclude voided notes
 AND  pro.pgroup = '#NT1' -- Note_ID not unique -- Use combo of Pgroup and Note_id where pgroup = #NT1 --> Notes
--- EXCLUDING NOTE-TYPES (some of these note types (pro.text) are not in use)
 AND NTE.Note_Type in (12,14,25,50,101,104,105,106,107,108,109,110,112,113,114,115,116,117,118,122,170,185,192,200,201,202,207,209,210,211,212,213,15039)
 ;
 
