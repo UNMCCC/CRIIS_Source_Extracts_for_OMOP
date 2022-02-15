@@ -35,40 +35,29 @@ Notes:
 	
 9)  This script is to be run and is written to be run in MS SQL Server and will generate errors if run in other DB platforms
 
-12/13/2021 -- This was written by RS21 under the assumption that notes in Mosaiq are official Provider Clinic Visit Notes.
-However, Provider Clinical Visit Notes are stored in Cerner with PDF saved in UNMCCC Shared Directories
-Notes in this context refer to treatment and administrative comments recorded in Mosaiq by staff including providers, clerical, techical, and administrative staff
-Type of Notes Included: (some types do not contain notes)
-and (
-   nte.text in ('Allergies/Alerts','Care Plan','Care Plan Activity')
-or nte.text in ('Chemotherapy Tx', 'Chemo Teaching','Clinical Trial','Clinical Trial_old')
-or nte.text in ('Clinical-General', 'Clinical-Past Hx', 'Clinical-Pharmacy', 'Clinical-Onc Hx', 'Clinical-Prev Rad','Clinical-RO MD no','Clinical-Fam Hx')
-or nte.text in ('Code Link Component','Code Link Component','Code Link Name','CrossOvr')   -- empty
-or nte.text in ('Diagnosis','Dose','Dose Action Point', 'Dose Site','Dosimetry')
-or nte.text in ('eChart Check','MQ App Support notes')
-or nte.text in ('Nursing','Observation','Patient Care Plan','Patient Education','Physician','Physics','Prescription', 'Protocol')
-or nte.text in ('RT Plan','Screen MSG', 'Structure Set','Transfusion','Transfusion Reaction')
-)
-Confidence Level 60% -- are the included note types useful?  And have I included/excluded correctly
 
-01/12/22 -- addressed NULLs
-EXECUTION CHECK SUCCESSFUL DAH 01/12/2022
+
 02/03/22 -- Fixed formatting on Modified_DtTm 
 		-- Wrapped NTE.SUBJECT and PRO.TEXT in Replace statements to remove CRLF characters per KG request
 02/03/22 -- Added nte.Edit_DtTm >= '2010-01-01' -- start date 
+02/14/22 -- Included fields PROMPT.PGROUP (#NT1) and NTE.Note_Type (aka PRO.ENUM) because these determine what types of notes to select from MQ; not sure which OMOP fields to map to
+02/14/22 -- Updated OMOP Classification List for Kevin.  Note _Type is not always set accurately because the type is selected manually by person keying in the note.  
+		 -- Therefore, classification and note_types selection are "best guess".  Not sure how valuable data will be. DAH
+02/14/22 -- Added Provider/Staff who created note
 */
+-- drop table #notes
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|NOTE_ID|PERSON_ID|NOTE_EVENT_ID|NOTE_EVENT_FIELD_CONCEPT_ID|NOTE_DATE|NOTE_DATETIME|NOTE_TYPE_CONCEPT_ID|NOTE_CLASS_CONCEPT_ID|NOTE_TITLE|NOTE_TEXT|ENCODING_CONCEPT_ID|LANGUAGE_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|NOTE_SOURCE_VALUE|Modified_DtTm';
 SELECT 'MOSAIQ NOTES(OMOP_NOTE)' AS IDENTITY_CONTEXT 
- 	   ,NTE.NOTE_ID AS SOURCE_PK 
+ 	   ,NTE.NOTE_ID AS SOURCE_PK  
  	   ,NTE.NOTE_ID AS NOTE_ID
        ,NTE.pat_id1 AS PERSON_ID
- 	   ,NTE.NOTE_ID  AS NOTE_EVENT_ID
-	   ,NTE.NOTE_ID  AS NOTE_EVENT_FIELD_CONCEPT_ID
+ 	   ,PRO.PGROUP  AS NOTE_EVENT_ID  -- GROUP containing Notes entered in MQ UI by providers and admin staff
+	   ,NTE.Note_Type AS NOTE_EVENT_FIELD_CONCEPT_ID  -- combine with Pro.PGroup to determine which note types to report
 	   ,isNULL(FORMAT(NTE.CREATE_DTTM,'yyyy-MM-dd 00:00:00'), '') AS NOTE_DATE
 	   ,isNULL(FORMAT(NTE.CREATE_DTTM,'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME
 	   ,isNULL(RTRIM(PRO.TEXT), '')		AS NOTE_TYPE_CONCEPT_ID
-	   ,''							 AS NOTE_CLASS_CONCEPT_ID
+	   ,'EHR NOTES'		    AS NOTE_CLASS_CONCEPT_ID
 	   ,case when NTE.SUBJECT <> ' ' 
 			THEN isNULL(RTRIM( REPLACE(REPLACE(REPLACE(NTE.SUBJECT, CHAR(13), ''), CHAR(10), ''), '|','-' )), '') 
 			ELSE isNULL(RTRIM( REPLACE(REPLACE(REPLACE(PRO.TEXT, CHAR(13), ''), CHAR(10), ''), '|','-' )), '') 
@@ -76,7 +65,7 @@ SELECT 'MOSAIQ NOTES(OMOP_NOTE)' AS IDENTITY_CONTEXT
 	   ,isNULL(REPLACE(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),''), '|','-' ) , '') AS NOTE_TEXT
 	   ,''	AS ENCODING_CONCEPT_ID -- 'UTF-8 (32678)' AS ENCODING_CONCEPT_ID (?)
 	   ,''	AS LANGUAGE_CONCEPT_ID -- '4182347' AS LANGUAGE_CONCEPT_ID (?)
-	   ,''  AS PROVIDER_ID
+	   ,NTE.Create_ID  AS PROVIDER_ID  -- person who created the note; may be a provider or may be administrative staff
 	   ,''  AS VISIT_OCCURRENCE_ID   -- ??
 	   ,''  AS VISIT_DETAIL_ID      -- don't set
       --   ,isNULL(REPLACE(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),''), '|','-' ) , '')  AS NOTE_SOURCE_VALUE
@@ -89,15 +78,7 @@ INNER JOIN MosaiqAdmin.dbo.RS21_Patient_list_for_Security_review subset on nte.p
 WHERE nte.Edit_DtTm >= '2010-01-01' -- start date 
 AND	nte.status_enum <> 1 -- exclude voided notes
 AND  pro.pgroup = '#NT1' -- Note_ID not unique -- Use combo of Pgroup and Note_id where pgroup = #NT1 --> Notes
--- EXCLUDING NOTE-TYPES (some of these note types (pro.text) are not in use)
-and pro.text not in ('Admin-General','Admission/Referral','Authorization', 'Batch Payments', 'BatchPay Audit')
-and pro.text not in ('Bill Cfg Assign','Billing Benchmarks','Billing Config','Billing RCF','Billing RVU','Billing RVU Componen','Billing Trend Info','CDS','Claim Charge','Claim Config','Claim Config Assign','Claim Delivery Name','Collections')
-and pro.text not in ('Document','DNR Note', 'EDI_Def', 'EDI_DST','EDI_Log','EDI_WS', 'Ext Lab Comp', 'Ext Lab Name', 'Facility', 'Filter Charges','Financial Class','Follow-Up','HSC-Billing')
-and pro.text not in ('Image', 'Image Registration', 'IMPAC','Lab','Lab/Vitals','LabComp','LabOrder','Ledger Archive','Ledger Audit','Ledger names','Ledger transactions')
-and pro.text not in ('GPC','GPC Component','HSC-FC')
-and pro.text not in ('Medical Records','Medication Admin','Name/I.D.','OCI-Billing','OCI-FC','Old Ledger', 'Old Progress','Order')
-and pro.text not in ('Patient Payer','Pat Statement Dtl','Pat Statement Hdr','Patient Charge', 'Patient Trial', 'People / Places')
-and pro.text not in ('Print/Transmit Claim','PSDA Note','Quality Check List','Returned Mail','Rx Check/Waste','Schedule','SCP','Shape', 'Site Simulation','Trial Sponsor','XA Image')
-AND nte.Edit_DtTm >= '2010-01-01' 
+AND NTE.Note_Type in (12,14,25,50,101,104,105,106,107,108,109,110,112,113,114,115,116,117,118,122,170,185,192,200,201,202,207,209,210,211,212,213,15039)
 ;
+
 
