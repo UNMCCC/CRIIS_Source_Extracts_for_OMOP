@@ -77,7 +77,7 @@ LABS -- Don't know the Visit Date associated with Lab -- Labs are often ordered 
 02/04/2022 MEASUREMENT DTTM  -- Need to do some internal validation
 VITALS -- Same DATE as VISIT-DATE, but Time will be the actual time that day that vitals were taken by medical staff.  May be multiple vitals per day.
 LABS -- Date-TM the LAB RESULTS were entered into MOSAIQ VIA the Inbound Interface from Tricore labs, or Dt-Tm labs manually entered into the system if results not via II
-
+02/15/2022 -- Fixed Case Statement for Range_HIGH (changed from rsource.Range_Low to corrected field of rsource.Range_high)
 */
 SET NOCOUNT ON;
 
@@ -104,7 +104,7 @@ SELECT  'MOSAIQ REF_PATIENT_MEASUREMENTS(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
 		END RANGE_LOW 
 	  ,CASE 
 			WHEN Observation_Bucket = 'LAB RESULTS'	THEN rtrim(isNULL(cast(rsource.lab_reference_range as char),''))	
-			WHEN Observation_Bucket = 'VITAL SIGNS'	THEN rtrim(isNULL(cast(rsource.Range_Low as char),''))	
+			WHEN Observation_Bucket = 'VITAL SIGNS'	THEN rtrim(isNULL(cast(rsource.Range_High as char),''))	
 			ELSE ''
 		END RANGE_HIGH 
 	  ,''			AS PROVIDER_ID		 
