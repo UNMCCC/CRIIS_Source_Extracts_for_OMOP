@@ -65,51 +65,45 @@ Sort output file as example of how data would look in assessment form: Assessmen
 NOTE that only assessment items having responses for a given a given patient are returned.  The entire assessment is NOT represented for each patient.
 Debbie
 */
-
+-- drop table #test
 SET NOCOUNT ON;
-SELECT 'IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_ID|PERSON_ID|OBSERVATION_CONCEPT_ID|OBSERVATION_DATE|OBSERVATION_DATETIME|OBSERVATION_TYPE_CONCEPT_ID|VALUE_AS_NUMBER|VALUE_AS_STRING|VALUE_AS_CONCEPT_ID|QUALIFIER_CONCEPT_ID|UNIT_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|OBSERVATION_SOURCE_VALUE|UNIT_SOURCE_VALUE|QUALIFIER_SOURCE_VALUE|OBSERVATION_EVENT_ID|OBS_EVENT_FIELD_CONCEPT_ID|VALUE_AS_DATETIME|OBS_DESC|OBS_LABEL|OBS_CHOICE_LABEL|OBS_CHOICE_DESC|OBS_RESULTS|Modified_DtTm';
-SELECT 'MosaiqAdmin OBSERVE(OMOP_OBSERVATION)' AS IDENTITY_CONTEXT 
- 	   ,obx.OBX_ID			AS SOURCE_PK 
- 	   ,obx.OBX_ID			AS OBSERVATION_ID
-       ,obx.pat_id1			AS PERSON_ID
+SELECT  'IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_ID|PERSON_ID|OBSERVATION_CONCEPT_ID|OBSERVATION_DATE|OBSERVATION_DATETIME|OBSERVATION_TYPE_CONCEPT_ID|VALUE_AS_NUMBER|VALUE_AS_STRING|VALUE_AS_CONCEPT_ID|QUALIFIER_CONCEPT_ID|UNIT_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|OBSERVATION_SOURCE_VALUE|UNIT_SOURCE_VALUE|QUALIFIER_SOURCE_VALUE|OBSERVATION_EVENT_ID|OBS_EVENT_FIELD_CONCEPT_ID|VALUE_AS_DATETIME|OBS_DESC|OBS_LABEL|OBS_CHOICE_LABEL|OBS_CHOICE_DESC|OBS_RESULTS|Modified_DtTm';
+--check 'IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_ID|PERSON_ID|OBSERVATION_CONCEPT_ID|OBSERVATION_DATE|OBSERVATION_DATETIME|OBSERVATION_TYPE_CONCEPT_ID|VALUE_AS_NUMBER|VALUE_AS_STRING|VALUE_AS_CONCEPT_ID|QUALIFIER_CONCEPT_ID|UNIT_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|OBSERVATION_SOURCE_VALUE|UNIT_SOURCE_VALUE|QUALIFIER_SOURCE_VALUE|OBSERVATION_EVENT_ID|OBS_EVENT_FIELD_CONCEPT_ID|VALUE_AS_DATETIME|OBS_DESC|OBS_LABEL|OBS_CHOICE_LABEL|OBS_CHOICE_DESC|OBS_RESULTS|Modified_DtTm;
+
+SELECT  'MosaiqAdmin OBSERVE(OMOP_OBSERVATION)' AS IDENTITY_CONTEXT 
+ 	   ,Assessment.OBX_ID	AS SOURCE_PK 
+ 	   ,Assessment.OBX_ID	AS OBSERVATION_ID
+       ,Assessment.pat_id1	AS PERSON_ID
 	   ,''					AS OBSERVATION_CONCEPT_ID
-	   ,isNULL(FORMAT(obr.Obs_DtTm,'yyyy-MM-dd 00:00:00'), '')  AS OBSERVATION_DATE
-	   ,isNULL(FORMAT(obr.Obs_DtTm,'yyyy-MM-dd HH:mm:ss'), '')  AS OBSERVATION_DATETIME
-	   ,'EHR Assessment'		AS OBSERVATION_TYPE_CONCEPT_ID   
-	   ,ISNUMERIC(answer.label)			AS VALUE_AS_NUMBER		--ANSWER	to the Assessment Item  
-	   ,isNULL(answer.description, '')	AS VALUE_AS_STRING	    --ANSWER	to the Assessment Item
-	   ,ltrim(rtrim(Assessment.Item_Label))	AS VALUE_AS_CONCEPT_ID	  -- label of the Assessment Item (Items should appear in the order of View_Seq when presented as part of the Assessment as a whole)
-	   ,Assessment.Assessment_Label	AS QUALIFIER_CONCEPT_ID		-- Name of Assessment -- there will be many Item_Labels associated with each Assessment Name 
+	   ,isNULL(FORMAT(Assessment.Obs_DtTm,'yyyy-MM-dd 00:00:00'), '')  AS OBSERVATION_DATE
+	   ,isNULL(FORMAT(Assessment.Obs_DtTm,'yyyy-MM-dd HH:mm:ss'), '')  AS OBSERVATION_DATETIME
+	   ,'EHR Assessment'	AS OBSERVATION_TYPE_CONCEPT_ID   
+	   ,REPLACE(iSNULL(Assessment.Value_AS_NUMBER,''),0,'')	AS VALUE_AS_NUMBER		--ANSWER	to the Assessment Item  
+	   ,isNULL(Assessment.VALUE_AS_STRING,'')	AS VALUE_AS_STRING	    --ANSWER	to the Assessment Item
+	   ,''  AS VALUE_AS_CONCEPT_ID	-- Question  
+	   ,''  AS QUALIFIER_CONCEPT_ID		-- Name of Assessment -- there will be many Item_Labels associated with each Assessment Name 
 	   ,''	AS UNIT_CONCEPT_ID
 	   ,''	AS PROVIDER_ID  -- providers aren't associated with assessments 
 	   ,''	AS VISIT_OCCURRENCE_ID	-- assessment not necessarily taken when patient has an appt (could be over phone; mail; email)
 	   ,''	AS VISIT_DETAIL_ID  -- Not linked to a particular appointment
-       ,isNULL(answer.description,'')   AS OBSERVATION_SOURCE_VALUE 
+       ,''  AS OBSERVATION_SOURCE_VALUE 
 	   ,''	AS UNIT_SOURCE_VALUE
-	   ,isNULL(Assessment.View_Seq, 0)  AS QUALIFIER_SOURCE_VALUE  
+	   ,''  AS QUALIFIER_SOURCE_VALUE   -- label of the Assessment Item (Items should appear in the order of View_Seq when presented as part of the Assessment as a whole)
 	   ,''	AS OBSERVATION_EVENT_ID
 	   ,''	AS OBS_EVENT_FIELD_CONCEPT_ID  
-	   ,isNULL(isDate(mosaiq.dbo.fn_GetObsResult(obx_id,1)),'')  AS VALUE_AS_DATETIME -- if response is a date, it is stored as a float and must be retrieved using MQ FN
-	   ,ltrim(rtrim(Assessment.Assessment_Label)) AS OBS_DESC -- Using as Assessment-Name 
-	   ,cast(Assessment.View_Seq as char(4)) + ': ' + Assessment.Item_Label		AS OBS_LABEL	 -- Seq#/Order of item in assessment plus item label/name 
-	   ,Assessment.Item_Label					AS OBS_CHOICE_LABEL		
-	   ,Assessment.Item_Desc					AS OBS_CHOICE_DESC	
-	    --,ltrim(rtrim(Assessment.Assessment_Label)) + ': ' + ltrim(rtrim(Assessment.Item_Label)) + ' -- ' + ltrim(rtrim(answer.Description)) AS OBS_RESULTS-- can't use...if answer is a date must retrieve with function an it is time-consuming
-	   ,''  AS OBS_RESULTS			 
-	   ,Format(getDate(),'yyyy-MM-dd HH:mm:ss')			AS Modified_DtTm   -- need to change later 2/9/2022
-from Mosaiq.dbo.observe obx
-Inner join Mosaiq.dbo.ObsReq obr on obx.obr_set_id = obr.obr_set_id
-inner join mosaiq.dbo.ident on obx.pat_id1 = ident.pat_id1
-inner join Mosaiq.dbo.ObsDef answer on obx.obs_choice = answer.obd_id  -- to get the patient response/answer to the Assessment item/question
-left join MosaiqAdmin.dbo.Ref_ObsDefs_Assessments Assessment on obx.obd_id = Assessment.Item_Obd_Id -- Assessment Item aka "Question"
-Inner join MosaiqAdmin.dbo.Ref_Patients on obx.pat_id1 = Ref_Patients.pat_id1 and is_valid = 'Y'
-WHERE obx.obx_id is not null 
-and year(obr.obs_DtTm) >= '2010'
+	   ,''  AS VALUE_AS_DATETIME -- if response is a date, it is stored as a float and must be retrieved using MQ FN
+	   ,isNULL(Assessment.Assessment_Label,'')	AS ASSESSMENT_NAME
+	   ,isNULL(Assessment.View_Seq,'')	 AS ASSESSMENT_SEQ   -- Seq#/Order of QUESTIONS 
+	   ,isNULL(Assessment.Item_label,'') AS ASSESSMENT_QUESTION		
+	   ,Assessment.VALUE_AS_STRING		 AS ASSESSMENT_ANSWER	
+	   ,isNULL(Format(Assessment.Modified_DtTm,'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm  
+from Ref_Observation_Assessments Assessment
+WHERE  year(Assessment.obs_DtTm) = '2019'
 and (Assessment.Assessment_Label like '%TCP%' or Assessment.Assessment_Label = 'Pain Assessment') 
-/*ORDER BY 
+ORDER BY 
 Assessment.Assessment_Label 
-,obx.Pat_ID1
-,obr.Obs_DtTm
+,Assessment.Pat_ID1
+,Assessment.Obs_DtTm
 ,Assessment.View_Seq
-*/
  ;
+
