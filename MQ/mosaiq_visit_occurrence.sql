@@ -83,32 +83,34 @@ CONFIDENCE LEVEL:  MEDIUM
 EXECUTION CHECK SUCESSFUL 01/10/2022
 1/10/2022 -- added modified_dtTm  for incremental add
 1/10/2022 -- using concatenation of Appt date and Mosaiq Patient ID as visit occurrence identifer
+2/18/2022 -- added max(run_date) and group by to get distinct modified_DtTm
+2/18/2022 -- NOTE Visit_OCCURRENCE is really a DISTINCT apptDt_PatID from Visit_DETAIL -- this extract shouldn't even be required
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|VISIT_OCCURRENCE_ID|PERSON_ID|VISIT_CONCEPT_ID|VISIT_START_DATE|VISIT_START_DATETIME|VISIT_END_DATE|VISIT_END_DATETIME|VISIT_TYPE_CONCEPT_ID|PROVIDER_ID|CARE_SITE_ID|VISIT_SOURCE_VALUE|VISIT_SOURCE_CONCEPT_ID|ADMITTED_FROM_CONCEPT_ID|ADMITTED_FROM_SOURCE_VALUE|DISCHARGE_TO_CONCEPT_ID|DISCHARGE_TO_SOURCE_VALUE|PRECEDING_VISIT_OCCURRENCE_ID|modified_dtTm';
 SELECT	DISTINCT
 		'MosaiqAdmin Ref_SchSets (OMOP_VISIT_OCCURRENCE)'	AS IDENTITY_CONTEXT
-	   ,Ref_SchSets.apptDt_PatID				AS SOURCE_PK					-- will have multiple Visit_Details for each apptDt_PatID
- 	   ,Ref_SchSets.apptDt_PatID				AS VISIT_OCCURRENCE_ID  
-       ,Ref_SchSets.Pat_ID1						AS PERSON_ID
-	   ,'Outpatient Visit'						AS VISIT_CONCEPT_ID				 
-	   ,isNULL(FORMAT(Ref_SchSets.appt_date,'yyyy-MM-dd 00:00:00'),'')	AS VISIT_START_DATE		-- Date only 
-	   ,''										AS VISIT_START_DATETIME			-- DateTime will be on the Visit Detail records
-	   ,''										AS VISIT_END_DATE
-	   ,''										AS VISIT_END_DATETIME
-	   ,'EHR RECORD'								AS VISIT_TYPE_CONCEPT_ID	
-	   ,''										AS PROVIDER_ID					-- Provider will be on the Visit Detail record
-	   ,5										AS CARE_SITE_ID		
-	   ,Ref_SchSets.apptDt_PatID				AS VISIT_SOURCE_VALUE
-	   ,''										AS VISIT_SOURCE_CONCEPT_ID
-	   ,''										AS ADMITTED_FROM_CONCEPT_ID
- 	   ,''										AS ADMITTED_FROM_SOURCE_VALUE
-	   ,''										AS DISCHARGE_TO_CONCEPT_ID
-	   ,''										AS DISCHARGE_TO_SOURCE_VALUE
-	   ,''										AS PRECEDING_VISIT_OCCURRENCE_ID  -- Not tracked in MQ, but RS21 will calculate
-	   ,isNULL(FORMAT(Ref_SchSets.run_date,'yyyy-MM-dd HH:mm:ss'),'')	AS Modified_DtTm 
-FROM MosaiqAdmin.dbo.Ref_SchSets
+	   ,rsource.apptDt_PatID	AS SOURCE_PK					-- will have multiple Visit_Details for each apptDt_PatID
+ 	   ,rsource.apptDt_PatID	AS VISIT_OCCURRENCE_ID  
+       ,rsource.Pat_ID1			AS PERSON_ID
+	   ,'Outpatient Visit'		AS VISIT_CONCEPT_ID				 
+	   ,isNULL(FORMAT(rsource.appt_date,'yyyy-MM-dd 00:00:00'),'')	AS VISIT_START_DATE		-- Date only 
+	   ,''						AS VISIT_START_DATETIME			-- DateTime will be on the Visit Detail records
+	   ,''						AS VISIT_END_DATE
+	   ,''						AS VISIT_END_DATETIME
+	   ,'EHR RECORD'			AS VISIT_TYPE_CONCEPT_ID	
+	   ,''						AS PROVIDER_ID					-- Provider will be on the Visit Detail record
+	   ,5						AS CARE_SITE_ID		
+	   ,rsource.apptDt_PatID	AS VISIT_SOURCE_VALUE
+	   ,''						AS VISIT_SOURCE_CONCEPT_ID
+	   ,''						AS ADMITTED_FROM_CONCEPT_ID
+ 	   ,''						AS ADMITTED_FROM_SOURCE_VALUE
+	   ,''						AS DISCHARGE_TO_CONCEPT_ID
+	   ,''						AS DISCHARGE_TO_SOURCE_VALUE
+	   ,''						AS PRECEDING_VISIT_OCCURRENCE_ID  -- Not tracked in MQ, but RS21 will calculate
+	   ,MAX(isNULL(FORMAT(rsource.run_date,'yyyy-MM-dd HH:mm:ss'),'')) as modified_DtTm
+FROM MosaiqAdmin.dbo.Ref_SchSets  rsource -- need to fix dups in SP that creates this
 --INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on Ref_SchSets.pat_id1 = pat.pat_id1 -- subset 
-WHERE   Ref_SchSets.Pat_ID1 IS NOT NULL
+WHERE   rsource.Pat_ID1 IS NOT NULL
+GROUP BY rsource.apptDt_PatID, rsource.Pat_ID1, rsource.appt_date
 ;
-
