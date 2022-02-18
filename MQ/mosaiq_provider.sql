@@ -58,7 +58,7 @@ EXECUTION CHECK SUCCESSFUL -- DAH 01/10/2022
 2/1/22 -- changed these 2 Select Top 1 statements to Left joins to be able to use isNULL function
 --(SELECT TOP 1 ID_Code FROM Mosaiq.dbo.EXT_ID rsTarget WHERE rsSource.Staff_ID = rsTarget.Staff_id AND rsTarget.Ext_Type = 'NPI') AS NPI,
 --(SELECT TOP 1 isNULL(ID_Code,'') FROM Mosaiq.dbo.EXT_ID rsTarget WHERE rsSource.Staff_ID = rsTarget.Staff_id AND rsTarget.Ext_Type = 'DEA') AS DEA,
-
+2/18/22 -- Relaxed Provider exclusions to preserve integrity of joins between visits and providers for visits with "dirty data" (test providers)
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PROVIDER_ID|PROVIDER_NAME|NPI|DEA|SPECIALTY_CONCEPT_ID|CARE_SITE_ID|YEAR_OF_BIRTH|GENDER_CONCEPT_ID|PROVIDER_SOURCE_VALUE|SPECIALTY_SOURCE_VALUE|SPECIALTY_SOURCE_CONCEPT_ID|GENDER_SOURCE_VALUE|GENDER_SOURCE_CONCEPT_ID|modified_dtTm';
@@ -84,9 +84,22 @@ LEFT JOIN Mosaiq.dbo.EXT_ID NPI on RsSource.Staff_ID = NPI.Staff_ID and NPI.Ext_
 LEFT JOIN Mosaiq.dbo.EXT_ID DEA on RsSource.Staff_ID = NPI.Staff_ID and NPI.Ext_Type = 'DEA'
 WHERE rsSource.Staff_id is not null
 	and	rsSource.Type <> 'Location'				-- To select people and exclude places and machines
-    and rsSource.Type <> '*Do Not Delete*'		 
-	and rsSource.First_Name not in ('Template', 'Sample')	
-	and rsSource.Last_Name not like '%ZZ%'	
-	and rsSource.Last_Name not in  ('Auditor', 'Unknown', 'Unknown Doctor', 'Unlisted', 'zBilling', 'Himaudit')
+--   and rsSource.Type <> '*Do Not Delete*'		 
+--	and rsSource.First_Name not in ('Template', 'Sample')	
+--	and rsSource.Last_Name not like '%ZZ%'	
+--	and rsSource.Last_Name not in  ('Auditor', 'Unknown', 'Unknown Doctor', 'Unlisted', 'zBilling', 'Himaudit')
+
+
 ;
 
+/* these have captured appts
+last_name	first_name	type	 
+Infusion     (0-1)		Template
+Infusion     (5.5+		Template
+Infusion     (2.5-3)	Template
+Infusion     (3.5-5)	Template
+Infusion     Add On		Template
+Infusion     (1.5-2)	Template
+TEST         MD			*Do Not Delete*	
+*DIAMOND    TEMPLATE 	*Do Not Delete*	
+*/
