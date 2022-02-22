@@ -43,6 +43,7 @@ LTV - 2/7/2022 - handled NULL values with the ISNULL function. Join from Treatme
 LTV - 2/8/2022 - handled empty column values where a satic value is added to them so that nothing would be returned. Change predicate for 3rd unioned select statement to 
 	             exclude rows where RAD.F07799 would be NULL, empty, '00', or '99'.
 LTV - 2/22/2022 - Changed condition on the SURG table from SRG.F03488 != '00' to SRG.F03488 > '00' per Mark to avoid NULL and empty space values.
+LTV - 2/22/2022 - Changed condition on the Radiation table. Added WHERE F05257 > '000'.
 
 */
 SET NOCOUNT ON;
@@ -116,7 +117,8 @@ SELECT 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT         
    FROM UNM_CNExTCases.dbo.Tumor rsSource
   INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-  WHERE F07799 > '00'
+  WHERE F05257 > '000' 
+    AND F07799 > '00'
     AND F07799 < '99'
 UNION ALL
 SELECT 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                 /*'UNMTR OTHER RECORD'*/

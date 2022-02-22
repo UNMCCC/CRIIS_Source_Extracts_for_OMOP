@@ -40,6 +40,7 @@ Notes:
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 LTV - 2/7/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks.
 LTV - 2/22/2022 - Changed condition on the SURG table from SRG.F03488 != '00' to SRG.F03488 > '00' per Mark to avoid NULL and empty space values.
+LTV - 2/22/2022 - Changed condition on the Radiation table. Added AND F07799 > '00' AND F07799 < '99' to the predicate per Mark.
 
 */
 SET NOCOUNT ON;
@@ -104,6 +105,8 @@ SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
   INNER JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
   INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
   WHERE F05257 > '000'
+    AND F07799 > '00'
+    AND F07799 < '99'
 UNION ALL
 SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
