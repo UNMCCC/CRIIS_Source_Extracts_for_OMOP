@@ -38,8 +38,8 @@ Notes:
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
-
 LTV - 2/7/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks.
+LTV - 2/22/2022 - Changed condition on the SURG table from SRG.F03488 != '00' to SRG.F03488 > '00' per Mark to avoid NULL and empty space values.
 
 */
 SET NOCOUNT ON;
@@ -74,7 +74,7 @@ SELECT DISTINCT  'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
    JOIN UNM_CNExTCases.dbo.Surg SRG ON SRG.fk2 = rsSource.uk
-WHERE SRG.F03488 != '00' 
+WHERE SRG.F03488 > '00' 
     AND SRG.F03488 < '98'
 UNION ALL
 SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
