@@ -39,6 +39,8 @@ Notes:
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
 LTV - 2/4/2022 - handled NULL values with the ISNULL function.
+LTV - 2/22/2022 - Changed the UNION ALL to only UNION to reduce the number of duplicated addresses. This reduced the number of rows returned substantially - from 128,481 to 122,157;
+                  however, some addresses still appear to be duplicated but because other selected fields are different, like County, the rows are considered to be different.
 
 */
 SET NOCOUNT ON;
@@ -58,7 +60,7 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
 	  ,ISNULL(HSP.F00006, '') AS MRN
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-  UNION ALL
+  UNION
  SELECT 'CNEXT PATEXTENDED(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*current location*/
          ,ISNULL(rsSource.uk, '') AS SOURCE_PK
          ,ISNULL(rsSource.uk, '') AS LOCATION_ID
