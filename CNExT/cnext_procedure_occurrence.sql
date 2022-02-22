@@ -38,12 +38,11 @@ Notes:
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
-
 LTV - 2/7/2022 - handled NULL values with the ISNULL function. Join from Treatment table to Tumor corrected in 1st select statement and removed
                  from all others. 
-				 
 LTV - 2/8/2022 - handled empty column values where a satic value is added to them so that nothing would be returned. Change predicate for 3rd unioned select statement to 
 	             exclude rows where RAD.F07799 would be NULL, empty, '00', or '99'.
+LTV - 2/22/2022 - Changed condition on the SURG table from SRG.F03488 != '00' to SRG.F03488 > '00' per Mark to avoid NULL and empty space values.
 
 */
 SET NOCOUNT ON;
@@ -94,7 +93,7 @@ SELECT 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT         
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Surg SRG ON SRG.fk2 = rsSource.uk
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-WHERE SRG.F03488 != '00' 
+WHERE SRG.F03488 > '00' 
     AND SRG.F03488 < '98'
 UNION ALL
 SELECT 'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                  /*'UNMTR RADIATION RECORD'*/
