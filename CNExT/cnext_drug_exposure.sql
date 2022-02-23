@@ -38,7 +38,9 @@ Notes:
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
-LTV - 2/4/2022 - handled NULL values with the ISNULL function. Note: there are some provider_id's that contain all 9's. I don't know if this is equivilant to an unknown value and whether or not it should be converted to a null.
+LTV - 2/4/2022 - handled NULL values with the ISNULL function. Note: there are some provider_id's that contain all 9's. I don't know if
+                 this is equivilant to an unknown value and whether or not it should be converted to a null.
+LTV- 2/22/2022 - removed the 'AND CHM.F04755 IS NOT NULL'  conditon on the Chemo table per Mark.
 
 */
 SET NOCOUNT ON;
@@ -76,5 +78,4 @@ SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.UK
  WHERE CHM.F05037 IN ('01', '02', '03')
    AND CHM.F05669 > '00'
-   AND CHM.F04755 is not null
  ORDER BY 2 DESC
