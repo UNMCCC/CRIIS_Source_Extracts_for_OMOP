@@ -44,11 +44,13 @@ LTV - 2/4/2022 - handled NULL values with the ISNULL function. I am removing the
 
 */
 SET NOCOUNT ON;
-SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PERSON_ID|OBSERVATION_PERIOD_START_DATE|OBSERVATION_PERIOD_END_DATE|PERIOD_TYPE_CONCEPT_ID';
+SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PERSON_ID|OBSERVATION_PERIOD_START_DATE|OBSERVATION_PERIOD_END_DATE|PERIOD_TYPE_CONCEPT_ID|Modified_DtTm';
 SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
       ,rsSource.UK  AS SOURCE_PK
       ,ISNULL(RTRIM(rsSource.F00006), '') AS PERSON_ID                                                                                                                       /*10*/
 	  ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00427 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_START_DATE     /*590*/
       ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00128 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_END_DATE       /*600*/
 	  ,'1791@32' AS PERIOD_TYPE_CONCEPT_ID
+	  ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Hospital rsSource
+  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on rsSource.uk=HExt.UK

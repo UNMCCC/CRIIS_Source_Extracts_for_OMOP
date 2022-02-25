@@ -68,9 +68,11 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
 	,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
 	,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_OCCURRENCE_ID
 	,ISNULL(HSP.F00006, '') AS MRN
+   ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
 FROM UNM_CNExTCases.dbo.Patient rsSource
 JOIN UNM_CNExTCases.dbo.PatExtended PEX ON PEX.uk = rsSource.UK
 JOIN UNM_CNExTCases.dbo.Tumor TUM ON rsSource.uk = TUM.fk1
 JOIN UNM_CNExTCases.dbo.Hospital HSP ON TUM.uk = HSP.fk2
 JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
+ INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
 WHERE PEX.F00004 IS NOT NULL
