@@ -38,8 +38,8 @@ Notes:
 10) Comments reflect Item # as referrd to in the NAACCR layout V21-Chapter-IX-
 
 LTV - 1/31/2022 - adding patient's MRN at the end of the query per Mark.
-
 LTV - 2/7/2022 - handled NULL values with the ISNULL function. Replaced NULL selections with empty ticks.
+LTV - 2/25/2022 - renamed REFERRED_TO_CONCEPT_ID to DISCHARGE_TO_CONCEPT_ID per Mark.
 
 */
 SET NOCOUNT ON;
@@ -64,7 +64,7 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
      END AS VISIT_SOURCE_CONCEPT_ID
 	,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTED_FROM_CONCEPT_ID              /*2410*/
 	,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTED_FROM_SOURCE_VALUE            /*2415*/
-	,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS REFERRED_TO_CONCEPT_ID                /*2420*/
+	,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_CONCEPT_ID                /*2420*/
 	,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
 	,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_OCCURRENCE_ID
 	,ISNULL(HSP.F00006, '') AS MRN
