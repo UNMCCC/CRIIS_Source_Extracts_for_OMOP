@@ -45,9 +45,9 @@ LTV - 2/22/2022 - Changed condition on the Radiation table. Added AND F07799 > '
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|VISIT_DETAIL_ID|PERSON_ID|VISIT_DETAIL_CONCEPT_ID|VISIT_DETAIL_START_DATE|VISIT_DETAIL_START_DATETIME|VISIT_DETAIL_END_DATE|VISIT_DETAIL_END_DATETIME|VISIT_DETAIL_TYPE_CONCEPT_ID|PROVIDER_ID|CARE_SITE_ID|VISIT_DETAIL_SOURCE_VALUE|VISIT_DETAIL_SOURCE_CONCEPT_ID|ADMITTING_SOURCE_VALUE|ADMITTING_SOURCE_CONCEPT_ID|DISCHARGE_TO_SOURCE_VALUE|DISCHARGE_TO_CONCEPT_ID|PRECEDING_VISIT_DETAIL_ID|VISIT_DETAIL_PARENT_ID|VISIT_OCCURRENCE_ID|MRN';
-SELECT DISTINCT  'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
-        ,CONCAT('SURG-',rsSource.uk) AS SOURCE_PK
-        ,CONCAT('SURG-',rsSource.uk)  AS VISIT_DETAIL_ID
+SELECT DISTINCT  'CNEXT SURG (OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID              /*545*/                                                                                                                           /*190*/
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
         ,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1200*/ 
@@ -78,12 +78,12 @@ SELECT DISTINCT  'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 WHERE SRG.F03488 > '00' 
     AND SRG.F03488 < '98'
 UNION ALL
-SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
-        ,CONCAT('RADIATION-',rsSource.uk) AS SOURCE_PK
-        ,CONCAT('RADIATION-',rsSource.uk) AS VISIT_DETAIL_ID
+SELECT DISTINCT 'CNEXT RADIATION(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                              /*190*/
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1210*/ 
+        ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1210*/ 
     	,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1210*/
         ,ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_END_DATE                       /*3220*/
         ,ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3220*/
@@ -108,9 +108,9 @@ SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
     AND F07799 > '00'
     AND F07799 < '99'
 UNION ALL
-SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
-        ,CONCAT('CHEMO-',rsSource.uk) AS SOURCE_PK
-        ,CONCAT('CHEMO-',rsSource.uk) AS VISIT_DETAIL_ID
+SELECT DISTINCT 'CNEXT CHEMO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                              /*190*/
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                /*605*/
 	    ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1220*/ 
@@ -137,9 +137,9 @@ SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 WHERE CHM.F05037 IN ('01', '02', '03')
     AND CHM.F05669 > '00'
 UNION ALL
-SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
-        ,CONCAT('HORMONE-',rsSource.uk) AS SOURCE_PK
-        ,CONCAT('HORMONE-',rsSource.uk) AS VISIT_DETAIL_ID
+SELECT DISTINCT 'CNEXT HORMONE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                               /*190*/
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
 	    ,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1230*/ 
@@ -165,9 +165,9 @@ SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN UNM_CNExTCases.dbo.Hormone HOR ON HOR.fk2 = rsSource.uk
 WHERE HOR.F05063 = '01'
 UNION ALL
-SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
-        ,CONCAT('IMMUNO-',rsSource.uk) AS SOURCE_PK
-        ,CONCAT('IMMUNO-',rsSource.uk) AS VISIT_DETAIL_ID
+SELECT DISTINCT 'CNEXT IMMUNO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                                /*190*/
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
 	    ,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1240*/ 
@@ -193,9 +193,9 @@ SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN UNM_CNExTCases.dbo.Immuno BRM ON BRM.fk2 = rsSource.uk
 WHERE BRM.F05066 = '01'
 UNION ALL
-SELECT DISTINCT 'CNEXT PATIENT(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
-        ,CONCAT('OTHER-',rsSource.uk) AS SOURCE_PK
-        ,CONCAT('OTHER-',rsSource.uk) AS VISIT_DETAIL_ID
+SELECT DISTINCT 'CNEXT OTHER(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS VISIT_DETAIL_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                               /*190*/
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                 /*605*/
 	    ,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1250*/ 
