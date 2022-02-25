@@ -45,11 +45,13 @@ LTV - 2/4/2022 - handled NULL values with the ISNULL function. Removed the ISNUL
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_ID|PERSON_ID|OBSERVATION_CONCEPT_ID_1|OBSERVATION_CONCEPT_ID_2|OBSERVATION_CONCEPT_ID_3|OBSERVATION_CONCEPT_ID_4|OBSERVATION_CONCEPT_ID_5|OBSERVATION_CONCEPT_ID_6|OBSERVATION_CONCEPT_ID_7|OBSERVATION_CONCEPT_ID_8|OBSERVATION_CONCEPT_ID_9|OBSERVATION_CONCEPT_ID_10|OBSERVATION_DATE|OBSERVATION_DATETIME|OBSERVATION_TYPE_CONCEPT_ID|VALUE_AS_NUMBER|VALUE_AS_STRING|VALUE_AS_CONCEPT_ID_1|QUALIFIER_CONCEPT_ID_1|VALUE_AS_CONCEPT_ID_2|QUALIFIER_CONCEPT_ID_2|VALUE_AS_CONCEPT_ID_3|QUALIFIER_CONCEPT_ID_3|UNIT_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|OBSERVATION_SOURCE_VALUE|OBSERVATION_SOURCE_CONCEPT_ID|UNIT_SOURCE_VALUE|QUALIFIER_SOURCE_VALUE|OBSERVATION_EVENT_ID|OBS_EVENT_FIELD_CONCEPT_ID|VALUE_AS_DATETIME|MRN';
-SELECT  'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*Family History*/
+SELECT top (10) 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*Family History*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS OBSERVATION_ID
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
-        ,F06433 AS OBSERVATION_CONCEPT_ID_1    --this field cannot be null per predicate
+        ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') 
+		           FROM UNM_CNExTCases.dbo.PatExtended rsTarget 
+				   WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,F06433 AS OBSERVATION_CONCEPT_ID_1    --this field is not null per WHERE condition -- tumor.F06433::Family History (nullable)
 	    ,'' AS OBSERVATION_CONCEPT_ID_2
         ,'' AS OBSERVATION_CONCEPT_ID_3
         ,'' AS OBSERVATION_CONCEPT_ID_4
@@ -59,7 +61,7 @@ SELECT  'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                    
         ,'' AS OBSERVATION_CONCEPT_ID_8
         ,'' AS OBSERVATION_CONCEPT_ID_9
         ,'' AS OBSERVATION_CONCEPT_ID_10
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS OBSERVATION_DATE
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS OBSERVATION_DATE  -- tumor.f00029 Date of Dx
         ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_DATETIME
 		,'1791@32' AS OBSERVATION_TYPE_CONCEPT_ID
 	    ,'' AS VALUE_AS_NUMBER
@@ -71,15 +73,17 @@ SELECT  'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                    
         ,ISNULL(F06438,'') AS VALUE_AS_CONCEPT_ID_3
         ,ISNULL(F06439,'') AS QUALIFIER_CONCEPT_ID_3
 	    ,'' AS UNIT_CONCEPT_ID
-		,(SELECT TOP 1 ISNULL(rsTarget.F05162,'') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
-		,ISNULL(rsSource.fk1,'') AS VISIT_OCCURRENCE_ID
-        ,rsSource.uk AS VISIT_DETAIL_ID 
-        ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE                                                                                                    /*400*/
+		,(SELECT TOP 1 ISNULL(rsTarget.F05162,'') 
+		       FROM UNM_CNExTCases.dbo.DxStg rsTarget 
+			   WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460  DD: Dx/Stg Proc, Physician */
+		,ISNULL(rsSource.fk1,'') AS VISIT_OCCURRENCE_ID  -- Really?  FK1 is the connecting ID for patient. tumor.UK connects to Hosp.FK2
+        ,rsSource.uk AS VISIT_DETAIL_ID -- better, but still, that hust joins to the Hosp.PK.
+        ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE       --Site - Primary (ICD-O-3)                 /*400*/
 		,0 AS OBSERVATION_SOURCE_CONCEPT_ID
         ,0 AS UNIT_SOURCE_VALUE	   
-	    ,F06433 AS QUALIFIER_SOURCE_VALUE    --this field cannot be null per predicate
-	    ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID
-	    ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
+	    ,F06433 AS QUALIFIER_SOURCE_VALUE    --this field is not be null per WHERE condition  --Family History
+	    ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID                          
+		,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	    ,'' AS VALUE_AS_DATETIME
 		,ISNULL(HSP.F00006,'') AS MRN
    FROM UNM_CNExTCases.dbo.Tumor rsSource
@@ -129,7 +133,7 @@ JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
     AND F03442 <> '00000'
     AND F03442 <> ''
 UNION ALL
-SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY FOLLOWUP RECURRENCE'*/
+SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY FOLLOWUP RECURRENCE'*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS OBSERVATION_ID                                                                                                                                  /*1772*/
         ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
@@ -172,7 +176,7 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
   WHERE F00070 IS NOT NULL
     AND F00070 != ''
 UNION ALL
-SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY SECONDARY DX RECORD'*/
+SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY SECONDARY DX RECORD'*/
            ,rsSource.uk AS SOURCE_PK
            ,rsSource.uk AS OBSERVATION_ID
            ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
