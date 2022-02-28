@@ -51,7 +51,7 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PROCEDURE_OCCURRENCE_ID|PERSON_ID|PROCEDURE_C
 SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                           /*'UNMTR DX/STG RECORD'*/
          ,rsSource.uk  AS SOURCE_PK
          ,rsSource.uk AS PROCEDURE_OCCURRENCE_ID
-         ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
+         ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
          ,'740@'  + TRT.F00420 AS PROCEDURE_CONCEPT_ID   --nulls handled by predicate; no empty space values  /*740*/
          ,ISNULL(FORMAT(TRY_CAST(F00422 AS DATE), 'yyyy-MM-dd'), '') AS PROCEDURE_DATE                        /*1280*/
          ,ISNULL(FORMAT(TRY_CAST(F00422 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME
@@ -67,16 +67,15 @@ SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT        
 		 ,ISNULL(HSP.F00006, '') AS MRN
 		 ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
-  JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.UK = rsSource.UK--TRT.fk1 = rsSource.UK
-  JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
-  JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-  where TRT.F00420 NOT IN ('00','09')
-UNION ALL
+  JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.UK = rsSource.UK  --TRT.fk1 = rsSource.UK
+  JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2 = rsSource.UK
+  JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+ where TRT.F00420 NOT IN ('00','09')
+UNION
 SELECT 'CNEXT SURG(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                   /*'UNMTR SURGICAL RECORD'*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
+        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
         ,CASE                                  --no nulls, but empty space values to handle
 			WHEN SRG.F03488 <> ''
 			THEN '670@'  + SRG.F03488
@@ -98,15 +97,14 @@ SELECT 'CNEXT SURG(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT              
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Surg SRG ON SRG.fk2 = rsSource.uk
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-   JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-WHERE SRG.F03488 > '00' 
+   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+  WHERE SRG.F03488 > '00' 
     AND SRG.F03488 < '98'
-UNION ALL
+UNION
 SELECT 'CNEXT RADIATION(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                  /*'UNMTR RADIATION RECORD'*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
+        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
        	,'1506@'  + RAD.F07799 AS PROCEDURE_CONCEPT_ID   --handled nulls, empty spaces, and values '00' and '99' in predicate             /*1506*/
 		,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE),'yyyy-MM-dd'), '') AS PROCEDURE_DATE                                                  /*1210*/ 
     	,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME                                 /*1210*/
@@ -122,18 +120,17 @@ SELECT 'CNEXT RADIATION(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT         
 		,ISNULL(HSP.F00006, '') AS MRN
 	 ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
-   INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
+  INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-   JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
+   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE F05257 > '000' 
     AND F07799 > '00'
     AND F07799 < '99'
-UNION ALL
+UNION
 SELECT 'CNEXT OTHER(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                 /*'UNMTR OTHER RECORD'*/
         ,rsSource.uk SOURCE_PK
         ,rsSource.UK AS PROCEDURE_OCCURRENCE_ID
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
+        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
         ,'730@'  + OTH.F05069 AS PROCEDURE_CONCEPT_ID    --empty spaces and null values handled by predicate          /*730*/
         ,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd'), '')  AS PROCEDURE_DATE                            /*1250*/ 
     	,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME             /*1250*/
@@ -151,6 +148,102 @@ SELECT 'CNEXT OTHER(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT             
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Other OTH ON OTH.fk2 = rsSource.uk
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-   JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-WHERE OTH.F05069 in ( '1','2','3','6')
+   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+  WHERE OTH.F05069 in ( '1','2','3','6')
+UNION
+SELECT 'CNEXT CHEMO(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS PROCEDURE_OCCURRENCE_ID
+    	,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
+    	,'700@' + CHM.F05037 AS PROCEDURE_CONCEPT_ID
+	    ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd'), '') AS PROCEDURE_DATE
+    	,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')  AS PROCEDURE_DATETIME 
+        ,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
+		,0 AS MODIFIER_CONCEPT_ID
+		,1 AS QUANTITY
+    	,ISNULL(CHM.F05157, '') AS PROVIDER_ID 
+		,HSP.UK AS VISIT_OCCURRENCE_ID
+        ,rsSource.uk AS VISIT_DETAIL_ID		
+        ,CHM.F05037 AS PROCEDURE_SOURCE_VALUE
+        ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
+	    ,0 AS MODIFIER_SOURCE_VALUE
+	    ,ISNULL(HSP.F00006, '') AS MRN
+		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+   FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
+   JOIN UNM_CNExTCases.dbo.Chemo CHM ON CHM.fk2 = rsSource.uk
+   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+WHERE CHM.F05037 IN ('01', '02', '03')
+    AND CHM.F05669 > '00'
+UNION
+SELECT 'CNEXT HORMONE(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS PROCEDURE_OCCURRENCE_ID
+    	,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
+    	,'710@' + HOR.F05063 AS PROCEDURE_CONCEPT_ID
+	    ,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd'), '') AS PROCEDURE_DATE
+    	,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME
+    	,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
+		,0 AS MODIFIER_CONCEPT_ID
+		,1 AS QUANTITY
+    	,ISNULL(HOR.F05158, '') AS PROVIDER_ID
+		,HSP.UK AS VISIT_OCCURRENCE_ID
+	    ,rsSource.uk AS VISIT_DETAIL_ID		
+        ,HOR.F05063 AS PROCEDURE_SOURCE_VALUE
+        ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
+	    ,0 AS MODIFIER_SOURCE_VALUE
+		,ISNULL(HSP.F00006, '') AS MRN
+		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+   FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
+   JOIN UNM_CNExTCases.dbo.Hormone HOR ON HOR.fk2 = rsSource.uk
+   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+WHERE HOR.F05063 = '01'
+UNION
+SELECT 'CNEXT IMMUNO(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS VISIT_DETAIL_ID
+    	,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
+		,'720@' + BRM.F05066  AS PROCEDURE_CONCEPT_ID
+	    ,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd'), '') AS PROCEDURE_DATE
+    	,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME
+    	,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
+		,0 AS MODIFIER_CONCEPT_ID
+		,1 AS QUANTITY
+    	,ISNULL(BRM.F05159, '') AS PROVIDER_ID
+		,HSP.UK AS VISIT_OCCURRENCE_ID
+	    ,rsSource.uk AS VISIT_DETAIL_ID		
+    	,BRM.F05066 AS PROCEDURE_SOURCE_VALUE
+        ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
+	    ,0 AS MODIFIER_SOURCE_VALUE	
+	    ,ISNULL(HSP.F00006, '') AS MRN
+		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+   FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
+   JOIN UNM_CNExTCases.dbo.Immuno BRM ON BRM.fk2 = rsSource.uk
+   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+WHERE BRM.F05066 = '01'
+UNION
+SELECT 'CNEXT TRANSPLANT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
+        ,rsSource.uk AS SOURCE_PK
+        ,rsSource.uk AS VISIT_DETAIL_ID
+    	,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
+		,'3250@' + TRE.F05086  AS PROCEDURE_CONCEPT_ID
+	    ,ISNULL(FORMAT(TRY_CAST(TRE.F05209 AS DATE), 'yyyy-MM-dd'), '') AS PROCEDURE_DATE
+    	,ISNULL(FORMAT(TRY_CAST(TRE.F05209 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS PROCEDURE_DATETIME
+    	,'1791@32' AS PROCEDURE_TYPE_CONCEPT_ID
+		,0 AS MODIFIER_CONCEPT_ID
+		,1 AS QUANTITY
+    	,ISNULL(TRE.F06134, '') AS PROVIDER_ID
+		,HSP.UK AS VISIT_OCCURRENCE_ID
+	    ,rsSource.uk AS VISIT_DETAIL_ID		
+    	,TRE.F05086 AS PROCEDURE_SOURCE_VALUE
+        ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
+	    ,0 AS MODIFIER_SOURCE_VALUE	
+	    ,ISNULL(HSP.F00006, '') AS MRN
+		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+   FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
+   JOIN UNM_CNExTCases.dbo.Transplant TRE ON TRE.fk2 = rsSource.uk
+   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+WHERE TRE.F05086 in('10', '11', '12', '20', '30', '40')
