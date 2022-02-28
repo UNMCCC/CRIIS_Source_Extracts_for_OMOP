@@ -50,10 +50,10 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.uk AS DEVICE_EXPOSURE_ID
     	,ISNULL(HSP.F00016, '') AS PERSON_ID
         ,RAD.F07799 AS DEVICE_CONCEPT_ID   --nulls handled by the predicate                                        /*1506*/
-		,ISNULL(FORMAT(TRY_CAST(F05187 AS DATE), 'yyyy-MM-dd'), '') AS Radiation_Date_Started                      /*1210*/
-        ,ISNULL(FORMAT(TRY_CAST(F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS Radiation_Datetime_Started      /*1210*/
-        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATE), 'yyyy-MM-dd'), '') AS Radiation_Date_Ended                        /*3220*/
-        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS Radiation_Datetime_Ended        /*3220*/
+		,ISNULL(FORMAT(TRY_CAST(F05187 AS DATE), 'yyyy-MM-dd'), '') AS DEVICE_EXPOSURE_START_DATE                      /*1210*/
+        ,ISNULL(FORMAT(TRY_CAST(F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_START_DATETIME      /*1210*/
+        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATE), 'yyyy-MM-dd'), '') AS DEVICE_EXPOSURE_END_DATE                        /*3220*/
+        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_END_DATETIME        /*3220*/
 	    ,'EHR dispensing record' AS DEVICE_TYPE_CONCEPT_ID
         ,ISNULL(RAD.F05259, '') AS UNIQUE_DEVICE_ID                                                                /*1570*/
         ,ISNULL(RAD.F07797, '') AS QUANTITY                                                                        /*1533*/
