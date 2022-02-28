@@ -44,7 +44,7 @@ LTV - 2/4/2022 - handled NULL values with the ISNULL function. Handled empty spa
 LTV - 2/8/2022 - handled NULL and empty values for RAD.F07799 in predicate
 */
 SET NOCOUNT ON;
-SELECT 'IDENTITY_CONTEXT|SOURCE_PK|DEVICE_EXPOSURE_ID|PERSON_ID|DEVICE_CONCEPT_ID|Radiation_Date_Started|Radiation_Datetime_Started|Radiation_Date_Ended|Radiation_Datetime_Ended|DEVICE_TYPE_CONCEPT_ID|UNIQUE_DEVICE_ID|QUANTITY|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|DEVICE_SOURCE_VALUE|DEVICE_SOURCE_CONCEPT_ID|MRN';
+SELECT 'IDENTITY_CONTEXT|SOURCE_PK|DEVICE_EXPOSURE_ID|PERSON_ID|DEVICE_CONCEPT_ID|Radiation_Date_Started|Radiation_Datetime_Started|Radiation_Date_Ended|Radiation_Datetime_Ended|DEVICE_TYPE_CONCEPT_ID|UNIQUE_DEVICE_ID|QUANTITY|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|DEVICE_SOURCE_VALUE|DEVICE_SOURCE_CONCEPT_ID|MRN|Modified_DtTm';
 SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.uk AS SOURCE_PK
         ,RAD.uk AS DEVICE_EXPOSURE_ID
@@ -63,9 +63,11 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.F07799 AS DEVICE_SOURCE_VALUE   --nulls handled by the predicate                                      /*1502*/
 	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID --nulls and empty spaces handled in predicate
         ,ISNULL(HSP.F00006, '') AS MRN
+		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Radiation RAD
   INNER JOIN UNM_CNExTCases.dbo.Tumor TUM ON RAD.fk2 = TUM.uk
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON TUM.uk = HSP.fk2
+  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
   WHERE F05257 > '000'
     AND RAD.F07799 > '00'
 	AND RAD.F07799 < '99'
