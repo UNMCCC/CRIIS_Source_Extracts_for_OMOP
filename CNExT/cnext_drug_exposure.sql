@@ -48,7 +48,7 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|DRUG_EXPOSURE_ID|PERSON_ID|DRUG_CONCEPT_ID|DR
 SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
        ,CHM.uk AS SOURCE_PK
        ,CHM.uk AS DRUG_EXPOSURE_ID
-       ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/
+       ,PAT.UK AS PERSON_ID  /*20*/
        ,CHM.F05037 AS DRUG_CONCEPT_ID  --nulls handled by predicate                                                  /*700*/
        ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd'), '') AS DRUG_EXPOSURE_START_DATE                   /*1220*/
        ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATETIME   /*1220*/
@@ -75,9 +75,10 @@ SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
       -- ,(SELECT TOP 1 rsTarget.F00016 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
       -- ,(SELECT TOP 1 rsTarget.F00006 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN  
   FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.Chemo CHM on CHM.fk2 = rsSource.UK
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.UK
-  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
+  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
  WHERE CHM.F05037 IN ('01', '02', '03')
    AND CHM.F05669 > '00'
  ORDER BY 2 DESC

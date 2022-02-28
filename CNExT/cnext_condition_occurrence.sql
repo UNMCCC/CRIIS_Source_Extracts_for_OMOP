@@ -47,7 +47,7 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|CONDITION_OCCURRENCE_ID|PERSON_ID|CONDITION_C
 SELECT  'CNEXT TUMOR(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS CONDITION_OCCURRENCE_ID
-    	,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsSource.uk = rsTarget.fk2  Order By rsTarget.UK ASC) AS PERSON_ID  /*545*/ 
+    	,PAT.UK AS PERSON_ID  /*545*/ 
 		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE                                                                                       /*400*/ 
         ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS CONDITION_CONCEPT_ID_MORPH                                                                                      /*521*/ 
         ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS CONDITION_START_DATE                              /*390*/ 
@@ -68,7 +68,8 @@ SELECT  'CNEXT TUMOR(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT
 		,ISNULL(HSP.F00006, '') AS MRN
 		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
  FROM UNM_CNExTCases.dbo.Tumor rsSource
+ JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
  JOIN UNM_CNExTCases.dbo.Stage rsTarget ON rsTarget.uk = rsSource.uk
  JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
- INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
+ INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   ORDER BY rsSource.uk DESC

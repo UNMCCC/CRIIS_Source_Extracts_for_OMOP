@@ -48,7 +48,7 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|DEVICE_EXPOSURE_ID|PERSON_ID|DEVICE_CONCEPT_I
 SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.uk AS SOURCE_PK
         ,RAD.uk AS DEVICE_EXPOSURE_ID
-    	,ISNULL(HSP.F00016, '') AS PERSON_ID
+    	,PAT.UK AS PERSON_ID
         ,RAD.F07799 AS DEVICE_CONCEPT_ID   --nulls handled by the predicate                                        /*1506*/
 		,ISNULL(FORMAT(TRY_CAST(F05187 AS DATE), 'yyyy-MM-dd'), '') AS DEVICE_EXPOSURE_START_DATE                      /*1210*/
         ,ISNULL(FORMAT(TRY_CAST(F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_START_DATETIME      /*1210*/
@@ -66,8 +66,9 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
 		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Radiation RAD
   INNER JOIN UNM_CNExTCases.dbo.Tumor TUM ON RAD.fk2 = TUM.uk
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = TUM.fk1
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON TUM.uk = HSP.fk2
-  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
+  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE F05257 > '000'
     AND RAD.F07799 > '00'
 	AND RAD.F07799 < '99'
