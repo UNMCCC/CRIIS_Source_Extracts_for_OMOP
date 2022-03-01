@@ -48,9 +48,7 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_ID|PERSON_ID|OBSERVATION_CONCEPT_
 SELECT top (10) 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*Family History*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS OBSERVATION_ID
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') 
-		           FROM UNM_CNExTCases.dbo.PatExtended rsTarget 
-				   WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,PAT.UK AS PERSON_ID  /*20*/ 
         ,F06433 AS OBSERVATION_CONCEPT_ID_1    --this field is not null per WHERE condition -- tumor.F06433::Family History (nullable)
 	    ,'' AS OBSERVATION_CONCEPT_ID_2
         ,'' AS OBSERVATION_CONCEPT_ID_3
@@ -88,14 +86,15 @@ SELECT top (10) 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT            
 		,ISNULL(HSP.F00006,'') AS MRN
 		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-   JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
+   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE F06433 IS NOT NULL
-UNION ALL
+UNION
 SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                     /*'TUMOR REGISTRY COMORBIDITY RECORD'*/
            ,rsSource.uk AS SOURCE_PK
            ,rsSource.uk AS OBSERVATION_ID
-           ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+           ,PAT.UK AS PERSON_ID  /*20*/ 
            ,F03442 AS OBSERVATION_CONCEPT_ID_1    --this field cannot be null per predicate
            ,ISNULL(F03443,'') AS OBSERVATION_CONCEPT_ID_2                                                       /*3120*/ 
            ,ISNULL(F03444,'') AS OBSERVATION_CONCEPT_ID_3                                                       /*3130*/ 
@@ -131,16 +130,17 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
            ,ISNULL(HSP.F00006,'') AS MRN		   
 		   ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-  JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
+  JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
  WHERE F03442 IS NOT NULL
     AND F03442 <> '00000'
     AND F03442 <> ''
-UNION ALL
+UNION
 SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY FOLLOWUP RECURRENCE'*/
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS OBSERVATION_ID                                                                                                                                  /*1772*/
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,PAT.UK AS PERSON_ID  /*20*/ 
         ,F00070 AS OBSERVATION_CONCEPT_ID_1   --this field cannot be null per predicate   
         ,ISNULL(F03443,'') AS OBSERVATION_CONCEPT_ID_2                                               /*3120*/ 
         ,ISNULL(F03444,'') AS OBSERVATION_CONCEPT_ID_3                                               /*3130*/ 
@@ -176,17 +176,17 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
 		,ISNULL(HSP.F00006,'') AS MRN
         ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.UK
-  JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-  WHERE F00070 IS NOT NULL
-    AND F00070 != ''
-UNION ALL
+  JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+ WHERE F00070 IS NOT NULL
+   AND F00070 != ''
+UNION
 SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY SECONDARY DX RECORD'*/
            ,rsSource.uk AS SOURCE_PK
            ,rsSource.uk AS OBSERVATION_ID
-           ,(SELECT TOP 1 ISNULL(rsTarget.F00004,'') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+           ,PAT.UK AS PERSON_ID  /*20*/ 
            ,F06117 AS OBSERVATION_CONCEPT_ID_1   --this field cannot be null per predicate
            ,ISNULL(F06118,'') AS OBSERVATION_CONCEPT_ID_2                    /*3120*/ 
            ,ISNULL(F06119,'') AS OBSERVATION_CONCEPT_ID_3                    /*3130*/ 
@@ -222,11 +222,10 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
 		   ,ISNULL(HSP.F00006,'') AS MRN
           ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.UK
-  JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-
+  JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
  WHERE F06117 IS NOT NULL
     AND F06117 <> '0000000'
     AND F06117 <> ''

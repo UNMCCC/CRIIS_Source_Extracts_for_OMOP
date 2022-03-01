@@ -49,7 +49,7 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|SPECIMEN_ID|PERSON_ID|SPECIMEN_CONCEPT_ID|SPE
 SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS SPECIMEN_ID                                                                                                                                       /*1772*/
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,PAT.UK AS PERSON_ID
         ,CASE                         --no null values; changed to a case statement to handle empty space values
 			WHEN F05084 <> '' 
 			THEN '740@' + F05084
@@ -74,8 +74,9 @@ SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
 		,ISNULL(HSP.F00006, '') AS MRN
 		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.DxStg rsTarget ON rsTarget.FK2 = rsSource.uk
   JOIN UNM_CNExTCases.dbo.FollowUp FU ON FU.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-  WHERE F05084 NOT IN ( '00','09')
+ INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+ WHERE F05084 NOT IN ( '00','09')

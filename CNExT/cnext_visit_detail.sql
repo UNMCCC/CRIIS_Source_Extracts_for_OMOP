@@ -48,7 +48,7 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|VISIT_DETAIL_ID|PERSON_ID|VISIT_DETAIL_CONCEP
 SELECT DISTINCT  'CNEXT SURG (OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
-    	,ISNULL(HSP.F00016, '') AS PERSON_ID              /*545*/                                                                                                                           /*190*/
+    	,PAT.UK AS PERSON_ID 
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
         ,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1200*/ 
     	,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1200*/
@@ -73,18 +73,18 @@ SELECT DISTINCT  'CNEXT SURG (OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 		,ISNULL(HSP.F00006, '') AS MRN
 		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
    JOIN UNM_CNExTCases.dbo.Surg SRG ON SRG.fk2 = rsSource.uk
-  JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-WHERE SRG.F03488 > '00' 
+   JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+  WHERE SRG.F03488 > '00' 
     AND SRG.F03488 < '98'
-UNION ALL
+UNION
 SELECT DISTINCT 'CNEXT RADIATION(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
-    	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                              /*190*/
+    	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                /*605*/
         ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1210*/ 
     	,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1210*/
@@ -103,21 +103,21 @@ SELECT DISTINCT 'CNEXT RADIATION(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,'' AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                 /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
-		 ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
   INNER JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
   INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
-  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
+  INNER JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE F05257 > '000'
     AND F07799 > '00'
     AND F07799 < '99'
-UNION ALL
+UNION
 SELECT DISTINCT 'CNEXT CHEMO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
-    	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                              /*190*/
+    	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                /*605*/
 	    ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1220*/ 
     	,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1220*/
@@ -138,18 +138,18 @@ SELECT DISTINCT 'CNEXT CHEMO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 		,ISNULL(HSP.F00006, '') AS MRN
        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
    JOIN UNM_CNExTCases.dbo.Chemo CHM ON CHM.fk2 = rsSource.uk
-   INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-WHERE CHM.F05037 IN ('01', '02', '03')
+  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+  WHERE CHM.F05037 IN ('01', '02', '03')
     AND CHM.F05669 > '00'
-UNION ALL
+UNION
 SELECT DISTINCT 'CNEXT HORMONE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
-    	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                               /*190*/
+    	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
 	    ,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1230*/ 
     	,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1230*/
@@ -170,17 +170,17 @@ SELECT DISTINCT 'CNEXT HORMONE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 		,ISNULL(HSP.F00006, '') AS MRN
    	  ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
    JOIN UNM_CNExTCases.dbo.Hormone HOR ON HOR.fk2 = rsSource.uk
-   INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-WHERE HOR.F05063 = '01'
-UNION ALL
+  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+  WHERE HOR.F05063 = '01'
+UNION
 SELECT DISTINCT 'CNEXT IMMUNO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
-    	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                                /*190*/
+    	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
 	    ,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1240*/ 
     	,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1240*/
@@ -201,17 +201,17 @@ SELECT DISTINCT 'CNEXT IMMUNO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 		,ISNULL(HSP.F00006, '') AS MRN
    	    ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
    JOIN UNM_CNExTCases.dbo.Immuno BRM ON BRM.fk2 = rsSource.uk
-   INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-WHERE BRM.F05066 = '01'
-UNION ALL
+  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+  WHERE BRM.F05066 = '01'
+UNION
 SELECT DISTINCT 'CNEXT OTHER(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS VISIT_DETAIL_ID
-    	,ISNULL(HSP.F00016, '') AS PERSON_ID                                                                                                                                               /*190*/
+    	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                 /*605*/
 	    ,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1250*/ 
     	,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1250*/
@@ -232,8 +232,9 @@ SELECT DISTINCT 'CNEXT OTHER(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 		,ISNULL(HSP.F00006, '') AS MRN
 		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
+   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
    JOIN UNM_CNExTCases.dbo.Other OTH ON OTH.fk2 = rsSource.uk
-   INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-WHERE OTH.F05069 in ( '1','2','3','6')
+  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+  WHERE OTH.F05069 in ( '1','2','3','6')

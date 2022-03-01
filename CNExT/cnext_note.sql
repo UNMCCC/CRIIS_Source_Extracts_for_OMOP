@@ -45,7 +45,7 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|NOTE_ID|PERSON_ID|NOTE_EVENT_ID|NOTE_EVENT_FI
 SELECT  'CNEXT FOLLOWUP(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk = rsSource.fk1) AS PERSON_ID  /*20*/ 
         ,rsSource.uk AS NOTE_EVENT_ID
 	,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
         ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd'), '') AS NOTE_DATE                                                                                               /*443*/ 
@@ -84,18 +84,16 @@ SELECT  'CNEXT FOLLOWUP(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
         ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
         ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
-        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
-	
+        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm	
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
-  JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-  union all
-
-  SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
+  JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+UNION
+SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk = rsSource.fk1) AS PERSON_ID  /*20*/ 
         ,rsSource.uk AS NOTE_EVENT_ID
 	,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
         ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd'), '') AS NOTE_DATE                                                                                               /*443*/ 
@@ -149,17 +147,14 @@ SELECT  'CNEXT FOLLOWUP(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
         ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
         ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
-
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
-  JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-
- UNION ALL
+  JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+UNION
 SELECT 'CNEXT TREATMENT(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00004, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS PERSON_ID  /*20*/ 
+        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk = rsSource.fk1) AS PERSON_ID  /*20*/ 
         ,rsSource.uk AS NOTE_EVENT_ID
 		,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
         ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd'), '') AS NOTE_DATE                                                                                                         /*443*/ 
@@ -212,12 +207,10 @@ SELECT 'CNEXT TREATMENT(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
         ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
-
   FROM UNM_CNExTCases.dbo.Tumor rsSource
-  JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.UK = rsSource.UK--TRT.fk1 = rsSource.UK
+  JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.UK = rsSource.UK  --TRT.fk1 = rsSource.UK
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
-  JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK=HExt.UK
-
-  WHERE TRT.F00420 NOT IN ('00','09')
-   ORDER BY NOTE_TYPE_CONCEPT_ID
+  JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+ WHERE TRT.F00420 NOT IN ('00','09')
+ ORDER BY NOTE_TYPE_CONCEPT_ID
            ,rsSource.UK DESC
