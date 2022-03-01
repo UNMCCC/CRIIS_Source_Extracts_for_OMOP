@@ -65,7 +65,7 @@ SELECT 'MOSAIQ NOTES(OMOP_NOTE)' AS IDENTITY_CONTEXT
 	   ,isNULL(REPLACE(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),''), '|','-' ) , '') AS NOTE_TEXT
 	   ,''	AS ENCODING_CONCEPT_ID -- 'UTF-8 (32678)' AS ENCODING_CONCEPT_ID (?)
 	   ,''	AS LANGUAGE_CONCEPT_ID -- '4182347' AS LANGUAGE_CONCEPT_ID (?)
-	   ,NTE.Create_ID  AS PROVIDER_ID  -- person who created the note; may be a provider or may be administrative staff
+	   ,isNull(NTE.Create_ID, '')  AS PROVIDER_ID  -- person who created the note; may be a provider or may be administrative staff
 	   ,''  AS VISIT_OCCURRENCE_ID   -- ??
 	   ,''  AS VISIT_DETAIL_ID      -- don't set
       --   ,isNULL(REPLACE(replace(replace(RTRIM(MosaiqAdmin.dbo.RTF2TXT(NTE.NOTES)),CHAR(13),''),CHAR(10),''), '|','-' ) , '')  AS NOTE_SOURCE_VALUE
