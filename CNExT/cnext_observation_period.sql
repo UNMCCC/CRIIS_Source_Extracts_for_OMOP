@@ -47,6 +47,7 @@ SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PERSON_ID|OBSERVATION_PERIOD_START_DATE|OBSERVATION_PERIOD_END_DATE|PERIOD_TYPE_CONCEPT_ID|Modified_DtTm';
 SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
       ,rsSource.UK  AS SOURCE_PK
+	  ,rsSource.UK  AS OBSERVATION_PERIOD_ID
       ,PAT.UK AS PERSON_ID                                                                                                                       /*10*/
 	  ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00427 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_START_DATE     /*590*/
       ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00128 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_END_DATE       /*600*/
