@@ -49,8 +49,8 @@ SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
       ,rsSource.UK  AS SOURCE_PK
 	  ,rsSource.UK  AS OBSERVATION_PERIOD_ID
       ,PAT.UK AS PERSON_ID                                                                                                                       /*10*/
-	  ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00427 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_START_DATE     /*590*/
-      ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00128 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS OBSERVATION_PERIOD_END_DATE       /*600*/
+	  ,ISNULL(FORMAT(TRY_CAST(F00024 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_PERIOD_START_DATE     /*590*/
+      ,ISNULL(FORMAT(TRY_CAST(F00068 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_PERIOD_END_DATE       /*600*/
 	  ,'1791@32' AS PERIOD_TYPE_CONCEPT_ID
 	  ,ISNULL(RTRIM(rsSource.F00006), '') MRN
 	  ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
