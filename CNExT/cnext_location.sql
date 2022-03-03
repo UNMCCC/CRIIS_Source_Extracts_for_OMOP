@@ -44,7 +44,7 @@ LTV - 2/22/2022 - Changed the UNION ALL to only UNION to reduce the number of du
 
 */
 SET NOCOUNT ON;
-SELECT 'IDENTITY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|MRN';
+SELECT 'IDENTITY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|MRN|Modified_DTTm';
 SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
       ,ISNULL(rsSource.FK1, '')  AS SOURCE_PK
       ,ISNULL(rsSource.FK1, '')  AS  LOCATION_ID
@@ -58,6 +58,7 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
       ,'' AS LATITUDE
       ,'' AS LONGITUDE
 	  ,ISNULL(HSP.F00006, '') AS MRN
+     ,format(SYSDATETIME(),'yyyy-mm-dd HH:mm:ss') as Modified_DtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   UNION
@@ -74,6 +75,7 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
          ,'' AS LATITUDE
          ,'' AS LONGITUDE
 		 ,ISNULL(HSP.F00006, '') AS MRN
+        ,format(SYSDATETIME(),'yyyy-mm-dd HH:mm:ss') as Modified_DtTm
     FROM UNM_CNExTCases.dbo.PatExtended rsSource
 	JOIN UNM_CNExTCases.dbo.Tumor ON Tumor.fk1 = rsSource.UK
     JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = Tumor.uk
