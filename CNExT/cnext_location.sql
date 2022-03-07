@@ -58,7 +58,7 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
       ,'' AS LATITUDE
       ,'' AS LONGITUDE
 	  ,ISNULL(HSP.F00006, '') AS MRN
-     ,format(SYSDATETIME(),'yyyy-mm-dd HH:mm:ss') as Modified_DtTm
+     ,rtrim(format(SYSDATETIME(),'yyyy-dd-mm HH:mm:ss')) as Modified_DtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
   UNION
@@ -75,7 +75,7 @@ SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
          ,'' AS LATITUDE
          ,'' AS LONGITUDE
 		 ,ISNULL(HSP.F00006, '') AS MRN
-        ,format(SYSDATETIME(),'yyyy-mm-dd HH:mm:ss') as Modified_DtTm
+        ,rtrim(format(SYSDATETIME(),'yyyy-dd-mm HH:mm:ss')) as Modified_DtTm
     FROM UNM_CNExTCases.dbo.PatExtended rsSource
 	JOIN UNM_CNExTCases.dbo.Tumor ON Tumor.fk1 = rsSource.UK
     JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = Tumor.uk
