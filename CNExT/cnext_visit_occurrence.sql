@@ -45,34 +45,29 @@ LTV - 2/25/2022 - renamed REFERRED_TO_CONCEPT_ID to DISCHARGE_TO_CONCEPT_ID per 
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|VISIT_OCCURRENCE_ID|PERSON_ID|VISIT_CONCEPT_ID|VISIT_START_DATE|VISIT_START_DATETIME|VISIT_END_DATE|VISIT_END_DATETIME|VISIT_TYPE_CONCEPT_ID|PROVIDER_ID|CARE_SITE_ID|VISIT_SOURCE_VALUE|VISIT_SOURCE_CONCEPT_ID|ADMITTED_FROM_CONCEPT_ID|ADMITTED_FROM_SOURCE_VALUE|REFERRED_TO_CONCEPT_ID|DISCHARGE_TO_SOURCE_VALUE|PRECEDING_VISIT_OCCURRENCE_ID|MRN';
 SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
-    ,HSP.UK AS SOURCE_PK
-    ,HSP.UK AS VISIT_OCCURRENCE_ID
-	,rsSource.uk AS PERSON_ID                                                                                                                                         /*190*/
-	,ISNULL(HSG.F05522, '') AS VISIT_CONCEPT_ID                                                                                                                                  /*605*/
-	,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00427 AS DATE), 'yyyy-MM-dd'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS VISIT_START_DATE                     /*590*/ 
-	,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00427 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS VISIT_START_DATETIME     /*590*/
-    ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00128 AS DATE), 'yyyy-MM-dd'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS VISIT_END_DATE                       /*600*/
-    ,(SELECT TOP 1 ISNULL(FORMAT(TRY_CAST(F00128 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS VISIT_END_DATETIME       /*600*/
-	,'1791@32' AS VISIT_TYPE_CONCEPT_ID
-	,(SELECT TOP 1 ISNULL(rsTarget.F00675, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS PROVIDER_ID                          /*2460*/
-    ,(SELECT TOP 1 ISNULL(rsTarget.F00003, '') FROM UNM_CNExTCases.dbo.PatExtended rsTarget WHERE rsTarget.uk = rsSource.uk Order By rsTarget.UK ASC) AS CARE_SITE_ID                           /*21*/
-	,ISNULL(HSG.F05522, '') AS VISIT_SOURCE_VALUE                                                                                                                                /*605*/
-	,CASE                        --handles nulls and empty field values
-		WHEN HSG.F05522 <> ''
-		THEN '605@' + HSG.F05522
-		ELSE ''
-     END AS VISIT_SOURCE_CONCEPT_ID
-	,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTED_FROM_CONCEPT_ID              /*2410*/
-	,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTED_FROM_SOURCE_VALUE            /*2415*/
-	,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_CONCEPT_ID                /*2420*/
-	,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
-	,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_OCCURRENCE_ID
-	,ISNULL(HSP.F00006, '') AS MRN
-   ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
-  FROM UNM_CNExTCases.dbo.Patient rsSource
-  JOIN UNM_CNExTCases.dbo.PatExtended PEX ON PEX.uk = rsSource.UK
-  JOIN UNM_CNExTCases.dbo.Tumor TUM ON rsSource.uk = TUM.fk1
-  JOIN UNM_CNExTCases.dbo.Hospital HSP ON TUM.uk = HSP.fk2
-  JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
- INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
- WHERE PEX.F00004 IS NOT NULL
+        ,rsSource.UK AS SOURCE_PK
+        ,rsSource.UK AS VISIT_OCCURRENCE_ID
+	    ,PAT.uk AS PERSON_ID                                                                                   /*190*/
+	    ,'' AS VISIT_CONCEPT_ID                                                                                /*605*/
+	    ,ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_START_DATE
+	    ,ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_START_DATETIME
+        ,'' AS VISIT_END_DATE                       /*600*/
+        ,'' AS VISIT_END_DATETIME                   /*600*/
+	    ,'1791@32' AS VISIT_TYPE_CONCEPT_ID
+	    ,'' AS PROVIDER_ID                          /*2460*/
+        ,'' AS CARE_SITE_ID                           /*21*/
+	    ,'' AS VISIT_SOURCE_VALUE                                                                              /*605*/
+	    ,'' AS VISIT_SOURCE_CONCEPT_ID
+	    ,(SELECT TOP 1 rsTarget.F01684 FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK and rsTarget.F01684 > '0000000000' and rsTarget.F01684 < '9999' Order By rsTarget.UK ASC)
+	       AS ADMITTED_FROM_CONCEPT_ID
+	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTED_FROM_SOURCE_VALUE            /*2415*/
+	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK and rsTarget.F01685 > '0000000000' and rsTarget.F01685 < '9999' Order By rsTarget.UK ASC)
+	       AS DISCHARGE_TO_CONCEPT_ID
+	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
+	    ,rsSource.UK AS PRECEDING_VISIT_OCCURRENCE_ID
+	    ,ISNULL(HSP.F00006, '') AS MRN
+        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+  FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1  
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk 
+ INNER JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK 
