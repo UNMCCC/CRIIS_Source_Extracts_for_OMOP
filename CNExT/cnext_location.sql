@@ -46,37 +46,19 @@ LTV - 2/22/2022 - Changed the UNION ALL to only UNION to reduce the number of du
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|MRN|Modified_DTTm';
 SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
-      ,ISNULL(rsSource.FK1, '')  AS SOURCE_PK
-      ,ISNULL(rsSource.FK1, '')  AS  LOCATION_ID
-      ,ISNULL(RTRIM(rsSource.F00012), '') AS ADDRESS_1                /*2330*/
+      ,rsSource.UK AS SOURCE_PK
+      ,rsSource.UK AS LOCATION_ID
+      ,ISNULL(rsSource.F00012,'') AS ADDRESS_1               /*2330*/
       ,'' AS ADDRESS_2                                         /*2355*/
-      ,ISNULL(RTRIM(rsSource.F00013), '') AS CITY                     /*70*/
-      ,ISNULL(rsSource.F00014, '') AS STATE                    /*80*/
-      ,ISNULL(RTRIM(rsSource.F00015), '') AS ZIP                      /*100*/
-      ,ISNULL(RTRIM(rsSource.F00017), '') AS COUNTY                   /*90*/
-      ,ISNULL(RTRIM(rsSource.FK1), '')  AS LOCATION_SOURCE_VALUE
+      ,rsSource.F00013 AS CITY                     /*70*/
+      ,rsSource.F00014 AS STATE                    /*80*/
+      ,ISNULL(rsSource.F00015, '') AS ZIP                      /*100*/
+      ,ISNULL(rsSource.F00017, '') AS COUNTY                   /*90*/
+      ,rsSource.FK1 AS LOCATION_SOURCE_VALUE
       ,'' AS LATITUDE
       ,'' AS LONGITUDE
 	  ,ISNULL(HSP.F00006, '') AS MRN
      ,rtrim(format(SYSDATETIME(),'yyyy-dd-mm HH:mm:ss')) as Modified_DtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
-  UNION
- SELECT 'CNEXT PATEXTENDED(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*current location*/
-         ,ISNULL(rsSource.uk, '') AS SOURCE_PK
-         ,ISNULL(rsSource.uk, '') AS LOCATION_ID
-         ,ISNULL(RTRIM(rsSource.F05296), '') AS ADDRESS_1                  /*2350*/
-         ,ISNULL(RTRIM(rsSource.F05297), '') AS ADDRESS_2                  /*2355*/
-         ,ISNULL(RTRIM(rsSource.F05269), '') AS CITY                       /*1810*/
-         ,ISNULL(RTRIM(rsSource.F05270), '') AS STATE                      /*1820*/
-         ,ISNULL(RTRIM(rsSource.F05271), '') AS ZIP                        /*1830*/
-         ,ISNULL(RTRIM(rsSource.F05272), '') AS COUNTY                     /*1840*/
-         ,ISNULL(RTRIM(rsSource.F00004), '') AS LOCATION_SOURCE_VALUE
-         ,'' AS LATITUDE
-         ,'' AS LONGITUDE
-		 ,ISNULL(HSP.F00006, '') AS MRN
-        ,rtrim(format(SYSDATETIME(),'yyyy-dd-mm HH:mm:ss')) as Modified_DtTm
-    FROM UNM_CNExTCases.dbo.PatExtended rsSource
-	JOIN UNM_CNExTCases.dbo.Tumor ON Tumor.fk1 = rsSource.UK
-    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = Tumor.uk
-ORDER BY 2,3,1
+  
