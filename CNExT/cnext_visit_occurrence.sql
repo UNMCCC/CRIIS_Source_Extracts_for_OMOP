@@ -58,12 +58,12 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,'' AS CARE_SITE_ID                           /*21*/
 	    ,'' AS VISIT_SOURCE_VALUE                                                                              /*605*/
 	    ,'' AS VISIT_SOURCE_CONCEPT_ID
-	    ,(SELECT TOP 1 rsTarget.F01684 FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK and rsTarget.F01684 > '0000000000' and rsTarget.F01684 < '9999' Order By rsTarget.UK ASC)
+	    ,(SELECT TOP 1 rsTarget.F01684 FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = HSP.UK and rsTarget.F01684 > '0000000000' and rsTarget.F01684 < '9999' Order By rsTarget.UK ASC)
 	       AS ADMITTED_FROM_CONCEPT_ID
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTED_FROM_SOURCE_VALUE            /*2415*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK and rsTarget.F01685 > '0000000000' and rsTarget.F01685 < '9999' Order By rsTarget.UK ASC)
+	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = HSP.UK Order By rsTarget.UK ASC) AS ADMITTED_FROM_SOURCE_VALUE            /*2415*/
+	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = HSP.UK and rsTarget.F01685 > '0000000000' and rsTarget.F01685 < '9999' Order By rsTarget.UK ASC)
 	       AS DISCHARGE_TO_CONCEPT_ID
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
+	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = HSP.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
 	    ,rsSource.UK AS PRECEDING_VISIT_OCCURRENCE_ID
 	    ,ISNULL(HSP.F00006, '') AS MRN
         ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
