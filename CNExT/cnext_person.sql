@@ -58,7 +58,7 @@ SELECT  'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
 	        ELSE '' END AS DEATH_DATETIME     /*1750*/                   
 	  ,ISNULL(PatExtended.F00021, '') AS RACE_CONCEPT_ID                                 /*160*/
       ,ISNULL(PatExtended.F00138, '') AS ETHNICITY_CONCEPT_ID                            /*190*/
-      ,ISNULL(PatExtended.F05271, '') AS LOCATION_ID                                     /*1830*/
+      ,Tumor.UK AS LOCATION_ID                                     /*1830*/
 	  ,ISNULL(HospExtended.F00675, '') AS PROVIDER_ID                                    /*2460*/
       ,ISNULL(PatExtended.F00003, '') AS CARE_SITE_ID                                    /*21*/
 	  ,ISNULL(PatExtended.F00004, '') AS PERSON_SOURCE_VALUE                             /*20*/
@@ -69,7 +69,7 @@ SELECT  'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
 	  ,ISNULL(PatExtended.F00138, '') AS ETHNICITY_SOURCE_VALUE                          /*190*/
 	  ,ISNULL('190@' + PatExtended.F00138, '') AS ETHNICITY_SOURCE_CONCEPT_ID
       ,ISNULL(Hospital.F00006, '') AS MRN
-      ,format(SYSDATETIME(),'yyyy-mm-dd HH:mm:ss') as Modified_DtTm
+      ,format(GETDATE(),'yyyy-MM-dd HH:mm:ss') as Modified_DtTm
   FROM UNM_CNExTCases.dbo.Patient rsSource
   JOIN UNM_CNExTCases.dbo.PatExtended on PatExtended.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Tumor on rsSource.uk = Tumor.fk1

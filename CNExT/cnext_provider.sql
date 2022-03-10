@@ -57,7 +57,7 @@ SELECT 'CNEXT PATIENT (OMOP_PROVIDER)' AS IDENTITY_CONTEXT
        ,'' AS SPECIALTY_SOURCE_CONCEPT_ID
        ,'' AS GENDER_SOURCE_VALUE
        ,'' AS GENDER_SOURCE_CONCEPT_ID
-      ,format(SYSDATETIME(),'yyyy-mm-dd HH:mm:ss') as Modified_DtTm
+      ,format(GETDATE(),'yyyy-MM-dd HH:mm:ss') as Modified_DtTm
        /*MD_INST AS CARE_SITE_DESC*/
   FROM UNMPHYSICIANS.DBO.DOCTORS
   where LBL_CODE not like 'Z999%'
