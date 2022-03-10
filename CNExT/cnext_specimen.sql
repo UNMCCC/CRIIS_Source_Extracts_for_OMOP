@@ -72,7 +72,7 @@ SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
 		,'' AS ANATOMIC_SITE_SOURCE_VALUE
 		,'' AS DISEASE_STATUS_SOURCE_VALUE
 		,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.DxStg rsTarget ON rsTarget.FK2 = rsSource.uk

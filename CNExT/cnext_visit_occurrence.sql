@@ -64,7 +64,7 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
 	    ,ISNULL(HExt.F03716, '') AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
 	    ,rsSource.UK AS PRECEDING_VISIT_OCCURRENCE_ID
 	    ,ISNULL(HSP.F00006, '') AS MRN
-        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1  
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk 
