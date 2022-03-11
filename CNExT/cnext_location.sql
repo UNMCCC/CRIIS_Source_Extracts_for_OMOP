@@ -45,19 +45,30 @@ LTV - 2/22/2022 - Changed the UNION ALL to only UNION to reduce the number of du
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|Modified_DTTm';
-SELECT  'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
-      ,rsSource.UK AS SOURCE_PK
-      ,rsSource.UK AS LOCATION_ID
-      ,ISNULL(rsSource.F00012,'') AS ADDRESS_1               /*2330*/
-      ,'' AS ADDRESS_2                                         /*2355*/
-      ,rsSource.F00013 AS CITY                     /*70*/
-      ,rsSource.F00014 AS STATE                    /*80*/
-      ,ISNULL(rsSource.F00015, '') AS ZIP                      /*100*/
-      ,ISNULL(rsSource.F00017, '') AS COUNTY                   /*90*/
-      ,rsSource.FK1 AS LOCATION_SOURCE_VALUE
+select 'CNEXT TUMOR(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*location at Dx*/
+      ,rsSource.uk AS SOURCE_PK
+      ,rsSource.fk1 AS LOCATION_ID
+      ,ISNULL(rsSource.F00012,'') AS ADDRESS_1
+      ,'' AS ADDRESS_2
+      ,ISNULL(rsSource.F00013, '') AS CITY
+      ,ISNULL(rsSource.F00014, '') AS STATE
+      ,ISNULL(rsSource.F00015, '') AS ZIP
+      ,ISNULL(rsSource.F00017, '') AS COUNTY
+      ,rsSource.uk AS LOCATION_SOURCE_VALUE
       ,'' AS LATITUDE
       ,'' AS LONGITUDE
      ,format(GETDATE(),'yyyy-MM-dd HH:mm:ss') as Modified_DtTm
-  FROM UNM_CNExTCases.dbo.Tumor rsSource
-
+     FROM
+			(select max(A.uk) AS UK,fk1 from
+                         (SELECT rsSource.uk 
+                                ,rsSource.fk1
+							  FROM UNM_CNExTCases.dbo.Tumor rsSource
+							  where 1 = 1
+							  and f00029 = (select max(f00029)
+											  from UNM_CNExTCases.dbo.Tumor t
+											 where t.fk1 = rsSource.fk1
+											   and f00012 is not null)
+							) as A
+           group by fk1) as B
+	INNER JOIN UNM_CNExTCases.dbo.Tumor rsSource ON B.UK = rsSource.uk
   
