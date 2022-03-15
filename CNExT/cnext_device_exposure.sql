@@ -58,7 +58,7 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,ISNULL(RAD.F05259, '') AS UNIQUE_DEVICE_ID                                                                /*1570*/
         ,ISNULL(RAD.F07797, '') AS QUANTITY                                                                        /*1533*/
         ,ISNULL(RAD.F05156, '') AS PROVIDER_ID                                                                     /*2480*/
-        ,HSP.UK AS VISIT_OCCURRENCE_ID
+        ,TUM.UK AS VISIT_OCCURRENCE_ID
 		,TUM.uk AS VISIT_DETAIL_ID
         ,RAD.F07799 AS DEVICE_SOURCE_VALUE   --nulls handled by the predicate                                      /*1502*/
 	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID --nulls and empty spaces handled in predicate
