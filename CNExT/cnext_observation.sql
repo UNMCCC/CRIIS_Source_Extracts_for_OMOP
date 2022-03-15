@@ -59,32 +59,32 @@ SELECT top (10) 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT            
         ,'' AS OBSERVATION_CONCEPT_ID_8
         ,'' AS OBSERVATION_CONCEPT_ID_9
         ,'' AS OBSERVATION_CONCEPT_ID_10
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS OBSERVATION_DATE  -- tumor.f00029 Date of Dx
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_DATE  -- tumor.f00029 Date of Dx
         ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_DATETIME
-		,'1791@32' AS OBSERVATION_TYPE_CONCEPT_ID
-	    ,'' AS VALUE_AS_NUMBER
-	    ,'' AS VALUE_AS_STRING
+	,'1791@32' AS OBSERVATION_TYPE_CONCEPT_ID
+	,'' AS VALUE_AS_NUMBER
+	,'' AS VALUE_AS_STRING
         ,ISNULL(F06434,'') AS VALUE_AS_CONCEPT_ID_1
         ,ISNULL(F06435,'') AS QUALIFIER_CONCEPT_ID_1
         ,ISNULL(F06436,'') AS VALUE_AS_CONCEPT_ID_2
         ,ISNULL(F06437,'') AS QUALIFIER_CONCEPT_ID_2
         ,ISNULL(F06438,'') AS VALUE_AS_CONCEPT_ID_3
         ,ISNULL(F06439,'') AS QUALIFIER_CONCEPT_ID_3
-	    ,'' AS UNIT_CONCEPT_ID
-		,(SELECT TOP 1 ISNULL(rsTarget.F05162,'') 
-		       FROM UNM_CNExTCases.dbo.DxStg rsTarget 
-			   WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460  DD: Dx/Stg Proc, Physician */
-		,ISNULL(rsSource.fk1,'') AS VISIT_OCCURRENCE_ID  -- Really?  FK1 is the connecting ID for patient. tumor.UK connects to Hosp.FK2
+	,'' AS UNIT_CONCEPT_ID
+	,(SELECT TOP 1 ISNULL(rsTarget.F05162,'') 
+	       FROM UNM_CNExTCases.dbo.DxStg rsTarget 
+		   WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460  DD: Dx/Stg Proc, Physician */
+	,ISNULL(rsSource.fk1,'') AS VISIT_OCCURRENCE_ID  -- Really?  FK1 is the connecting ID for patient. tumor.UK connects to Hosp.FK2
         ,rsSource.uk AS VISIT_DETAIL_ID -- better, but still, that hust joins to the Hosp.PK.
         ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE       --Site - Primary (ICD-O-3)                 /*400*/
-		,0 AS OBSERVATION_SOURCE_CONCEPT_ID
+	,0 AS OBSERVATION_SOURCE_CONCEPT_ID
         ,0 AS UNIT_SOURCE_VALUE	   
-	    ,F06433 AS QUALIFIER_SOURCE_VALUE    --this field is not be null per WHERE condition  --Family History
-	    ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID                          
-		,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
-	    ,'' AS VALUE_AS_DATETIME
-		,ISNULL(HSP.F00006,'') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+	,F06433 AS QUALIFIER_SOURCE_VALUE    --this field is not be null per WHERE condition  --Family History
+	   ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID                          
+	,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
+	   ,'' AS VALUE_AS_DATETIME
+	 ,ISNULL(HSP.F00006,'') AS MRN
+	,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk

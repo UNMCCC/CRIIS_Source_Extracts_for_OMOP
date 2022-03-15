@@ -50,11 +50,11 @@ SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
        ,CHM.uk AS DRUG_EXPOSURE_ID
        ,PAT.UK AS PERSON_ID  /*20*/
        ,CHM.F05037 AS DRUG_CONCEPT_ID  --nulls handled by predicate                                                  /*700*/
-       ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd'), '') AS DRUG_EXPOSURE_START_DATE                   /*1220*/
+       ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATE                   /*1220*/
        ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATETIME   /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd'), '') AS DRUG_EXPOSURE_END_DATE                     /*1220*/
+       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATE                     /*1220*/
        ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATETIME     /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd'), '') AS VERBATIM_END_DATE                          /*3220*/
+       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VERBATIM_END_DATE                          /*3220*/
 	   ,'EHR dispensing record' AS DRUG_TYPE_CONCEPT_ID
 	   ,''  AS STOP_REASON
 	   ,''  AS REFILLS

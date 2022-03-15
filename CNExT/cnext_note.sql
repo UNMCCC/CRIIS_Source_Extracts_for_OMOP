@@ -48,7 +48,7 @@ SELECT  'CNEXT FOLLOWUP(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk = rsSource.fk1) AS PERSON_ID  /*20*/ 
         ,rsSource.uk AS NOTE_EVENT_ID
 	,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
-        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd'), '') AS NOTE_DATE                                                                                               /*443*/ 
+        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATE                                                                                               /*443*/ 
         ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME                                                                                /*443*/ 
 	,'1791@32' AS NOTE_TYPE_CONCEPT_ID
 	,'' AS NOTE_CLASS_CONCEPT_ID

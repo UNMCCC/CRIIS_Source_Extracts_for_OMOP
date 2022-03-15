@@ -53,9 +53,9 @@ SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
 		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS MEASUREMENT_CONCEPT_ID_SITE                                                                                        /*400*/ 
         ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS MEASUREMENT_CONCEPT_ID_MORPH                                                                                       /*521*/ 
         ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_CONCEPT_ID_GRADE_PATHOLOGICAL                                                                                         /*3844*/ 
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS MEASUREMENT_DATE                                                                          /*390*/ 
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS MEASUREMENT_DATE                                                                          /*390*/ 
         ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS MEASUREMENT_DATETIME                                                          /*390*/
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS TIME),'HH:mm:ss'), '') AS MEASUREMENT_TIME                                                                                                            /*390*/  
+        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS TIME),'HH:mm:ss HH:mm:ss'), '') AS MEASUREMENT_TIME                                                                     /*390*/  
 	    ,'1791@32' AS MEASUREMENT_TYPE_CONCEPT_ID
 	    ,'' AS OPERATOR_CONCEPT_ID
 		,ISNULL(rsSource.F02503, '') AS VALUE_AS_NUMBER                                                                                                               /*521*/ 

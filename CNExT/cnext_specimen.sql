@@ -56,7 +56,7 @@ SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
             ELSE ''
          END AS SPECIMEN_CONCEPT_ID
 		,'1791@32' AS SPECIMEN_TYPE_CONCEPT_ID
-        ,ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATE), 'yyyy-MM-dd'), '') AS SPECIMEN_DATE                             /*1280*/
+        ,ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS SPECIMEN_DATE                             /*1280*/
         ,ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS SPECIMEN_DATETIME             /*1280*/
 		,'' AS QUANTITY
 		,'' AS UNIT_CONCEPT_ID

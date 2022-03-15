@@ -50,9 +50,9 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.uk AS DEVICE_EXPOSURE_ID
     	,PAT.UK AS PERSON_ID
         ,RAD.F07799 AS DEVICE_CONCEPT_ID   --nulls handled by the predicate                                        /*1506*/
-		,ISNULL(FORMAT(TRY_CAST(F05187 AS DATE), 'yyyy-MM-dd'), '') AS DEVICE_EXPOSURE_START_DATE                      /*1210*/
+		,ISNULL(FORMAT(TRY_CAST(F05187 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_START_DATE                      /*1210*/
         ,ISNULL(FORMAT(TRY_CAST(F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_START_DATETIME      /*1210*/
-        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATE), 'yyyy-MM-dd'), '') AS DEVICE_EXPOSURE_END_DATE                        /*3220*/
+        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_END_DATE                        /*3220*/
         ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_END_DATETIME        /*3220*/
 	    ,'EHR dispensing record' AS DEVICE_TYPE_CONCEPT_ID
         ,ISNULL(RAD.F05259, '') AS UNIQUE_DEVICE_ID                                                                /*1570*/
@@ -63,7 +63,7 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.F07799 AS DEVICE_SOURCE_VALUE   --nulls handled by the predicate                                      /*1502*/
 	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID --nulls and empty spaces handled in predicate
         ,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+	,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Radiation RAD
   INNER JOIN UNM_CNExTCases.dbo.Tumor TUM ON RAD.fk2 = TUM.uk
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = TUM.fk1

@@ -50,9 +50,9 @@ SELECT DISTINCT  'CNEXT SURG (OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID 
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
-        ,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1200*/ 
+        ,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1200*/ 
     	,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1200*/
-        ,ISNULL(FORMAT(TRY_CAST(SRG.F05169 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
+        ,ISNULL(FORMAT(TRY_CAST(SRG.F05169 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
         ,ISNULL(FORMAT(TRY_CAST(SRG.F05169 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3180*/
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(SRG.F05161, '') AS PROVIDER_ID                            /*2480*/
@@ -86,9 +86,9 @@ SELECT DISTINCT 'CNEXT RADIATION(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                /*605*/
-        ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1210*/ 
+        ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1210*/ 
     	,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1210*/
-        ,ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_END_DATE                       /*3220*/
+        ,ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3220*/
         ,ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3220*/
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(RAD.F05156, '') AS PROVIDER_ID                            /*2480*/
@@ -119,9 +119,9 @@ SELECT DISTINCT 'CNEXT CHEMO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1220*/ 
+	    ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1220*/ 
     	,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1220*/
-        ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
+        ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
         ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3180*/
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(CHM.F05157, '') AS PROVIDER_ID                            /*2460*/
@@ -151,9 +151,9 @@ SELECT DISTINCT 'CNEXT HORMONE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1230*/ 
+	    ,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1230*/ 
     	,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1230*/
-        ,ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
+        ,ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
         ,ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3180*/
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(HOR.F05158, '') AS PROVIDER_ID                            /*2460*/
@@ -182,9 +182,9 @@ SELECT DISTINCT 'CNEXT IMMUNO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1240*/ 
+	    ,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1240*/ 
     	,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1240*/
-        ,ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
+        ,ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
         ,ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3180*/
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(BRM.F05159, '') AS PROVIDER_ID                            /*2460*/
@@ -213,7 +213,7 @@ SELECT DISTINCT 'CNEXT OTHER(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                 /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_DETAIL_START_DATE                     /*1250*/ 
+	    ,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1250*/ 
     	,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1250*/
         ,'' AS VISIT_DETAIL_END_DATE
         ,'' AS VISIT_DETAIL_END_DATETIME 

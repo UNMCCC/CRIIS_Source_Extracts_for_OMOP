@@ -49,7 +49,7 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.UK AS VISIT_OCCURRENCE_ID
 	    ,PAT.uk AS PERSON_ID                                                                                   /*190*/
 	    ,'' AS VISIT_CONCEPT_ID                                                                                /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATE), 'yyyy-MM-dd'), '') AS VISIT_START_DATE
+	    ,ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_START_DATE
 	    ,ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_START_DATETIME
         ,'' AS VISIT_END_DATE                       /*600*/
         ,'' AS VISIT_END_DATETIME                   /*600*/
