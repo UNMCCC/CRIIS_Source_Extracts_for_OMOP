@@ -65,7 +65,10 @@ SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT        
          ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
          ,0 AS MODIFIER_SOURCE_VALUE
 		 ,ISNULL(HSP.F00006, '') AS MRN
-		 ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+	 ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+        then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.UK = rsSource.UK  --TRT.fk1 = rsSource.UK
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2 = rsSource.UK

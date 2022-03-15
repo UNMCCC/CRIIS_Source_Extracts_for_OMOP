@@ -71,7 +71,10 @@ SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
        ,0 AS ROUTE_SOURCE_VALUE
        ,0 AS DOSE_UNIT_SOURCE_VALUE
 	   ,ISNULL(HSP.F00006, '') AS MRN
-	   ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+       ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+       then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+       else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+       AS modified_dtTm
       -- ,(SELECT TOP 1 rsTarget.F00016 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
       -- ,(SELECT TOP 1 rsTarget.F00006 FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN  
   FROM UNM_CNExTCases.dbo.Tumor rsSource

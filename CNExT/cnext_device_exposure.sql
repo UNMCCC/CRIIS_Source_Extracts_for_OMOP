@@ -63,7 +63,10 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.F07799 AS DEVICE_SOURCE_VALUE   --nulls handled by the predicate                                      /*1502*/
 	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID --nulls and empty spaces handled in predicate
         ,ISNULL(HSP.F00006, '') AS MRN
-	,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+	,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+        then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Radiation RAD
   INNER JOIN UNM_CNExTCases.dbo.Tumor TUM ON RAD.fk2 = TUM.uk
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = TUM.fk1
