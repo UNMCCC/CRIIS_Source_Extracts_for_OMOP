@@ -58,10 +58,10 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,'' AS CARE_SITE_ID                           /*21*/
 	    ,'' AS VISIT_SOURCE_VALUE                                                                              /*605*/
 	    ,'' AS VISIT_SOURCE_CONCEPT_ID
-	    ,ISNULL(HExt.F01684, '') AS ADMITTED_FROM_CONCEPT_ID
-	    ,ISNULL(HExt.F03715, '') AS ADMITTED_FROM_SOURCE_VALUE            /*2415*/
-	    ,ISNULL(HExt.F01685, '') AS DISCHARGE_TO_CONCEPT_ID
-	    ,ISNULL(HExt.F03716, '') AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
+	    ,'' AS ADMITTED_FROM_CONCEPT_ID
+	    ,'' AS ADMITTED_FROM_SOURCE_VALUE            /*2415*/
+	    ,'' AS DISCHARGE_TO_CONCEPT_ID
+	    ,'' AS DISCHARGE_TO_SOURCE_VALUE             /*2425*/
 	    ,rsSource.UK AS PRECEDING_VISIT_OCCURRENCE_ID
 	    ,ISNULL(HSP.F00006, '') AS MRN
         , CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
