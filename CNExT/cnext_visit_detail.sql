@@ -106,7 +106,10 @@ SELECT DISTINCT 'CNEXT RADIATION(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,'' AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                 /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+		,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+             then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	    else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	    AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   INNER JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
@@ -139,7 +142,10 @@ SELECT DISTINCT 'CNEXT CHEMO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,'' AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
-       ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+       ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+             then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	    else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	    AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
@@ -171,7 +177,10 @@ SELECT DISTINCT 'CNEXT HORMONE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,'' AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
-   	  ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+   	  ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+             then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	    else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	    AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
@@ -202,7 +211,10 @@ SELECT DISTINCT 'CNEXT IMMUNO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,'' AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                               /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
-   	    ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+   	    ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+             then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	    else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	    AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
@@ -233,7 +245,10 @@ SELECT DISTINCT 'CNEXT OTHER(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
 	    ,'' AS VISIT_DETAIL_PARENT_ID
 	    ,HSP.UK AS VISIT_OCCURRENCE_ID                             /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+		,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+             then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	    else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	    AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
