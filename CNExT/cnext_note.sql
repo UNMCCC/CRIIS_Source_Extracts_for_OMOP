@@ -52,15 +52,20 @@ SELECT  'CNEXT FOLLOWUP(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME                                                                                /*443*/ 
 	,'1791@32' AS NOTE_TYPE_CONCEPT_ID
 	,'' AS NOTE_CLASS_CONCEPT_ID
-        ,CASE WHEN F01220 IS NOT NULL THEN 'Text_Follow_Up_Notes' 
-		          ELSE '' END AS NOTE_TITLE_1
-        ,CASE WHEN F01220 IS NOT NULL THEN F01220 
-		          ELSE '' END AS  NOTE_TEXT_1                                                                                                /*2680*/ 
-	,CASE WHEN F01506 IS NOT NULL THEN 'Text_Follow_Up_Remarks' 
-		          ELSE '' END AS NOTE_TITLE_2
-        ,CASE WHEN F01506 IS NOT NULL THEN F01506 
-		          ELSE '' END AS  NOTE_TEXT_2                                                                                                /*2580*/
+    ,CASE WHEN F01220 IS NOT NULL THEN 
+	       'Text_Follow_Up_Notes' 
+	    ELSE '' END AS NOTE_TITLE_1
+    ,CASE WHEN F01220 IS NOT NULL THEN 
+	        isNULL(RTRIM(REPLACE(REPLACE(REPLACE(CAST(F01220 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')				 
+	      ELSE '' END AS  NOTE_TEXT_1                                                                                                /*2680*/ 
+	,CASE WHEN F01506 IS NOT NULL THEN 
+	        'Text_Follow_Up_Remarks' 
+		  ELSE '' END AS NOTE_TITLE_2
+    ,CASE WHEN F01506 IS NOT NULL THEN 
+	        isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01506 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')	
+          ELSE '' END AS  NOTE_TEXT_2                                                                                                /*2580*/
 	,'' AS NOTE_TITLE_3
+    ,'' AS NOTE_TEXT_3
 	,'' AS NOTE_TITLE_4
     ,'' AS NOTE_TEXT_4
 	,'' AS NOTE_TITLE_5
@@ -159,7 +164,6 @@ SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
           ELSE '' END AS  NOTE_TEXT_9                                                                                                /*2560*/
         ,'UTF-8 (32678)' AS ENCODING_CONCEPT_ID
 	,'4182347' AS LANGUAGE_CONCEPT_ID
-        ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
      ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
                         JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK 
 					 WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID                                              /*2460*/
