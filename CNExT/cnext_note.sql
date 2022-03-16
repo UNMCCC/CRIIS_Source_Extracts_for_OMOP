@@ -79,7 +79,7 @@ SELECT  'CNEXT FOLLOWUP(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
                        JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK 
 				 WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID                                              /*2460*/
-	,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
+	,rsSource.uk AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
         ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
@@ -92,7 +92,7 @@ SELECT  'CNEXT FOLLOWUP(OMOP_NOTES)' AS IDENTITY_CONTEXT
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
-UNION all
+UNION
 SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
@@ -144,7 +144,7 @@ SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
                         JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK 
 					 WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID                                              /*2460*/
-	,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
+	,rsSource.uk AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
         ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
@@ -153,7 +153,7 @@ SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
-UNION all
+UNION
 SELECT 'CNEXT TREATMENT(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
@@ -204,7 +204,7 @@ SELECT 'CNEXT TREATMENT(OMOP_NOTES)' AS IDENTITY_CONTEXT
 	    ,'4182347' AS LANGUAGE_CONCEPT_ID
         ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
                                JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID    /*2460*/
-		,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
+		,rsSource.uk AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
         ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/

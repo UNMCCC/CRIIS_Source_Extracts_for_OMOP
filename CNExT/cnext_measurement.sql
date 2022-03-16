@@ -64,7 +64,7 @@ SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
 		,'' AS RANGE_LOW
 		,'' AS RANGE_HIGH
 		,(SELECT TOP 1 ISNULL(rsTarget.F05162, '') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
-		,ISNULL(rsSource.fk1, '') AS VISIT_OCCURRENCE_ID
+		,rsSource.uk AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_SOURCE_VALUE  		/*3844*/ 
 		,CASE 

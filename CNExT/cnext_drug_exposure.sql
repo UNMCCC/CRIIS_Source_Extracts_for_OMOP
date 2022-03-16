@@ -64,7 +64,7 @@ SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
        ,''  AS ROUTE_CONCEPT_ID
 	   ,''  AS LOT_NUMBER
        ,ISNULL(CHM.F05157, '') AS PROVIDER_ID                                          /*2460*/
-       ,(SELECT TOP 1 rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1 Order By rsTarget.UK ASC) AS VISIT_OCCURRENCE_ID
+       ,rsSource.uk AS VISIT_OCCURRENCE_ID
        ,rsSource.uk AS VISIT_DETAIL_ID
 	   ,0 AS DRUG_SOURCE_VALUE
 	   ,'700@' + CHM.F05037 AS DRUG_SOURCE_CONCEPT_ID  --nulls handled by predicate 
