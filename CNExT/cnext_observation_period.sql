@@ -53,8 +53,12 @@ SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
       ,ISNULL(FORMAT(TRY_CAST(F00068 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_PERIOD_END_DATE       /*600*/
 	  ,'1791@32' AS PERIOD_TYPE_CONCEPT_ID
 	  ,ISNULL(RTRIM(rsSource.F00006), '') MRN
-	  ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+	  ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+         then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	    else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end 
+		as modified_dttm
   FROM UNM_CNExTCases.dbo.Hospital rsSource
   JOIN UNM_CNExTCases.dbo.Tumor TUM on TUM.uk = rsSource.fk2
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = TUM.fk1
  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on rsSource.uk=HExt.UK
+
