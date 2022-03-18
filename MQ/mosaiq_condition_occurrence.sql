@@ -19,14 +19,17 @@ CONFIDENCE LEVEL -- MEDIUM
 
 Addressed NULLS 01/12/2022
 EXECUTION CHECK SUCCESSFUL 01/20/2022
-1/10/2022 -- using concatenation of Appt date and Mosaiq Patient ID as  source_PK, Condition_OCcurrence_ID  
+1/10/2022 -- using concatenation of Appt date and Mosaiq Patient ID as  source_PK, Condition_Occurrence_ID  
 1/20/2022 added Modified DtTm
+3/17/2022 -- Since there are multiple diagnosis codes per patient per appt-dt, needed to add dx key (tpg_id) to create a unique key...
+	-- WOULD IT BE BETTER TO CREATE A PK?
+-- Cast tpg_id as char(5) -- current max tpg_id is 40111
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|CONDITION_OCCURRENCE_ID|PERSON_ID|CONDITION_CONCEPT_ID|CONDITION_START_DATE|CONDITION_START_DATETIME|CONDITION_END_DATE|CONDITION_END_DATETIME|CONDITION_TYPE_CONCEPT_ID|CONDITION_STATUS_CONCEPT_ID|STOP_REASON|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|CONDITION_SOURCE_VALUE|CONDITION_SOURCE_CONCEPT_ID|CONDITION_STATUS_SOURCE_VALUE|Modified_DtTm';
-SELECT DISTINCT   'MosaiqAdmin Ref_Patient_Diagnoses(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT  -- 1st Diag on charge
-  		    ,isNULL(DX.apptDt_PatID,'')		AS SOURCE_PK  -- need to populate with GROUP_CHG_ID ?
-            ,isNULL(DX.apptDt_PatID,'')		AS CONDITION_OCCURRENCE_ID  
+SELECT DISTINCT 'MosaiqAdmin Ref_Patient_Diagnoses(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT  -- 1st Diag on charge
+  		    ,rtrim(DX.apptDt_PatID) + '-' + cast(DX.tpg_id  as char(5))		AS SOURCE_PK  -- need to populate with GROUP_CHG_ID ?
+            ,rtrim(DX.apptDt_PatID) + '-' + cast(DX.tpg_id  as char(5))		AS CONDITION_OCCURRENCE_ID  
             ,DX.Pat_ID1						AS PERSON_ID
 			,DX.Diag_Code					AS CONDITION_CONCEPT_ID  -- DD has this typed as Number(22) -- but Diag isn't numeric -- diag was used in origional code
 			,isNULL(FORMAT(DX.appt_date,'yyyy-MM-dd 00:00:00'),'')	AS CONDITION_START_DATE
@@ -44,7 +47,6 @@ SELECT DISTINCT   'MosaiqAdmin Ref_Patient_Diagnoses(OMOP_CONDITION_OCCURRENCE)'
             ,''						AS CONDITION_STATUS_SOURCE_VALUE  
 			,isNULL(FORMAT(run_date, 'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm
 FROM MosaiqAdmin.dbo.Ref_Patient_Diagnoses DX	
---INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on DX.pat_id1 = pat.pat_id1 -- subset 
 WHERE DX.Diag_Code is not null
   AND DX.Diag_Code  <> ' '
 ;
