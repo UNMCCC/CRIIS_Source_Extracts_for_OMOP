@@ -9,7 +9,7 @@ SELECT
 ,src.PK_SITE AS LOCATION_ID   -- Care Site = Location to indicate patients are receiving treatment in UNMHSC but treatment info not maintained in Velos
 ,src.SITE_ID AS CARE_SITE_SOURCE_VALUE -- 'NM004'
 ,'' AS PLACE_OF_SERVICE_SOURCE_VALUE
-,DATE_FORMAT(curDate(),'%Y-%m-%d %H:%i')  AS MODIFIED_DtTM	 -- using today's date; this table shouldn't change unless we expand to include more sites outside of UNMHSC
+,DATE_FORMAT(curDate(),'%Y-%m-%d %H:%i:%s')  AS MODIFIED_DtTM	 -- using today's date; this table shouldn't change unless we expand to include more sites outside of UNMHSC
 FROM minivelos.ER_SITE src
 WHERE src.PK_site = 50 -- 'UNM - CRTC'
 --            FROM minivelos.ER_PATFACILITY EP_SOURCE;  -- I think that PatFacility refers to the Registering Facility and not the treatment (or enrollment facility)
