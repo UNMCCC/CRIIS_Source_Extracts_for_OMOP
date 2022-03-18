@@ -27,14 +27,14 @@ SELECT
    ,concat_ws("-",src.PKSTUDY_ST,src.PERSONCODE_P)  AS SOURCE_PK    -- Correct PK, but we need specific to record. Concat PKStudy_St,PersonCode_p  -- should be unique								
    ,src.TITLE_ST     AS OBSERVATION_PERIOD_ID 						 
    ,src.PERSONCODE_P AS PERSON_ID      -- MRN                       
-   ,DATE_FORMAT(src.ENROLL_DT_PP,'%Y-%m-%d %H:%i')  AS OBSERVATION_PERIOD_START_DATE    		
+   ,DATE_FORMAT(src.ENROLL_DT_PP,'%Y-%m-%d %H:%i:%s')  AS OBSERVATION_PERIOD_START_DATE    		
    ,CASE						
 	WHEN src.status_pss_lu = 'Off Study'   
-	THEN DATE_FORMAT(src.statusDt_pss,'%Y-%m-%d %H:%i') 	
+	THEN DATE_FORMAT(src.statusDt_pss,'%Y-%m-%d %H:%i:%s') 	
 	ELSE ''
    END OBSERVATION_PERIOD_END_DATE 
    ,'surrogate for CTMS EVELOS' AS PERIOD_TYPE_CONCEPT_ID -- Questionable, but consistent with other extracts
-   ,DATE_FORMAT(curDate(),'%Y-%m-%d %H:%i') As modified_DtTm  
+   ,DATE_FORMAT(curDate(),'%Y-%m-%d %H:%i:%s') As modified_DtTm  
 FROM MINIVELOS.DM_PATIENT_ENROLLMENTS  src
 WHERE src.PkStudy_St is not null and src.PersonCode_P is not null
 	and src.Enroll_dt_pp >= '2010-01-01'
