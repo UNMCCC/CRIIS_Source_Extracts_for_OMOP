@@ -47,29 +47,61 @@ SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|VISIT_DETAIL_ID|PERSON_ID|VISIT_DETAIL_CONCEPT_ID|VISIT_DETAIL_START_DATE|VISIT_DETAIL_START_DATETIME|VISIT_DETAIL_END_DATE|VISIT_DETAIL_END_DATETIME|VISIT_DETAIL_TYPE_CONCEPT_ID|PROVIDER_ID|CARE_SITE_ID|VISIT_DETAIL_SOURCE_VALUE|VISIT_DETAIL_SOURCE_CONCEPT_ID|ADMITTING_SOURCE_VALUE|ADMITTING_SOURCE_CONCEPT_ID|DISCHARGE_TO_SOURCE_VALUE|DISCHARGE_TO_CONCEPT_ID|PRECEDING_VISIT_DETAIL_ID|VISIT_DETAIL_PARENT_ID|VISIT_OCCURRENCE_ID|MRN|Modified_DtTm';
 SELECT DISTINCT  'CNEXT SURG (OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
-        ,rsSource.uk AS VISIT_DETAIL_ID
+        ,SRG.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID 
     	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
-        ,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1200*/ 
-    	,ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1200*/
-        ,ISNULL(FORMAT(TRY_CAST(SRG.F05169 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
-        ,ISNULL(FORMAT(TRY_CAST(SRG.F05169 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3180*/
+        ,case
+		     when SRG.F00434 = '99999999'
+			 then ''
+			 when right(SRG.F00434,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(SRG.F00434,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(SRG.F00434,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(SRG.F00434,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATE
+		 ,case
+		     when SRG.F00434 = '99999999'
+			 then ''
+			 when right(SRG.F00434,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(SRG.F00434,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(SRG.F00434,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(SRG.F00434,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(SRG.F00434 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATETIME
+		,case 
+		      when SRG.F05169 = '99999999'
+			  then ''
+		      when right(SRG.F05169, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(SRG.F05169,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(SRG.F05169, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(SRG.F05169,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(SRG.F05169 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATE
+		,case 
+		      when SRG.F05169 = '99999999'
+			  then ''
+		      when right(SRG.F05169, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(SRG.F05169,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(SRG.F05169, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(SRG.F05169,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(SRG.F05169 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATETIME
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(SRG.F05161, '') AS PROVIDER_ID                            /*2480*/
         ,ISNULL(SRG.F01689, '') AS CARE_SITE_ID                           /*540*/
-    	,SRG.F03488 AS VISIT_DETAIL_SOURCE_VALUE    --no nulls            /*670*/
-	    ,CASE                                       --no nulls, but empty space values to handle
+    	,SRG.F03488 AS VISIT_DETAIL_SOURCE_VALUE
+	    ,CASE
 			WHEN SRG.F03488 <> ''
 			THEN '605@'  + SRG.F03488
 			ELSE ''
 		 END AS VISIT_DETAIL_SOURCE_CONCEPT_ID         
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_CONCEPT_ID             /*2425*/
+	    ,HExt.F01684 AS ADMITTING_SOURCE_VALUE
+	    ,HExt.F03715 AS ADMITTING_SOURCE_CONCEPT_ID
+	    ,HExt.F01685 AS DISCHARGE_TO_SOURCE_VALUE
+	    ,HExt.F03716 AS DISCHARGE_TO_CONCEPT_ID
 	    ,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_DETAIL_ID
 	    ,'' AS VISIT_DETAIL_PARENT_ID
-	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                   /*10*/
+	    ,rsSource.UK AS VISIT_OCCURRENCE_ID                                   /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
             , CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
              then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
@@ -83,28 +115,62 @@ SELECT DISTINCT  'CNEXT SURG (OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE SRG.F03488 > '00' 
     AND SRG.F03488 < '98'
+	and ((SRG.F00434 is not null and SRG.F00434 != '' and SRG.F00434 not in ('00000000','88888888','99999999'))
+     or (SRG.F05169 is not null and SRG.F05169 != '' and SRG.F05169 not in ('00000000','88888888','99999999')))
 UNION
 SELECT DISTINCT 'CNEXT RADIATION(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
-        ,rsSource.uk AS VISIT_DETAIL_ID
+        ,RAD.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
-    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                /*605*/
-        ,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1210*/ 
-    	,ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1210*/
-        ,ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3220*/
-        ,ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3220*/
+    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID
+		,case
+		     when RAD.F05187 = '99999999'
+			 then ''
+			 when right(RAD.F05187,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(RAD.F05187,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(RAD.F05187,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(RAD.F05187,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATE
+		,case
+		     when RAD.F05187 = '99999999'
+			 then ''
+			 when right(RAD.F05187,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(RAD.F05187,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(RAD.F05187,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(RAD.F05187,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATETIME
+		,case 
+		      when RAD.F05212 = '99999999'
+			  then ''
+		      when right(RAD.F05212, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(RAD.F05212,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(RAD.F05212, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(RAD.F05212,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATE
+		,case 
+		      when RAD.F05212 = '99999999'
+			  then ''
+		      when right(RAD.F05212, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(RAD.F05212,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(RAD.F05212, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(RAD.F05212,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATETIME
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(RAD.F05156, '') AS PROVIDER_ID                            /*2480*/
         ,ISNULL(RAD.F03478, '') AS CARE_SITE_ID                           /*1550*/
-    	,RAD.F05257 AS VISIT_DETAIL_SOURCE_VALUE    --null values not selected per predicate                                                                                                  /*1360*/
-	    ,'1360@' + RAD.F05257 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --null and empty values not selected per predicate
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE         /*2410*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID    /*2415*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE      /*2420*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_CONCEPT_ID        /*2425*/
+    	,RAD.F05257 AS VISIT_DETAIL_SOURCE_VALUE
+	    ,'1360@' + RAD.F05257 AS VISIT_DETAIL_SOURCE_CONCEPT_ID
+	    ,HExt.F01684 AS ADMITTING_SOURCE_VALUE
+	    ,HExt.F03715 AS ADMITTING_SOURCE_CONCEPT_ID
+	    ,HExt.F01685 AS DISCHARGE_TO_SOURCE_VALUE
+	    ,HExt.F03716 AS DISCHARGE_TO_CONCEPT_ID
 	    ,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_DETAIL_ID
 	    ,'' AS VISIT_DETAIL_PARENT_ID
-	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                 /*10*/
+	    ,rsSource.UK AS VISIT_OCCURRENCE_ID                                 /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
 		,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
              then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
@@ -119,28 +185,62 @@ SELECT DISTINCT 'CNEXT RADIATION(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
   WHERE F05257 > '000'
     AND F07799 > '00'
     AND F07799 < '99'
+	and ((RAD.F05187 is not NULL and RAD.F05187 != '' and RAD.F05187 not in ('00000000','88888888','99999999'))
+	 or (RAD.F05212 is not NULL and RAD.F05212 != '' and RAD.F05212 not in ('00000000','88888888','99999999')))
 UNION
 SELECT DISTINCT 'CNEXT CHEMO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
-        ,rsSource.uk AS VISIT_DETAIL_ID
+        ,CHM.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
-    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1220*/ 
-    	,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1220*/
-        ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
-        ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3180*/
+    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID
+		,case
+		     when CHM.F05189 = '99999999'
+			 then ''
+			 when right(CHM.F05189,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(CHM.F05189,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(CHM.F05189,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(CHM.F05189,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATE
+		,case
+		     when CHM.F05189 = '99999999'
+			 then ''
+			 when right(CHM.F05189,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(CHM.F05189,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(CHM.F05189,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(CHM.F05189,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATETIME
+		,case 
+		      when CHM.F05214 = '99999999'
+			  then ''
+		      when right(CHM.F05214, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(CHM.F05214, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATE
+		,case 
+		      when CHM.F05214 = '99999999'
+			  then ''
+		      when right(CHM.F05214, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(CHM.F05214, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATETIME
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(CHM.F05157, '') AS PROVIDER_ID                            /*2460*/
         ,ISNULL(CHM.F03479, '') AS CARE_SITE_ID                           /*540*/
-    	,CHM.F05037 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null or empty per the predicate                                                                                              /*700*/
-	    ,'700@' + CHM.F05037 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null or empty per the predicate
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_CONCEPT_ID             /*2425*/
+    	,CHM.F05037 AS VISIT_DETAIL_SOURCE_VALUE
+	    ,'700@' + CHM.F05037 AS VISIT_DETAIL_SOURCE_CONCEPT_ID
+		,HExt.F01684 AS ADMITTING_SOURCE_VALUE
+	    ,HExt.F03715 AS ADMITTING_SOURCE_CONCEPT_ID
+	    ,HExt.F01685 AS DISCHARGE_TO_SOURCE_VALUE
+	    ,HExt.F03716 AS DISCHARGE_TO_CONCEPT_ID
 	    ,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_DETAIL_ID
 	    ,'' AS VISIT_DETAIL_PARENT_ID
-	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                /*10*/
+	    ,rsSource.UK AS VISIT_OCCURRENCE_ID                                /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
        ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
              then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
@@ -154,28 +254,62 @@ SELECT DISTINCT 'CNEXT CHEMO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
   INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE CHM.F05037 IN ('01', '02', '03')
     AND CHM.F05669 > '00'
+	and ((CHM.F05189 is not null and CHM.F05189 != '' and CHM.F05189 not in ('00000000','19000000','05  0532','07  0142','07  0252','07  0352','88888888','99999999'))
+	 or (CHM.F05214 is not null and CHM.F05214 != '' and CHM.F05214 not in ('00000000','88888888','99999999')))
 UNION
 SELECT DISTINCT 'CNEXT HORMONE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
-        ,rsSource.uk AS VISIT_DETAIL_ID
+        ,HOR.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
-    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1230*/ 
-    	,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1230*/
-        ,ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
-        ,ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3180*/
+    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID
+		,case
+		     when HOR.F05191 = '99999999'
+			 then ''
+			 when right(HOR.F05191,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(HOR.F05191,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(HOR.F05191,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(HOR.F05191,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATE
+		,case
+		     when HOR.F05191 = '99999999'
+			 then ''
+			 when right(HOR.F05191,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(HOR.F05191,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(HOR.F05191,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(HOR.F05191,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATETIME
+		,case 
+		      when HOR.F05216 = '99999999'
+			  then ''
+		      when right(HOR.F05216, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(HOR.F05216, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATE
+		,case 
+		      when HOR.F05216 = '99999999'
+			  then ''
+		      when right(HOR.F05216, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(HOR.F05216, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATETIME
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(HOR.F05158, '') AS PROVIDER_ID                            /*2460*/
-        ,ISNULL(HOR.F03480, '') AS CARE_SITE_ID                           /*540*/                                                                                                             /*710*/
-		,HOR.F05063 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null or empty per the predicate  
-	    ,'710@' + HOR.F05063 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null or empty per the predicate
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_CONCEPT_ID             /*2425*/
+        ,ISNULL(HOR.F03480, '') AS CARE_SITE_ID
+		,HOR.F05063 AS VISIT_DETAIL_SOURCE_VALUE
+	    ,'710@' + HOR.F05063 AS VISIT_DETAIL_SOURCE_CONCEPT_ID
+		,HExt.F01684 AS ADMITTING_SOURCE_VALUE
+	    ,HExt.F03715 AS ADMITTING_SOURCE_CONCEPT_ID
+	    ,HExt.F01685 AS DISCHARGE_TO_SOURCE_VALUE
+	    ,HExt.F03716 AS DISCHARGE_TO_CONCEPT_ID
 	    ,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_DETAIL_ID
 	    ,'' AS VISIT_DETAIL_PARENT_ID
-	    ,HSP.UK AS VISIT_OCCURRENCE_ID                                /*10*/
+	    ,rsSource.UK AS VISIT_OCCURRENCE_ID                                /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
    	  ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
              then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
@@ -188,28 +322,62 @@ SELECT DISTINCT 'CNEXT HORMONE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN UNM_CNExTCases.dbo.Hormone HOR ON HOR.fk2 = rsSource.uk
   INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE HOR.F05063 = '01'
+    and ((HOR.F05191 is not null and HOR.F05191 != '' and HOR.F05191 not in ('00000000','88888888','99999999'))
+     or (HOR.F05216 is not null and HOR.F05216 != '' and HOR.F05216 not in('00000000','88888888','99999999')))
 UNION
 SELECT DISTINCT 'CNEXT IMMUNO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
-        ,rsSource.uk AS VISIT_DETAIL_ID
+        ,BRM.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
-    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                  /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1240*/ 
-    	,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1240*/
-        ,ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATE                       /*3180*/
-        ,ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_END_DATETIME       /*3180*/
+    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID
+		,case
+		     when BRM.F05193 = '99999999'
+			 then ''
+			 when right(BRM.F05193,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(BRM.F05193,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(BRM.F05193,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(BRM.F05193,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATE
+		,case
+		     when BRM.F05193 = '99999999'
+			 then ''
+			 when right(BRM.F05193,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(BRM.F05193,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(BRM.F05193,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(BRM.F05193,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATETIME
+		,case 
+		      when BRM.F05218 = '99999999'
+			  then ''
+		      when right(BRM.F05218, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(BRM.F05218, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATE
+		,case 
+		      when BRM.F05218 = '99999999'
+			  then ''
+		      when right(BRM.F05218, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(BRM.F05218, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_END_DATETIME
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(BRM.F05159, '') AS PROVIDER_ID                            /*2460*/
         ,ISNULL(BRM.F03481, '') AS CARE_SITE_ID                           /*540*/
-    	,BRM.F05066 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null or empty per the predicate                                                                                              /*720*/
-	    ,'720@' + BRM.F05066 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null or empty per the predicate
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_CONCEPT_ID             /*2425*/
+    	,BRM.F05066 AS VISIT_DETAIL_SOURCE_VALUE
+	    ,'720@' + BRM.F05066 AS VISIT_DETAIL_SOURCE_CONCEPT_ID
+		,HExt.F01684 AS ADMITTING_SOURCE_VALUE
+	    ,HExt.F03715 AS ADMITTING_SOURCE_CONCEPT_ID
+	    ,HExt.F01685 AS DISCHARGE_TO_SOURCE_VALUE
+	    ,HExt.F03716 AS DISCHARGE_TO_CONCEPT_ID
 	    ,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_DETAIL_ID
 	    ,'' AS VISIT_DETAIL_PARENT_ID
-	    ,HSP.UK AS VISIT_OCCURRENCE_ID                               /*10*/
+	    ,rsSource.UK AS VISIT_OCCURRENCE_ID                               /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
    	    ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
              then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
@@ -222,28 +390,46 @@ SELECT DISTINCT 'CNEXT IMMUNO(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN UNM_CNExTCases.dbo.Immuno BRM ON BRM.fk2 = rsSource.uk
   INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE BRM.F05066 = '01'
+    and ((BRM.F05193 is not null and BRM.F05193 != '' and BRM.F05193 not in('00000000','88888888','99999999'))
+     or (BRM.F05218 is not null and BRM.F05218 != '' and BRM.F05218 not in('00000000','88888888','99999999')))
 UNION
 SELECT DISTINCT 'CNEXT OTHER(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
-        ,rsSource.uk AS VISIT_DETAIL_ID
+        ,OTH.uk AS VISIT_DETAIL_ID
     	,PAT.UK AS PERSON_ID
-    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID                                                                                                                                 /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATE                     /*1250*/ 
-    	,ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_DETAIL_START_DATETIME     /*1250*/
+    	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID
+		,case
+		     when OTH.F05195 = '99999999'
+			 then ''
+			 when right(OTH.F05195,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(OTH.F05195,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(OTH.F05195,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(OTH.F05195,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATE
+		,case
+		     when OTH.F05195 = '99999999'
+			 then ''
+			 when right(OTH.F05195,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(OTH.F05195,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(OTH.F05195,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(OTH.F05195,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(OTH.F05195 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VISIT_DETAIL_START_DATETIME
         ,'' AS VISIT_DETAIL_END_DATE
         ,'' AS VISIT_DETAIL_END_DATETIME 
     	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
     	,ISNULL(OTH.F05160, '') AS PROVIDER_ID                            /*2460*/
         ,ISNULL(OTH.F05067, '') AS CARE_SITE_ID                           /*540*/
-    	,OTH.F05069 AS VISIT_DETAIL_SOURCE_VALUE    --value cannot be null or empty per the predicate                                                                                              /*730*/
-	    ,'730@' + OTH.F05069 AS VISIT_DETAIL_SOURCE_CONCEPT_ID    --value cannot be null or empty per the predicate
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01684, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_VALUE              /*2410*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03715, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS ADMITTING_SOURCE_CONCEPT_ID         /*2415*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F01685, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_SOURCE_VALUE           /*2420*/
-	    ,(SELECT TOP 1 ISNULL(rsTarget.F03716, '')  FROM UNM_CNExTCases.dbo.HospExtended rsTarget WHERE rsTarget.UK = rsSource.UK Order By rsTarget.UK ASC) AS DISCHARGE_TO_CONCEPT_ID             /*2425*/
+    	,OTH.F05069 AS VISIT_DETAIL_SOURCE_VALUE
+	    ,'730@' + OTH.F05069 AS VISIT_DETAIL_SOURCE_CONCEPT_ID
+		,HExt.F01684 AS ADMITTING_SOURCE_VALUE
+	    ,HExt.F03715 AS ADMITTING_SOURCE_CONCEPT_ID
+	    ,HExt.F01685 AS DISCHARGE_TO_SOURCE_VALUE
+	    ,HExt.F03716 AS DISCHARGE_TO_CONCEPT_ID
 	    ,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_DETAIL_ID
 	    ,'' AS VISIT_DETAIL_PARENT_ID
-	    ,HSP.UK AS VISIT_OCCURRENCE_ID                             /*10*/
+	    ,rsSource.UK AS VISIT_OCCURRENCE_ID                             /*10*/
 		,ISNULL(HSP.F00006, '') AS MRN
 		,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
              then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
@@ -256,3 +442,68 @@ SELECT DISTINCT 'CNEXT OTHER(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
    JOIN UNM_CNExTCases.dbo.Other OTH ON OTH.fk2 = rsSource.uk
   INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE OTH.F05069 in ( '1','2','3','6')
+    and OTH.F05195 is not null and OTH.F05195 != '' and OTH.F05195 not in ('00000000','88888888','99999999')
+UNION
+  SELECT DISTINCT 'CNEXT HOSP(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+    ,rsSource.uk AS SOURCE_PK
+    ,hsp.UK AS VISIT_DETAIL_ID
+	,PAT.uk AS PERSON_ID
+	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID
+	,case
+		 when HExt.F00427 = '99999999'
+		 then ''
+		 when right(HExt.F00427,4) = '9999'
+		 then ISNULL(FORMAT(TRY_CAST(left(HExt.F00427,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+		 when right(HExt.F00427,2) = '99'
+		 then ISNULL(FORMAT(TRY_CAST(left(HExt.F00427,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 else ISNULL(FORMAT(TRY_CAST(HExt.F00427 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+	 end AS VISIT_DETAIL_START_DATE
+	,case
+		 when HExt.F00427 = '99999999'
+		 then ''
+		 when right(HExt.F00427,4) = '9999'
+		 then ISNULL(FORMAT(TRY_CAST(left(HExt.F00427,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+		 when right(HExt.F00427,2) = '99'
+		 then ISNULL(FORMAT(TRY_CAST(left(HExt.F00427,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 else ISNULL(FORMAT(TRY_CAST(HExt.F00427 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+	 end AS VISIT_DETAIL_START_DATETIME
+	,case 
+		 when HExt.F00128 = '99999999'
+		 then ''
+		 when right(HExt.F00128, 4) = '9999'
+		 then ISNULL(FORMAT(TRY_CAST(left(HExt.F00128,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 when right(HExt.F00128, 2) = '99'
+		 then ISNULL(FORMAT(TRY_CAST(left(HExt.F00128,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 else ISNULL(FORMAT(TRY_CAST(HExt.F00128 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+	 end AS VISIT_DETAIL_END_DATE
+	,case 
+		 when HExt.F00128 = '99999999'
+		 then ''
+		 when right(HExt.F00128, 4) = '9999'
+		 then ISNULL(FORMAT(TRY_CAST(left(HExt.F00128,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+	     when right(HExt.F00128, 2) = '99'
+		 then ISNULL(FORMAT(TRY_CAST(left(HExt.F00128,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 else ISNULL(FORMAT(TRY_CAST(HExt.F00128 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+	 end AS VISIT_DETAIL_END_DATETIME
+	,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
+	,ISNULL(HExt.F00675, '') AS PROVIDER_ID
+    ,ISNULL(PEX.F00003, '') AS CARE_SITE_ID
+	,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_SOURCE_VALUE
+	,'605@' + HSG.F05522 AS VISIT_DETAIL_SOURCE_CONCEPT_ID
+	,ISNULL(HExt.F01684, '') AS ADMITTING_SOURCE_VALUE
+	,ISNULL(HExt.F03715, '') AS ADMITTING_SOURCE_CONCEPT_ID
+	,ISNULL(HExt.F01685, '') AS DISCHARGE_TO_SOURCE_VALUE
+	,ISNULL(HExt.F03716, '') AS DISCHARGE_TO_CONCEPT_ID
+	,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_DETAIL_ID
+	,'' AS VISIT_DETAIL_PARENT_ID
+	,rsSource.UK AS VISIT_OCCURRENCE_ID
+	,ISNULL(HSP.F00006, '') AS MRN
+   ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-mm-dd HH:mm:ss'),'')  AS modified_dtTm
+  FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
+  JOIN UNM_CNExTCases.dbo.PatExtended PEX ON PEX.uk = PAT.UK
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
+  JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
+ INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK 
+WHERE ((HExt.F00427 is not null and HExt.F00427 != '' and HExt.F00427 not in ('00000000','88888888','99999999'))
+   or (HExt.F00128 is not null and HExt.F00128 != '' and HExt.F00128 not in('00000000','88888888','99999999')))
