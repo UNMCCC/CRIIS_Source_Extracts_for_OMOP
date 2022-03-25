@@ -46,15 +46,55 @@ LTV- 2/22/2022 - removed the 'AND CHM.F04755 IS NOT NULL'  conditon on the Chemo
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|DRUG_EXPOSURE_ID|PERSON_ID|DRUG_CONCEPT_ID|DRUG_EXPOSURE_START_DATE|DRUG_EXPOSURE_START_DATETIME|DRUG_EXPOSURE_END_DATE|DRUG_EXPOSURE_END_DATETIME|VERBATIM_END_DATE|DRUG_TYPE_CONCEPT_ID|STOP_REASON|REFILLS|QUANTITY|DAYS_SUPPLY|SIG|ROUTE_CONCEPT_ID|LOT_NUMBER|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|DRUG_SOURCE_VALUE|DRUG_SOURCE_CONCEPT_ID|ROUTE_SOURCE_VALUE|DOSE_UNIT_SOURCE_VALUE|MRN|Modified_DtTm';
 SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
-       ,rsSource.uk AS SOURCE_PK
+       ,CHM.uk AS SOURCE_PK
        ,CHM.UK AS DRUG_EXPOSURE_ID
        ,PAT.UK AS PERSON_ID  /*20*/
-       ,CHM.F05037 AS DRUG_CONCEPT_ID                                                  /*700*/
-       ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATE                   /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATETIME   /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATE                     /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATETIME     /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VERBATIM_END_DATE                          /*3220*/
+       ,CHM.F05037 AS DRUG_CONCEPT_ID
+	   ,case
+		     when CHM.F05189 = '99999999'
+			 then ''
+			 when right(CHM.F05189,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(CHM.F05189,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(CHM.F05189,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(CHM.F05189,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_START_DATE
+		,case
+		     when CHM.F05189 = '99999999'
+			 then ''
+			 when right(CHM.F05189,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(CHM.F05189,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(CHM.F05189,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(CHM.F05189,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(CHM.F05189 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_START_DATETIME
+		,case 
+		      when CHM.F05214 = '99999999'
+			  then ''
+		      when right(CHM.F05214, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(CHM.F05214, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_END_DATE
+		,case 
+		      when CHM.F05214 = '99999999'
+			  then ''
+		      when right(CHM.F05214, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(CHM.F05214, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_END_DATETIME
+	    ,case 
+		      when CHM.F05214 = '99999999'
+			  then ''
+		      when right(CHM.F05214, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(CHM.F05214, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(CHM.F05214,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(CHM.F05214 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VERBATIM_END_DATE
 	   ,'EHR dispensing record' AS DRUG_TYPE_CONCEPT_ID
 	   ,''  AS STOP_REASON
 	   ,''  AS REFILLS
@@ -84,17 +124,58 @@ SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
    AND CHM.F05669 > '00'
    and ((CHM.F05189 is not null and CHM.F05189 != '' and CHM.F05189 not in ('00000000','19000000','05  0532','07  0142','07  0252','07  0352','88888888','99999999'))
 	or (CHM.F05214 is not null and CHM.F05214 != '' and CHM.F05214 not in ('00000000','88888888','99999999')))
+   and HSP.F00006 not in (999999998, 9999998,999999, 9999)
+   and HSP.F00006 >= 1000
  UNION
  SELECT  'CNEXT HORMONE(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
-       ,rsSource.uk AS SOURCE_PK
+       ,HOR.uk AS SOURCE_PK
        ,HOR.UK AS DRUG_EXPOSURE_ID
        ,PAT.UK AS PERSON_ID  /*20*/
-       ,HOR.F05063 AS DRUG_CONCEPT_ID                                                /*700*/
-       ,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATE                   /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATETIME   /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATE                     /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATETIME     /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VERBATIM_END_DATE                          /*3220*/
+       ,HOR.F05063 AS DRUG_CONCEPT_ID	   ,case
+		     when HOR.F05191 = '99999999'
+			 then ''
+			 when right(HOR.F05191,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(HOR.F05191,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(HOR.F05191,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(HOR.F05191,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_START_DATE
+		,case
+		     when HOR.F05191 = '99999999'
+			 then ''
+			 when right(HOR.F05191,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(HOR.F05191,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(HOR.F05191,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(HOR.F05191,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(HOR.F05191 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_START_DATETIME
+		,case 
+		      when HOR.F05216 = '99999999'
+			  then ''
+		      when right(HOR.F05216, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(HOR.F05216, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_END_DATE
+		,case 
+		      when HOR.F05216 = '99999999'
+			  then ''
+		      when right(HOR.F05216, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(HOR.F05216, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_END_DATETIME
+	   ,case 
+		      when HOR.F05216 = '99999999'
+			  then ''
+		      when right(HOR.F05216, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(HOR.F05216, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(HOR.F05216,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(HOR.F05216 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VERBATIM_END_DATE
 	   ,'EHR dispensing record' AS DRUG_TYPE_CONCEPT_ID
 	   ,''  AS STOP_REASON
 	   ,''  AS REFILLS
@@ -123,17 +204,59 @@ SELECT  'CNEXT CHEMO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
  WHERE HOR.F05063 = '01'
     and ((HOR.F05191 is not null and HOR.F05191 != '' and HOR.F05191 not in ('00000000','88888888','99999999'))
      or (HOR.F05216 is not null and HOR.F05216 != '' and HOR.F05216 not in('00000000','88888888','99999999')))
+	and HSP.F00006 not in (999999998, 9999998,999999, 9999)
+    and HSP.F00006 >= 1000
 UNION
 SELECT  'CNEXT IMMUNO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
-       ,rsSource.uk AS SOURCE_PK
+       ,BRM.uk AS SOURCE_PK
        ,BRM.uk AS DRUG_EXPOSURE_ID
        ,PAT.UK AS PERSON_ID  /*20*/
-       ,BRM.F05066 AS DRUG_CONCEPT_ID                                              /*700*/
-       ,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATE                   /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_START_DATETIME   /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATE                     /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DRUG_EXPOSURE_END_DATETIME     /*1220*/
-       ,ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VERBATIM_END_DATE                          /*3220*/
+       ,BRM.F05066 AS DRUG_CONCEPT_ID
+	   ,case
+		     when BRM.F05193 = '99999999'
+			 then ''
+			 when right(BRM.F05193,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(BRM.F05193,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(BRM.F05193,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(BRM.F05193,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_START_DATE
+		,case
+		     when BRM.F05193 = '99999999'
+			 then ''
+			 when right(BRM.F05193,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(BRM.F05193,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(BRM.F05193,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(BRM.F05193,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(BRM.F05193 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_START_DATETIME
+		,case 
+		      when BRM.F05218 = '99999999'
+			  then ''
+		      when right(BRM.F05218, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(BRM.F05218, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_END_DATE
+		,case 
+		      when BRM.F05218 = '99999999'
+			  then ''
+		      when right(BRM.F05218, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(BRM.F05218, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DRUG_EXPOSURE_END_DATETIME
+       ,case 
+		      when BRM.F05218 = '99999999'
+			  then ''
+		      when right(BRM.F05218, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(BRM.F05218, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(BRM.F05218,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(BRM.F05218 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS VERBATIM_END_DATE
 	   ,'EHR dispensing record' AS DRUG_TYPE_CONCEPT_ID
 	   ,''  AS STOP_REASON
 	   ,''  AS REFILLS
@@ -162,4 +285,6 @@ SELECT  'CNEXT IMMUNO(OMOP_DRUG_EXPOSURE)' AS IDENTITY_CONTEXT
   WHERE BRM.F05066 = '01'
     and ((BRM.F05193 is not null and BRM.F05193 != '' and BRM.F05193 not in('00000000','88888888','99999999'))
      or (BRM.F05218 is not null and BRM.F05218 != '' and BRM.F05218 not in('00000000','88888888','99999999')))
+	and HSP.F00006 not in (999999998, 9999998,999999, 9999)
+    and HSP. F00006 >= 1000
 ORDER BY 2 DESC
