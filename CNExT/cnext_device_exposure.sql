@@ -49,19 +49,51 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,RAD.uk AS SOURCE_PK
         ,RAD.uk AS DEVICE_EXPOSURE_ID
     	,PAT.UK AS PERSON_ID
-        ,RAD.F07799 AS DEVICE_CONCEPT_ID   --nulls handled by the predicate                                        /*1506*/
-		,ISNULL(FORMAT(TRY_CAST(F05187 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_START_DATE                      /*1210*/
-        ,ISNULL(FORMAT(TRY_CAST(F05187 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_START_DATETIME      /*1210*/
-        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_END_DATE                        /*3220*/
-        ,ISNULL(FORMAT(TRY_CAST(F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS DEVICE_EXPOSURE_END_DATETIME        /*3220*/
+        ,RAD.F07799 AS DEVICE_CONCEPT_ID
+        ,case
+		     when RAD.F05187 = '99999999'
+			 then ''
+			 when right(RAD.F05187,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(RAD.F05187,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(RAD.F05187,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(RAD.F05187,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DEVICE_EXPOSURE_START_DATE
+		,case
+		     when RAD.F05187 = '99999999'
+			 then ''
+			 when right(RAD.F05187,4) = '9999'
+			 then ISNULL(FORMAT(TRY_CAST(left(RAD.F05187,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') 
+			 when right(RAD.F05187,2) = '99'
+			 then ISNULL(FORMAT(TRY_CAST(left(RAD.F05187,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+			 else ISNULL(FORMAT(TRY_CAST(RAD.F05187 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DEVICE_EXPOSURE_START_DATETIME
+		,case 
+		      when RAD.F05212 = '99999999'
+			  then ''
+		      when right(RAD.F05212, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(RAD.F05212,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(RAD.F05212, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(RAD.F05212,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DEVICE_EXPOSURE_END_DATE
+		,case 
+		      when RAD.F05212 = '99999999'
+			  then ''
+		      when right(RAD.F05212, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(RAD.F05212,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  when right(RAD.F05212, 2) = '99'
+			  then ISNULL(FORMAT(TRY_CAST(left(RAD.F05212,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+			  else ISNULL(FORMAT(TRY_CAST(RAD.F05212 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 end AS DEVICE_EXPOSURE_END_DATETIME
 	    ,'EHR dispensing record' AS DEVICE_TYPE_CONCEPT_ID
         ,ISNULL(RAD.F05259, '') AS UNIQUE_DEVICE_ID                                                                /*1570*/
         ,ISNULL(RAD.F07797, '') AS QUANTITY                                                                        /*1533*/
         ,ISNULL(RAD.F05156, '') AS PROVIDER_ID                                                                     /*2480*/
         ,TUM.UK AS VISIT_OCCURRENCE_ID
-		,TUM.uk AS VISIT_DETAIL_ID
-        ,RAD.F07799 AS DEVICE_SOURCE_VALUE   --nulls handled by the predicate                                      /*1502*/
-	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID --nulls and empty spaces handled in predicate
+		,RAD.uk AS VISIT_DETAIL_ID
+        ,RAD.F07799 AS DEVICE_SOURCE_VALUE                                                                         /*1502*/
+	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID
         ,ISNULL(HSP.F00006, '') AS MRN
 	,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
         then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
@@ -75,4 +107,8 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
   WHERE F05257 > '000'
     AND RAD.F07799 > '00'
 	AND RAD.F07799 < '99'
+	and ((RAD.F05187 is not NULL and RAD.F05187 != '' and RAD.F05187 not in ('00000000','88888888'))
+	 or (RAD.F05212 is not NULL and RAD.F05212 != '' and RAD.F05212 not in ('00000000','88888888')))
+	and HSP.F00006 not in (999999998, 9999998,999999, 9999)
+    and HSP.F00006 >= 1000
   order by F05212 desc

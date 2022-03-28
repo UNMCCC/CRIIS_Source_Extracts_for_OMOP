@@ -48,9 +48,25 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.UK AS SOURCE_PK
         ,rsSource.UK AS VISIT_OCCURRENCE_ID
 	    ,PAT.uk AS PERSON_ID                                                                                   /*190*/
-	    ,'' AS VISIT_CONCEPT_ID                                                                                /*605*/
-	    ,ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_START_DATE
-	    ,ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS VISIT_START_DATETIME
+	    ,'' AS VISIT_CONCEPT_ID
+		,case 
+		   when HSP.F00024 = '99999999'
+		   then ''
+		   when right(HSP.F00024, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(HSP.F00024,4) + '0101' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(HSP.F00024, 2) = '99'
+		   then ISNULL(FORMAT(TRY_CAST(left(HSP.F00024,6) + '01' AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATE),'yyyy-MM-dd HH:mm:ss'), '')
+	     end AS VISIT_START_DATE
+	    ,case 
+		   when HSP.F00024 = '99999999'
+		   then ''
+		   when right(HSP.F00024, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(HSP.F00024,4) + '0101' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+	       when right(HSP.F00024, 2) = '99'
+		   then ISNULL(FORMAT(TRY_CAST(left(HSP.F00024,6) + '01' AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(HSP.F00024 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+	     end AS VISIT_START_DATETIME
         ,'' AS VISIT_END_DATE                       /*600*/
         ,'' AS VISIT_END_DATETIME                   /*600*/
 	    ,'1791@32' AS VISIT_TYPE_CONCEPT_ID
@@ -72,3 +88,5 @@ SELECT  'CNEXT PATIENT(OMOP_VISIT_OCCURRENCE)' AS IDENTITY_CONTEXT
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1  
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk 
  INNER JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK 
+   and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+   and HSP.F00006 >= 1000

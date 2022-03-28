@@ -49,16 +49,34 @@ SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
       ,rsSource.UK  AS SOURCE_PK
 	  ,rsSource.UK  AS OBSERVATION_PERIOD_ID
       ,PAT.UK AS PERSON_ID                                                                                                                       /*10*/
-	  ,ISNULL(FORMAT(TRY_CAST(F00024 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_PERIOD_START_DATE     /*590*/
-      ,ISNULL(FORMAT(TRY_CAST(F00068 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_PERIOD_END_DATE       /*600*/
+	  ,case
+		 when F00024 = '00000000'
+		 then ''
+		 when right(F00024, 4) = '9999'
+		 then ISNULL(FORMAT(TRY_CAST(left(F00024,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 when right(F00024,2) = '99'
+         then ISNULL(FORMAT(TRY_CAST(left(F00024,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 else ISNULL(FORMAT(TRY_CAST(F00024 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+	   END AS OBSERVATION_PERIOD_START_DATE 
+	   ,case
+	     when F00068 = '00000000'
+		 then ''
+		 when right(F00068, 4) = '9999'
+		 then ISNULL(FORMAT(TRY_CAST(left(F00068,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 when right(F00068,2) = '99'
+         then ISNULL(FORMAT(TRY_CAST(left(F00068,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 else ISNULL(FORMAT(TRY_CAST(F00068 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+	   END AS OBSERVATION_PERIOD_END_DATE
 	  ,'1791@32' AS PERIOD_TYPE_CONCEPT_ID
-	  ,ISNULL(RTRIM(rsSource.F00006), '') MRN
+	  ,ISNULL(rsSource.F00006, '') MRN
 	  ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
-         then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+        then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
 	    else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end 
 		as modified_dttm
   FROM UNM_CNExTCases.dbo.Hospital rsSource
   JOIN UNM_CNExTCases.dbo.Tumor TUM on TUM.uk = rsSource.fk2
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = TUM.fk1
  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on rsSource.uk=HExt.UK
+   and rsSource.F00006 not in (999999998, 9999998, 999999, 9999)
+   and rsSource.F00006 >= 1000
 

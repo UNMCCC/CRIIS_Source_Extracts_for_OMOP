@@ -50,12 +50,45 @@ SELECT  'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
       ,rsSource.uk AS SOURCE_PK
       ,rsSource.uk AS PERSON_ID                                       /*10*/
       ,ISNULL(rsSource.F00022, '') AS GENDER_CONCEPT_ID                                  /*220*/
-      ,ISNULL(SUBSTRING (rsSource.F00019,1,4), '') AS YEAR_OF_BIRTH                      /*240*/
-      ,ISNULL(SUBSTRING (rsSource.F00019,5,2), '') AS MONTH_OF_BIRTH                     /*240*/
-      ,ISNULL(SUBSTRING (rsSource.F00019,7,2), '') AS DAY_OF_BIRTH                       /*240*/
-	  ,ISNULL(FORMAT(TRY_CONVERT(DATETIME, rsSource.F00019, 102),'yyyy-MM-dd HH:mm:ss'), '') AS BIRTH_DATETIME              /*240*/
-      ,CASE WHEN rsSource.F00069 = 0 THEN ISNULL(FORMAT(try_cast(rsSource.F00068 as DATETIME),'yyyy-MM-dd HH:mm:ss'), '')   /*1760*/               
-	        ELSE '' END AS DEATH_DATETIME     /*1750*/                   
+      ,case
+	     when rsSource.F00019 = '00000000'
+	     then ''
+	     else ISNULL(SUBSTRING(rsSource.F00019,1,4), '')
+	   end as YEAR_OF_BIRTH
+      ,case
+	     when rsSource.F00019 = '00000000'
+	     then ''
+	     when SUBSTRING(rsSource.F00019,5,2) = '99'
+		 then '01'
+		 else ISNULL(SUBSTRING(rsSource.F00019,5,2), '')
+	   end as MONTH_OF_BIRTH
+	  ,case
+	     when rsSource.F00019 = '00000000'
+	     then ''
+	     when SUBSTRING (rsSource.F00019,7,2) = '99'
+		 then '01'
+		 else ISNULL(SUBSTRING(rsSource.F00019,7,2), '')
+	   end as DAY_OF_BIRTH
+      ,case
+		 when rsSource.F00019 = '00000000'
+		 then ''
+		 when right(rsSource.F00019, 4) = '9999'
+		 then FORMAT(TRY_CAST(left(rsSource.F00019,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		 when right(rsSource.F00019,2) = '99'
+         then FORMAT(TRY_CAST(left(rsSource.F00019,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		 else ISNULL(FORMAT(TRY_CAST(rsSource.F00019 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+	  END AS BIRTH_DATETIME
+	  ,case
+	     when rsSource.F00068 = '00000000'
+		 then ''
+	     when (rsSource.F00069 = 0 and right(rsSource.F00068, 4) = '9999')
+		 then FORMAT(TRY_CAST(left(rsSource.F00068,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		 when (rsSource.F00069 = 0 and right(rsSource.F00068,2) = '99')
+         then FORMAT(TRY_CAST(left(rsSource.F00068,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+	     WHEN rsSource.F00069 = 0
+		 then ISNULL(FORMAT(try_cast(rsSource.F00068 as DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		 else ''
+	   END AS DEATH_DATETIME
 	  ,ISNULL(PatExtended.F00021, '') AS RACE_CONCEPT_ID                                 /*160*/
       ,ISNULL(PatExtended.F00138, '') AS ETHNICITY_CONCEPT_ID                            /*190*/
       ,Tumor.UK AS LOCATION_ID                                     /*1830*/
@@ -75,3 +108,5 @@ SELECT  'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
   JOIN UNM_CNExTCases.dbo.Tumor on rsSource.uk = Tumor.fk1
   JOIN UNM_CNExTCases.dbo.Hospital on Tumor.uk = Hospital.fk2
   JOIN UNM_CNExTCases.dbo.HospExtended ON HospExtended.uk = Hospital.uk
+ where Hospital.F00006 not in (999999998, 9999998, 999999, 9999)
+   and Hospital.F00006 >= 1000

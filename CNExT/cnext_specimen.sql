@@ -56,8 +56,24 @@ SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
             ELSE ''
          END AS SPECIMEN_CONCEPT_ID
 		,'1791@32' AS SPECIMEN_TYPE_CONCEPT_ID
-        ,ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS SPECIMEN_DATE                             /*1280*/
-        ,ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS SPECIMEN_DATETIME             /*1280*/
+		,case
+		     when rsTarget.F05175 = '99999999'
+		     then ''
+		     when right(rsTarget.F05175, 4) = '9999'
+		     then FORMAT(TRY_CAST(left(rsTarget.F05175,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss')
+		     when right(rsTarget.F05175,2) = '99'
+             then FORMAT(TRY_CAST(left(rsTarget.F05175,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss')
+		     else ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		  END AS SPECIMEN_DATE
+		  ,case
+		     when rsTarget.F05175 = '99999999'
+		     then ''
+		     when right(rsTarget.F05175, 4) = '9999'
+		     then FORMAT(TRY_CAST(left(rsTarget.F05175,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		     when right(rsTarget.F05175,2) = '99'
+             then FORMAT(TRY_CAST(left(rsTarget.F05175,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		     else ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		  END AS SPECIMEN_DATETIME
 		,'' AS QUANTITY
 		,'' AS UNIT_CONCEPT_ID
 		,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS ANATOMIC_SITE_CONCEPT_ID                                            /*400*/
@@ -83,3 +99,5 @@ SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
  WHERE F05084 NOT IN ( '00','09')
+   and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+   and HSP.F00006 >= 1000

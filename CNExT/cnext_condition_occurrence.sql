@@ -49,9 +49,25 @@ SELECT  'CNEXT TUMOR(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS CONDITION_OCCURRENCE_ID
     	,PAT.UK AS PERSON_ID  /*545*/ 
 	    ,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE                                                  /*400*/ 
-        ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS CONDITION_CONCEPT_ID_MORPH                                                 /*521*/ 
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS CONDITION_START_DATE                     /*390*/ 
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS CONDITION_START_DATETIME              /*390*/ 
+        ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS CONDITION_CONCEPT_ID_MORPH
+		,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS CONDITION_START_DATE
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS CONDITION_START_DATETIME
         ,'' AS CONDITION_END_DATE
 	    ,'' AS CONDITION_END_DATETIME
     	,'1791@32' AS CONDITION_TYPE_CONCEPT_ID
@@ -76,4 +92,6 @@ SELECT  'CNEXT TUMOR(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT
  JOIN UNM_CNExTCases.dbo.Stage rsTarget ON rsTarget.uk = rsSource.uk
  JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+ WHERE HSP.F00006 not in(999999998, 9999998, 999999, 9999)
+   and HSP.F00006 >= 1000
   ORDER BY rsSource.uk DESC
