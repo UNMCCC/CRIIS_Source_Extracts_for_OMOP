@@ -59,57 +59,91 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
         ,'' AS OBSERVATION_CONCEPT_ID_8
         ,'' AS OBSERVATION_CONCEPT_ID_9
         ,'' AS OBSERVATION_CONCEPT_ID_10
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_DATE  -- tumor.f00029 Date of Dx
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_DATETIME
-	,'1791@32' AS OBSERVATION_TYPE_CONCEPT_ID
-	,'' AS VALUE_AS_NUMBER
-	,'' AS VALUE_AS_STRING
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS OBSERVATION_DATE 
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS OBSERVATION_DATETIME
+		,'1791@32' AS OBSERVATION_TYPE_CONCEPT_ID
+		,'' AS VALUE_AS_NUMBER
+		,'' AS VALUE_AS_STRING
         ,ISNULL(F06434,'') AS VALUE_AS_CONCEPT_ID_1
         ,ISNULL(F06435,'') AS QUALIFIER_CONCEPT_ID_1
         ,ISNULL(F06436,'') AS VALUE_AS_CONCEPT_ID_2
         ,ISNULL(F06437,'') AS QUALIFIER_CONCEPT_ID_2
         ,ISNULL(F06438,'') AS VALUE_AS_CONCEPT_ID_3
         ,ISNULL(F06439,'') AS QUALIFIER_CONCEPT_ID_3
-	,'' AS UNIT_CONCEPT_ID
-	,(SELECT TOP 1 ISNULL(rsTarget.F05162,'') 
-	       FROM UNM_CNExTCases.dbo.DxStg rsTarget 
+		,'' AS UNIT_CONCEPT_ID
+		,(SELECT TOP 1 ISNULL(rsTarget.F05162,'') 
+	        FROM UNM_CNExTCases.dbo.DxStg rsTarget 
 		   WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460  DD: Dx/Stg Proc, Physician */
-	,rsSource.uk AS VISIT_OCCURRENCE_ID  -- Really?  FK1 is the connecting ID for patient. tumor.UK connects to Hosp.FK2
+		,rsSource.uk AS VISIT_OCCURRENCE_ID  -- Really?  FK1 is the connecting ID for patient. tumor.UK connects to Hosp.FK2
         ,rsSource.uk AS VISIT_DETAIL_ID -- better, but still, that hust joins to the Hosp.PK.
         ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE       --Site - Primary (ICD-O-3)                 /*400*/
-	,0 AS OBSERVATION_SOURCE_CONCEPT_ID
-        ,0 AS UNIT_SOURCE_VALUE	   
-	,F06433 AS QUALIFIER_SOURCE_VALUE    --this field is not be null per WHERE condition  --Family History
-	   ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID                          
-	,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
-	   ,'' AS VALUE_AS_DATETIME
-	 ,ISNULL(HSP.F00006,'') AS MRN
-	,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
-        then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
-	else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
-	AS modified_dtTm
+		'' AS OBSERVATION_SOURCE_CONCEPT_ID
+        ,'' AS UNIT_SOURCE_VALUE	   
+		,F06433 AS QUALIFIER_SOURCE_VALUE    --this field is not be null per WHERE condition  --Family History
+	    ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID                          
+	    ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
+	    ,'' AS VALUE_AS_DATETIME
+	    ,ISNULL(HSP.F00006,'') AS MRN
+		,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+           then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	       else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	     AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
    JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
   WHERE F06433 IS NOT NULL
+    and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+    and HSP.F00006 >= 1000
 UNION
 SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                     /*'TUMOR REGISTRY COMORBIDITY RECORD'*/
-           ,rsSource.uk AS SOURCE_PK
-           ,rsSource.uk AS OBSERVATION_ID
-           ,PAT.UK AS PERSON_ID  /*20*/ 
-           ,F03442 AS OBSERVATION_CONCEPT_ID_1    --this field cannot be null per predicate
-           ,ISNULL(F03443,'') AS OBSERVATION_CONCEPT_ID_2                                                       /*3120*/ 
-           ,ISNULL(F03444,'') AS OBSERVATION_CONCEPT_ID_3                                                       /*3130*/ 
-           ,ISNULL(F03445,'') AS OBSERVATION_CONCEPT_ID_4                                                       /*3140*/ 
-           ,ISNULL(F03446,'') AS OBSERVATION_CONCEPT_ID_5                                                       /*3150*/ 
-           ,ISNULL(F03447,'') AS OBSERVATION_CONCEPT_ID_6                                                       /*3160*/ 
-           ,ISNULL(F04261,'') AS OBSERVATION_CONCEPT_ID_7                                                       /*3161*/ 
-           ,ISNULL(F04262,'') AS OBSERVATION_CONCEPT_ID_8                                                       /*3162*/ 
-           ,ISNULL(F04263,'') AS OBSERVATION_CONCEPT_ID_9                                                       /*3163*/ 
-           ,ISNULL(F04264,'') AS OBSERVATION_CONCEPT_ID_10                                                      /*3164*/ 
-           ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS OBSERVATION_DATE
-           ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_DATETIME
+            ,rsSource.uk AS SOURCE_PK
+            ,rsSource.uk AS OBSERVATION_ID
+            ,PAT.UK AS PERSON_ID  /*20*/ 
+            ,F03442 AS OBSERVATION_CONCEPT_ID_1    --this field cannot be null per predicate
+            ,ISNULL(F03443,'') AS OBSERVATION_CONCEPT_ID_2                                                       /*3120*/ 
+            ,ISNULL(F03444,'') AS OBSERVATION_CONCEPT_ID_3                                                       /*3130*/ 
+            ,ISNULL(F03445,'') AS OBSERVATION_CONCEPT_ID_4                                                       /*3140*/ 
+            ,ISNULL(F03446,'') AS OBSERVATION_CONCEPT_ID_5                                                       /*3150*/ 
+            ,ISNULL(F03447,'') AS OBSERVATION_CONCEPT_ID_6                                                       /*3160*/ 
+            ,ISNULL(F04261,'') AS OBSERVATION_CONCEPT_ID_7                                                       /*3161*/ 
+            ,ISNULL(F04262,'') AS OBSERVATION_CONCEPT_ID_8                                                       /*3162*/ 
+            ,ISNULL(F04263,'') AS OBSERVATION_CONCEPT_ID_9                                                       /*3163*/ 
+            ,ISNULL(F04264,'') AS OBSERVATION_CONCEPT_ID_10                                                      /*3164*/ 
+            ,case
+		      when rsSource.F00029 = '00000000'
+		      then ''
+		      when right(rsSource.F00029, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		      when right(rsSource.F00029,2) = '99'
+              then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		      else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		    END AS OBSERVATION_DATE 
+			,case
+		      when rsSource.F00029 = '00000000'
+		      then ''
+		      when right(rsSource.F00029, 4) = '9999'
+		      then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		      when right(rsSource.F00029,2) = '99'
+              then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		      else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		    END AS OBSERVATION_DATETIME
 		   ,'1791@32' AS OBSERVATION_TYPE_CONCEPT_ID
 	       ,F03442 AS VALUE_AS_NUMBER          --this field cannot be null per predicate
 	       ,F03442 AS VALUE_AS_STRING          --this field cannot be null per predicate
@@ -139,6 +173,8 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
  WHERE F03442 IS NOT NULL
     AND F03442 <> '00000'
     AND F03442 <> ''
+	and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+    and HSP.F00006 >= 1000
 UNION
 SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY FOLLOWUP RECURRENCE'*/
         ,rsSource.uk AS SOURCE_PK
@@ -154,8 +190,24 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
         ,ISNULL(F04262,'') AS OBSERVATION_CONCEPT_ID_8                                               /*3162*/ 
         ,ISNULL(F04263,'') AS OBSERVATION_CONCEPT_ID_9                                               /*3163*/ 
         ,ISNULL(F04264,'') AS OBSERVATION_CONCEPT_ID_10                     
-        ,ISNULL(FORMAT(TRY_CAST(rsTarget.F00157 AS DATE), 'yyyy-MM-dd'), '') AS OBSERVATION_DATE     /*1772*/
-        ,ISNULL(FORMAT(TRY_CAST(rsTarget.F00157 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_DATETIME
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS OBSERVATION_DATE 
+		,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS OBSERVATION_DATETIME
 		,'1791@32' AS OBSERVATION_TYPE_CONCEPT_ID
         ,ISNULL(F05275,'') AS VALUE_AS_NUMBER
         ,ISNULL(F05275,'') AS VALUE_AS_STRING
@@ -185,6 +237,8 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
  WHERE F00070 IS NOT NULL
    AND F00070 != ''
+   and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+   and HSP.F00006 >= 1000
 UNION
 SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY SECONDARY DX RECORD'*/
            ,rsSource.uk AS SOURCE_PK
@@ -200,8 +254,24 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
            ,ISNULL(F06124,'') AS OBSERVATION_CONCEPT_ID_8                    /*3162*/ 
            ,ISNULL(F06125,'') AS OBSERVATION_CONCEPT_ID_9                    /*3163*/ 
            ,ISNULL(F06126,'') AS OBSERVATION_CONCEPT_ID_10                   /*3164*/ 
-           ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd'), '') AS OBSERVATION_DATE
-           ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS OBSERVATION_DATETIME
+           ,case
+		     when rsSource.F00029 = '00000000'
+		     then ''
+		     when right(rsSource.F00029, 4) = '9999'
+		     then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		     when right(rsSource.F00029,2) = '99'
+             then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		     else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		    END AS OBSERVATION_DATE 
+		   ,case
+		     when rsSource.F00029 = '00000000'
+		     then ''
+		     when right(rsSource.F00029, 4) = '9999'
+		     then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		     when right(rsSource.F00029,2) = '99'
+             then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		     else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		    END AS OBSERVATION_DATETIME
 		   ,'1791@32' AS OBSERVATION_TYPE_CONCEPT_ID
 	       ,F06117 AS VALUE_AS_NUMBER   --this field cannot be null per predicate
 	       ,F06117 AS VALUE_AS_STRING   --this field cannot be null per predicate
@@ -230,7 +300,9 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.UK
   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
  WHERE F06117 IS NOT NULL
-    AND F06117 <> '0000000'
-    AND F06117 <> ''
+   AND F06117 <> '0000000'
+   AND F06117 <> ''
+   and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+   and HSP.F00006 >= 1000
 ORDER BY OBSERVATION_TYPE_CONCEPT_ID
          ,rsSource.UK DESC

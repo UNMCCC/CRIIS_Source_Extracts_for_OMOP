@@ -45,149 +45,198 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|NOTE_ID|PERSON_ID|NOTE_EVENT_ID|NOTE_EVENT_FI
 SELECT  'CNEXT FOLLOWUP(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk = rsSource.fk1) AS PERSON_ID  /*20*/ 
+        ,PAT.UK AS PERSON_ID
         ,rsSource.uk AS NOTE_EVENT_ID
-	,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
-        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATE                                                                                               /*443*/ 
-        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME                                                                                /*443*/ 
-	,'1791@32' AS NOTE_TYPE_CONCEPT_ID
-	,'' AS NOTE_CLASS_CONCEPT_ID
-    ,CASE WHEN F01220 IS NOT NULL THEN 
+		,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS NOTE_DATE 
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS NOTE_DATETIME
+		,'1791@32' AS NOTE_TYPE_CONCEPT_ID
+		,'' AS NOTE_CLASS_CONCEPT_ID
+		,CASE WHEN F01220 IS NOT NULL THEN 
 	       'Text_Follow_Up_Notes' 
-	    ELSE '' END AS NOTE_TITLE_1
-    ,CASE WHEN F01220 IS NOT NULL THEN 
+	      ELSE '' END AS NOTE_TITLE_1
+		,CASE WHEN F01220 IS NOT NULL THEN 
 	        isNULL(RTRIM(REPLACE(REPLACE(REPLACE(CAST(F01220 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')				 
 	      ELSE '' END AS  NOTE_TEXT_1                                                                                                /*2680*/ 
-	,CASE WHEN F01506 IS NOT NULL THEN 
+		,CASE WHEN F01506 IS NOT NULL THEN 
 	        'Text_Follow_Up_Remarks' 
 		  ELSE '' END AS NOTE_TITLE_2
-    ,CASE WHEN F01506 IS NOT NULL THEN 
+		,CASE WHEN F01506 IS NOT NULL THEN 
 	        isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01506 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')	
           ELSE '' END AS  NOTE_TEXT_2                                                                                                /*2580*/
-	,'' AS NOTE_TITLE_3
-    ,'' AS NOTE_TEXT_3
-	,'' AS NOTE_TITLE_4
-    ,'' AS NOTE_TEXT_4
-	,'' AS NOTE_TITLE_5
-    ,'' AS NOTE_TEXT_5
-	,'' AS NOTE_TITLE_6
-    ,'' AS NOTE_TEXT_6
-	,'' AS NOTE_TITLE_7
-    ,'' AS NOTE_TEXT_7
-	,'' AS NOTE_TITLE_8
-    ,'' AS NOTE_TEXT_8
-	,'' AS NOTE_TITLE_9
-    ,'' AS NOTE_TEXT_9
-	,'UTF-8 (32678)' AS ENCODING_CONCEPT_ID
-	,'4182347' AS LANGUAGE_CONCEPT_ID
-    ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
-              JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK 
-			 WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID                                              /*2460*/
-	,rsSource.uk AS VISIT_OCCURRENCE_ID
+		,'' AS NOTE_TITLE_3
+		,'' AS NOTE_TEXT_3
+		,'' AS NOTE_TITLE_4
+		,'' AS NOTE_TEXT_4
+		,'' AS NOTE_TITLE_5
+		,'' AS NOTE_TEXT_5
+		,'' AS NOTE_TITLE_6
+		,'' AS NOTE_TEXT_6
+		,'' AS NOTE_TITLE_7
+		,'' AS NOTE_TEXT_7
+		,'' AS NOTE_TITLE_8
+		,'' AS NOTE_TEXT_8
+		,'' AS NOTE_TITLE_9
+		,'' AS NOTE_TEXT_9
+		,'UTF-8 (32678)' AS ENCODING_CONCEPT_ID
+		,'4182347' AS LANGUAGE_CONCEPT_ID
+		,ISNULL(HExt.F00675, '') AS PROVIDER_ID
+		,rsSource.uk AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
-    ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL THEN
+        ,ISNULL(HSP.F00016, '') AS ACCESSION_NUMBER
+		,ISNULL(HSP.F00006, '') AS MRN
+		,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL THEN
             FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
 	     ELSE FORMAT(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') END
- 	AS Modified_dtTm
+		 AS Modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.UK = rsSource.FK1
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
-  
+ where HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+   and HSP.F00006 >= 1000
 UNION ALL
 SELECT 'CNEXT TUMOR(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk = rsSource.fk1) AS PERSON_ID  /*20*/ 
+        ,PAT.UK AS PERSON_ID
         ,rsSource.uk AS NOTE_EVENT_ID
-	,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
-        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATE                                                                                                      /*443*/ 
-        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME                                                                                       /*443*/ 
-	,'1791@32' AS NOTE_TYPE_CONCEPT_ID
-	,'' AS NOTE_CLASS_CONCEPT_ID
-    ,CASE WHEN F00030 IS NOT NULL THEN 
+		,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS NOTE_DATE 
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS NOTE_DATETIME
+		,'1791@32' AS NOTE_TYPE_CONCEPT_ID
+		,'' AS NOTE_CLASS_CONCEPT_ID
+		,CASE WHEN F00030 IS NOT NULL THEN 
 	        'Text_Final_Dx' 
 	      ELSE '' END AS NOTE_TITLE_1
-    ,CASE WHEN F00030 IS NOT NULL THEN 
+		,CASE WHEN F00030 IS NOT NULL THEN 
  	        isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F00030 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '') 
 		  ELSE '' END AS  NOTE_TEXT_1                                                                                                /*2680*/ 
-	,CASE WHEN F00089 IS NOT NULL THEN 
+		,CASE WHEN F00089 IS NOT NULL THEN 
 	       'Text_Primary_Site' 
 		 ELSE '' END AS NOTE_TITLE_2
-    ,CASE WHEN F00089 IS NOT NULL THEN 
+		,CASE WHEN F00089 IS NOT NULL THEN 
     	    isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F00089 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '') 
          ELSE '' END AS  NOTE_TEXT_2                                                                                                /*2580*/
-	,CASE WHEN F00090 IS NOT NULL THEN 
+		,CASE WHEN F00090 IS NOT NULL THEN 
 	       'Text_Histology' 
 		  ELSE '' END AS NOTE_TITLE_3
-    ,CASE WHEN F00090 IS NOT NULL THEN 
-	isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F00090 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '') 
+		,CASE WHEN F00090 IS NOT NULL THEN 
+			isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F00090 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '') 
 		  ELSE '' END AS  NOTE_TEXT_3                                                                                                /*2590*/
-	,CASE WHEN F01209 IS NOT NULL THEN 
+		,CASE WHEN F01209 IS NOT NULL THEN 
 	       'Text_Scopes' 
 		  ELSE '' END AS NOTE_TITLE_4
-    ,CASE WHEN F01209 IS NOT NULL THEN 
-    	   isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01209 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
+		,CASE WHEN F01209 IS NOT NULL THEN 
+    	    isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01209 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
           ELSE '' END AS  NOTE_TEXT_4                                                                                                /*2540*/
-	,CASE WHEN F01210 IS NOT NULL THEN 
+		,CASE WHEN F01210 IS NOT NULL THEN 
 	       'Text_Labs' 
 	      ELSE '' END AS NOTE_TITLE_5
-    ,CASE WHEN F01210 IS NOT NULL THEN 
-     	   isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01210 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
+		,CASE WHEN F01210 IS NOT NULL THEN 
+     	    isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01210 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
           ELSE '' END AS  NOTE_TEXT_5                                                                                                /*2550*/
-	,CASE WHEN F01211 IS NOT NULL THEN 
+		,CASE WHEN F01211 IS NOT NULL THEN 
 	       'Text_Physical_Exam' 
          ELSE '' END AS NOTE_TITLE_6
-    ,CASE WHEN F01211 IS NOT NULL THEN 
-	       isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01211 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
+		,CASE WHEN F01211 IS NOT NULL THEN 
+	        isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01211 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
 		 ELSE '' END AS  NOTE_TEXT_6                                                                                                /*2520*/
-	,CASE WHEN F01212 IS NOT NULL THEN 
+		,CASE WHEN F01212 IS NOT NULL THEN 
 	       'Text_Xrays_Scans' 
 		  ELSE '' END AS NOTE_TITLE_7
-    ,CASE WHEN F01212 IS NOT NULL THEN 
-	isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01212 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
+		,CASE WHEN F01212 IS NOT NULL THEN 
+			isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01212 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
 		  ELSE '' END AS  NOTE_TEXT_7                                                                                                /*2530*/
-	,CASE WHEN F01213 IS NOT NULL THEN 
+		,CASE WHEN F01213 IS NOT NULL THEN 
 	        'Text_Pathology' 
           ELSE '' END AS NOTE_TITLE_8
-    ,CASE WHEN F01213 IS NOT NULL THEN 
+		,CASE WHEN F01213 IS NOT NULL THEN 
         	isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01213 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
 	      ELSE '' END AS  NOTE_TEXT_8                                                                                                /*2570*/
-	,CASE WHEN F01214 IS NOT NULL THEN 
+		,CASE WHEN F01214 IS NOT NULL THEN 
 	        'Text_Operative_Findings' 
 		  ELSE '' END AS NOTE_TITLE_9
-    ,CASE WHEN F01214 IS NOT NULL THEN 
+		,CASE WHEN F01214 IS NOT NULL THEN 
      	    isNULL(RTRIM( REPLACE(REPLACE(REPLACE(CAST(F01214 as NVarchar(4000)), CHAR(13), ''), CHAR(10), ''), '|','-' )), '')
           ELSE '' END AS  NOTE_TEXT_9                                                                                                /*2560*/
         ,'UTF-8 (32678)' AS ENCODING_CONCEPT_ID
-	,'4182347' AS LANGUAGE_CONCEPT_ID
-     ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
-                        JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK 
-					 WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID                                              /*2460*/
-	,rsSource.uk AS VISIT_OCCURRENCE_ID
+		,'4182347' AS LANGUAGE_CONCEPT_ID
+		,ISNULL(HExt.F00675, '') AS PROVIDER_ID
+		,rsSource.uk AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
+        ,ISNULL(HSP.F00016, '') AS ACCESSION_NUMBER
+		,ISNULL(HSP.F00006, '') AS MRN
         ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL THEN
             FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
 	     ELSE FORMAT(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') END
+		 AS Modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.UK = rsSource.FK1
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
-  
+  and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+  and HSP.F00006 >= 1000
 UNION all
 SELECT 'CNEXT TREATMENT(OMOP_NOTES)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS NOTE_ID
-        ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk = rsSource.fk1) AS PERSON_ID  /*20*/ 
+        ,PAT.UK AS PERSON_ID
         ,rsSource.uk AS NOTE_EVENT_ID
 		,'' AS NOTE_EVENT_FIELD_CONCEPT_ID
-        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATE                                                                                                                /*443*/ 
-        ,ISNULL(FORMAT(TRY_CAST(F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS NOTE_DATETIME                                                                                        /*443*/ 
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS NOTE_DATE 
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS NOTE_DATETIME
 		,'1791@32' AS NOTE_TYPE_CONCEPT_ID
 		,'' AS NOTE_CLASS_CONCEPT_ID
         ,CASE WHEN CAST(F01215 AS VARCHAR(100)) IS NOT NULL AND CAST(F01215 AS VARCHAR(100)) !=  ' ' THEN 
@@ -246,20 +295,23 @@ SELECT 'CNEXT TREATMENT(OMOP_NOTES)' AS IDENTITY_CONTEXT
 	        ELSE '' END AS  NOTE_TEXT_9
 	    ,'UTF-8 (32678)' AS ENCODING_CONCEPT_ID
 	    ,'4182347' AS LANGUAGE_CONCEPT_ID
-        ,(SELECT TOP 1 ISNULL(HEX.F00675, '') FROM UNM_CNExTCases.dbo.Hospital HSP
-              JOIN UNM_CNExTCases.dbo.HospExtended HEX ON HEX.UK = HSP.UK WHERE HSP.FK2 = rsSource.UK ORDER BY HEX.UK ASC) AS PROVIDER_ID    /*2460*/
-	,rsSource.uk AS VISIT_OCCURRENCE_ID
+        ,ISNULL(HExt.F00675, '') AS PROVIDER_ID
+		,rsSource.uk AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,'UNM_CNExTCases.dbo.Tumor.uk' AS NOTE_SOURCE_VALUE
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00016, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS ACCESSION_NUMBER  /*550*/
-        ,(SELECT TOP 1 ISNULL(rsTarget.F00006, '') FROM UNM_CNExTCases.dbo.Hospital rsTarget WHERE rsTarget.fk2 = rsSource.UK  Order By  rsTarget.fk2 ASC) AS MRN
+        ,ISNULL(HSP.F00016, '') AS ACCESSION_NUMBER
+		,ISNULL(HSP.F00006, '') AS MRN
        ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL THEN
             FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
 	     ELSE FORMAT(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') END
+		 AS Modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
-  JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.UK = rsSource.UK  --TRT.fk1 = rsSource.UK
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.UK = rsSource.FK1
+  JOIN UNM_CNExTCases.dbo.Treatment TRT on TRT.UK = rsSource.UK
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2=rsSource.UK
   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
  WHERE TRT.F00420 NOT IN ('00','09') 
+   and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+   and HSP.F00006 >= 1000
  ORDER BY NOTE_TYPE_CONCEPT_ID
            ,rsSource.UK DESC

@@ -52,10 +52,34 @@ SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
     	,PAT.UK AS PERSON_ID  /*20*/ 
 		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS MEASUREMENT_CONCEPT_ID_SITE                                                                                        /*400*/ 
         ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS MEASUREMENT_CONCEPT_ID_MORPH                                                                                       /*521*/ 
-        ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_CONCEPT_ID_GRADE_PATHOLOGICAL                                                                                         /*3844*/ 
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '') AS MEASUREMENT_DATE                                                                          /*390*/ 
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '') AS MEASUREMENT_DATETIME                                                          /*390*/
-        ,ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS TIME),'HH:mm:ss HH:mm:ss'), '') AS MEASUREMENT_TIME                                                                     /*390*/  
+        ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_CONCEPT_ID_GRADE_PATHOLOGICAL
+		,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS MEASUREMENT_DATE
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS MEASUREMENT_DATETIME 
+        ,case
+		   when rsSource.F00029 = '00000000'
+		   then ''
+		   when right(rsSource.F00029, 4) = '9999'
+		   then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   when right(rsSource.F00029,2) = '99'
+           then ISNULL(FORMAT(TRY_CAST(left(rsSource.F00029,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		   else ISNULL(FORMAT(TRY_CAST(rsSource.F00029 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		 END AS MEASUREMENT_TIME
 	    ,'1791@32' AS MEASUREMENT_TYPE_CONCEPT_ID
 	    ,'' AS OPERATOR_CONCEPT_ID
 		,ISNULL(rsSource.F02503, '') AS VALUE_AS_NUMBER                                                                                                               /*521*/ 
@@ -84,4 +108,6 @@ SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
  JOIN UNM_CNExTCases.dbo.Stage rsTarget ON rsTarget.uk = rsSource.uk
  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
 INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+where HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+ and HSP.F00006 >= 1000
 order by rsSource.uk desc
