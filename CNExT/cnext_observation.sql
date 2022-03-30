@@ -100,6 +100,7 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
 	    ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	    ,'' AS VALUE_AS_DATETIME
 	    ,ISNULL(HSP.F00006,'') AS MRN
+	    ,'Family_History' AS OBSERVATION_TYPE
 		,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
            then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
 	       else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
@@ -158,13 +159,14 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
 		   ,rsSource.uk AS VISIT_OCCURRENCE_ID
            ,rsSource.uk AS VISIT_DETAIL_ID 
            ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE                               /*400*/
-		   ,0 AS OBSERVATION_SOURCE_CONCEPT_ID
-           ,0 AS UNIT_SOURCE_VALUE	   
+		   ,'' AS OBSERVATION_SOURCE_CONCEPT_ID
+           ,'' AS UNIT_SOURCE_VALUE	   
 	       ,F03442 AS QUALIFIER_SOURCE_VALUE    --this field cannot be null per predicate
 	       ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID
 	       ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	       ,'' AS VALUE_AS_DATETIME
-           ,ISNULL(HSP.F00006,'') AS MRN		   
+           ,ISNULL(HSP.F00006,'') AS MRN
+	       ,'Comorbidity' AS OBSERVATION_TYPE		   
 		   ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
@@ -222,13 +224,14 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
 		,rsSource.uk AS VISIT_OCCURRENCE_ID
         ,rsSource.uk AS VISIT_DETAIL_ID 
         ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE                        /*400*/
-		,0 AS OBSERVATION_SOURCE_CONCEPT_ID
-        ,0 AS UNIT_SOURCE_VALUE	   
+		,'' AS OBSERVATION_SOURCE_CONCEPT_ID
+        ,'' AS UNIT_SOURCE_VALUE	   
 	    ,ISNULL(F00072,'') AS QUALIFIER_SOURCE_VALUE                                                  /*1791*/
 	    ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID
 	    ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	    ,'' AS VALUE_AS_DATETIME
 		,ISNULL(HSP.F00006,'') AS MRN
+	    ,'Follow_Up' AS OBSERVATION_TYPE
         ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
@@ -286,13 +289,14 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
 		   ,rsSource.uk AS VISIT_OCCURRENCE_ID
            ,rsSource.uk AS VISIT_DETAIL_ID 
            ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE    /*400*/
-		   ,0 AS OBSERVATION_SOURCE_CONCEPT_ID
-           ,0 AS UNIT_SOURCE_VALUE	   
+		   ,'' AS OBSERVATION_SOURCE_CONCEPT_ID
+           ,'' AS UNIT_SOURCE_VALUE	   
 	       ,F06117 AS QUALIFIER_SOURCE_VALUE   --this field cannot be null per predicate
 	       ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID
 	       ,'UNM_CNExTCases.dbo.Tumor rsSource' AS OBS_EVENT_FIELD_CONCEPT_ID
 	       ,'' AS VALUE_AS_DATETIME
 		   ,ISNULL(HSP.F00006,'') AS MRN
+	      ,'Secondary_Dx' AS OBSERVATION_TYPE
           ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
