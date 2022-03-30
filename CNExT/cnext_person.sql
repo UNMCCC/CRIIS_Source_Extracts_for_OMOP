@@ -91,7 +91,7 @@ SELECT  'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
 	   END AS DEATH_DATETIME
 	  ,ISNULL(PatExtended.F00021, '') AS RACE_CONCEPT_ID                                 /*160*/
       ,ISNULL(PatExtended.F00138, '') AS ETHNICITY_CONCEPT_ID                            /*190*/
-      ,Tumor.UK AS LOCATION_ID                                     /*1830*/
+      ,PatExtended.UK AS LOCATION_ID                                     /*1830*/
 	  ,ISNULL(HospExtended.F00675, '') AS PROVIDER_ID                                    /*2460*/
       ,ISNULL(PatExtended.F00003, '') AS CARE_SITE_ID                                    /*21*/
 	  ,ISNULL(PatExtended.F00004, '') AS PERSON_SOURCE_VALUE                             /*20*/
