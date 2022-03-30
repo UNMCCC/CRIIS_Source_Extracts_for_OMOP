@@ -48,12 +48,12 @@ SELECT 'IDENTITY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZI
 select 'CNEXT PATEXTENDED(OMOP_LOCATION)' AS IDENTITY_CONTEXT /*current location*/
       ,rsSource.uk AS SOURCE_PK                     /* also patient pk*/
       ,rsSource.uk AS LOCATION_ID
-      ,ISNULL(rsSource.F05296,'') AS ADDRESS_1
+      ,ISNULL(RTRIM(rsSource.F05296),'') AS ADDRESS_1
       ,'' AS ADDRESS_2
-      ,ISNULL(rsSource.F05269, '') AS CITY
-      ,ISNULL(rsSource.F05270, '') AS STATE
-      ,ISNULL(rsSource.F05271, '') AS ZIP
-      ,ISNULL(rsSource.F05272, '') AS COUNTY
+      ,ISNULL(RTRIM(rsSource.F05269), '') AS CITY
+      ,ISNULL(RTRIM(rsSource.F05270), '') AS STATE
+      ,ISNULL(RTRIM(rsSource.F05271), '') AS ZIP
+      ,ISNULL(RTRIM(rsSource.F05272), '') AS COUNTY
       ,rsSource.uk AS LOCATION_SOURCE_VALUE
       ,'' AS LATITUDE
       ,'' AS LONGITUDE
