@@ -99,7 +99,7 @@ SELECT 'CNEXT SURG(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT              
         ,(SELECT rsTarget.UK FROM UNM_CNExTCases.dbo.Patient rsTarget WHERE rsTarget.uk =  rsSource.fk1) AS PERSON_ID
         ,CASE                                  --no nulls, but empty space values to handle
 			WHEN SRG.F03488 <> ''
-			THEN '670@'  + SRG.F03488
+			THEN '1290@'  + SRG.F03488
 			ELSE ''
 		 END AS PROCEDURE_CONCEPT_ID                                                                          /*670*/
          ,case
