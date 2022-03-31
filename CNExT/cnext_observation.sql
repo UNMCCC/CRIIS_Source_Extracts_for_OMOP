@@ -93,7 +93,7 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
 		,rsSource.uk AS VISIT_OCCURRENCE_ID  -- Really?  FK1 is the connecting ID for patient. tumor.UK connects to Hosp.FK2
         ,rsSource.uk AS VISIT_DETAIL_ID -- better, but still, that hust joins to the Hosp.PK.
         ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE       --Site - Primary (ICD-O-3)                 /*400*/
-		'' AS OBSERVATION_SOURCE_CONCEPT_ID
+	,'' AS OBSERVATION_SOURCE_CONCEPT_ID
         ,'' AS UNIT_SOURCE_VALUE	   
 		,F06433 AS QUALIFIER_SOURCE_VALUE    --this field is not be null per WHERE condition  --Family History
 	    ,ISNULL(rsSource.FK1,'') AS OBSERVATION_EVENT_ID                          
