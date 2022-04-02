@@ -47,7 +47,7 @@ LTV - 2/22/2022 - Changed condition on the Radiation table. Added WHERE F05257 >
 
 */
 SET NOCOUNT ON;
-SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PROCEDURE_OCCURRENCE_ID|PERSON_ID|PROCEDURE_CONCEPT_ID|PROCEDURE_DATE|PROCEDURE_DATETIME|PROCEDURE_TYPE_CONCEPT_ID|MODIFIER_CONCEPT_ID|QUANTITY|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|PROCEDURE_SOURCE_VALUE|PROCEDURE_SOURCE_CONCEPT_ID|MODIFIER_SOURCE_VALUE|MRN|Modified_DtTm';
+SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PROCEDURE_OCCURRENCE_ID|PERSON_ID|PROCEDURE_CONCEPT_ID|PROCEDURE_DATE|PROCEDURE_DATETIME|PROCEDURE_TYPE_CONCEPT_ID|MODIFIER_CONCEPT_ID|QUANTITY|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|PROCEDURE_SOURCE_VALUE|PROCEDURE_SOURCE_CONCEPT_ID|MODIFIER_SOURCE_VALUE|MRN|CONDITION_CONCEPT_ID_SITE|Modified_DtTm';
 SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT                                                                           /*'UNMTR DX/STG RECORD'*/
          ,rsSource.uk  AS SOURCE_PK
          ,rsSource.uk AS PROCEDURE_OCCURRENCE_ID
@@ -81,6 +81,7 @@ SELECT  'CNEXT TREATMENT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT        
          ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
          ,0 AS MODIFIER_SOURCE_VALUE
 		 ,ISNULL(HSP.F00006, '') AS MRN
+		 ,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
 	 ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
         then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
 	else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
@@ -130,7 +131,12 @@ SELECT 'CNEXT SURG(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT              
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
 		,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
+		,CASE 
+		    WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+            then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	        else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss')
+		 end AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Surg SRG ON SRG.fk2 = rsSource.uk
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
@@ -175,7 +181,12 @@ SELECT 'CNEXT RADIATION(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT         
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
 		,ISNULL(HSP.F00006, '') AS MRN
-	 ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
+	    ,CASE 
+			WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+            then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	        else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss')
+		 end AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
   INNER JOIN UNM_CNExTCases.dbo.Radiation RAD ON RAD.fk2 = rsSource.uk
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
@@ -221,7 +232,12 @@ SELECT 'CNEXT OTHER(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT             
 	    ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
 		,ISNULL(HSP.F00006, '') AS MRN
-        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
+        ,CASE 
+			WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+            then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	        else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss')
+		 end AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Other OTH ON OTH.fk2 = rsSource.uk
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
@@ -264,7 +280,12 @@ SELECT 'CNEXT CHEMO(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
 	    ,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
+		,CASE 
+			WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+            then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	        else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss')
+		 end AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.Chemo CHM ON CHM.fk2 = rsSource.uk
@@ -309,7 +330,12 @@ SELECT 'CNEXT HORMONE(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE
 		,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
+		,CASE 
+			WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+            then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	        else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss')
+		 end AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.Hormone HOR ON HOR.fk2 = rsSource.uk
@@ -353,7 +379,12 @@ SELECT 'CNEXT IMMUNO(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE	
 	    ,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
+		,CASE 
+			WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+            then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	        else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss')
+		 end AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.Immuno BRM ON BRM.fk2 = rsSource.uk
@@ -397,7 +428,12 @@ SELECT 'CNEXT TRANSPLANT(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
         ,0 AS PROCEDURE_SOURCE_CONCEPT_ID
 	    ,0 AS MODIFIER_SOURCE_VALUE	
 	    ,ISNULL(HSP.F00006, '') AS MRN
-		,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
+		,CASE 
+			WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+            then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	        else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss')
+		 end AS modified_dtTm
    FROM UNM_CNExTCases.dbo.Tumor rsSource
    JOIN UNM_CNExTCases.dbo.Hospital HSP ON rsSource.uk = HSP.fk2
    JOIN UNM_CNExTCases.dbo.Transplant TRE ON TRE.fk2 = rsSource.uk
