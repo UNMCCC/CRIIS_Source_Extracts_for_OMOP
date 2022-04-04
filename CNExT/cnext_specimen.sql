@@ -50,39 +50,39 @@ SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
         ,rsSource.uk AS SOURCE_PK
         ,rsSource.uk AS SPECIMEN_ID                                                                                                                                       /*1772*/
         ,PAT.UK AS PERSON_ID
-        ,CASE                         --no null values; changed to a case statement to handle empty space values
-			WHEN F05084 <> '' 
-			THEN '740@' + F05084
+        ,CASE
+			WHEN rsSource.F05084 <> '' 
+			THEN '740@' + rsSource.F05084
             ELSE ''
          END AS SPECIMEN_CONCEPT_ID
 		,'1791@32' AS SPECIMEN_TYPE_CONCEPT_ID
 		,case
-		     when rsTarget.F05175 = '99999999'
+		     when rsSource.F05175 = '99999999'
 		     then ''
-		     when right(rsTarget.F05175, 4) = '9999'
-		     then FORMAT(TRY_CAST(left(rsTarget.F05175,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss')
-		     when right(rsTarget.F05175,2) = '99'
-             then FORMAT(TRY_CAST(left(rsTarget.F05175,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss')
-		     else ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		     when right(rsSource.F05175, 4) = '9999'
+		     then FORMAT(TRY_CAST(left(rsSource.F05175,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss')
+		     when right(rsSource.F05175,2) = '99'
+             then FORMAT(TRY_CAST(left(rsSource.F05175,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss')
+		     else ISNULL(FORMAT(TRY_CAST(rsSource.F05175 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
 		  END AS SPECIMEN_DATE
 		  ,case
-		     when rsTarget.F05175 = '99999999'
+		     when rsSource.F05175 = '99999999'
 		     then ''
-		     when right(rsTarget.F05175, 4) = '9999'
-		     then FORMAT(TRY_CAST(left(rsTarget.F05175,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
-		     when right(rsTarget.F05175,2) = '99'
-             then FORMAT(TRY_CAST(left(rsTarget.F05175,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
-		     else ISNULL(FORMAT(TRY_CAST(rsTarget.F05175 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
+		     when right(rsSource.F05175, 4) = '9999'
+		     then FORMAT(TRY_CAST(left(rsSource.F05175,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		     when right(rsSource.F05175,2) = '99'
+             then FORMAT(TRY_CAST(left(rsSource.F05175,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		     else ISNULL(FORMAT(TRY_CAST(rsSource.F05175 AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '')
 		  END AS SPECIMEN_DATETIME
 		,'' AS QUANTITY
 		,'' AS UNIT_CONCEPT_ID
-		,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS ANATOMIC_SITE_CONCEPT_ID                                            /*400*/
+		,ISNULL(STUFF(rsTarget.F00152,4,0,'.'),'') AS ANATOMIC_SITE_CONCEPT_ID                                            /*400*/
 		,CASE                         --no null values; changed to a case statement to handle empty space values                         
-			WHEN F00070 <> ''
-			THEN '1770@' + F00070
+			WHEN FU.F00070 <> ''
+			THEN '1770@' + FU.F00070
 			ELSE ''
 		END AS DISEASE_STATUS_CONCEPT_ID                                                                                  /*1770*/
-        ,rsTarget.F05084 AS SPECIMEN_SOURCE_ID   --no null values                                                         /*740*/
+        ,rsSource.F05084 AS SPECIMEN_SOURCE_ID   --no null values                                                         /*740*/
 		,'' AS SPECIMEN_SOURCE_VALUE
 		,'' AS UNIT_SOURCE_VALUE
 		,'' AS ANATOMIC_SITE_SOURCE_VALUE
@@ -92,13 +92,13 @@ SELECT  'CNEXT TUMOR(OMOP_SPECIMEN)' AS IDENTITY_CONTEXT
         then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
 	else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
 	AS modified_dtTm
-  FROM UNM_CNExTCases.dbo.Tumor rsSource
-  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
-  JOIN UNM_CNExTCases.dbo.DxStg rsTarget ON rsTarget.FK2 = rsSource.uk
-  JOIN UNM_CNExTCases.dbo.FollowUp FU ON FU.uk = rsSource.uk
-  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
+  FROM UNM_CNExTCases.dbo.DxStg rsSource
+  JOIN UNM_CNExTCases.dbo.Tumor rsTarget ON rsTarget.uk = rsSource.fk2
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsTarget.fk1  
+  JOIN UNM_CNExTCases.dbo.FollowUp FU ON FU.uk = rsTarget.uk
+  JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsTarget.uk
  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
- WHERE F05084 NOT IN ( '00','09')
+ WHERE rsSource.F05084 NOT IN ( '00','09')
    and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
    and HSP.F00006 >= 1000
-   and F05175 != '00000000'
+   and rsSource.F05175 != '00000000'
