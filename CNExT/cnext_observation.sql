@@ -91,7 +91,7 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
 	        FROM UNM_CNExTCases.dbo.DxStg rsTarget 
 		   WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460  DD: Dx/Stg Proc, Physician */
 		,rsSource.uk AS VISIT_OCCURRENCE_ID  -- Really?  FK1 is the connecting ID for patient. tumor.UK connects to Hosp.FK2
-        ,rsSource.uk AS VISIT_DETAIL_ID -- better, but still, that hust joins to the Hosp.PK.
+        ,'' AS VISIT_DETAIL_ID -- better, but still, that hust joins to the Hosp.PK.
         ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE       --Site - Primary (ICD-O-3)                 /*400*/
 	,'' AS OBSERVATION_SOURCE_CONCEPT_ID
         ,'' AS UNIT_SOURCE_VALUE	   
@@ -157,7 +157,7 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
 	       ,'' AS UNIT_CONCEPT_ID
 		   ,(SELECT TOP 1 ISNULL(rsTarget.F05162,'') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
 		   ,rsSource.uk AS VISIT_OCCURRENCE_ID
-           ,rsSource.uk AS VISIT_DETAIL_ID 
+           ,'' AS VISIT_DETAIL_ID 
            ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE                               /*400*/
 		   ,'' AS OBSERVATION_SOURCE_CONCEPT_ID
            ,'' AS UNIT_SOURCE_VALUE	   
@@ -222,7 +222,7 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
 	    ,'' AS UNIT_CONCEPT_ID                                /*2460*/
         ,ISNULL(F00075,'') AS PROVIDER_ID                     /*2470*/ 
 		,rsSource.uk AS VISIT_OCCURRENCE_ID
-        ,rsSource.uk AS VISIT_DETAIL_ID 
+        ,'' AS VISIT_DETAIL_ID 
         ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE                        /*400*/
 		,'' AS OBSERVATION_SOURCE_CONCEPT_ID
         ,'' AS UNIT_SOURCE_VALUE	   
@@ -287,7 +287,7 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
 	       ,'' AS UNIT_CONCEPT_ID
 		   ,(SELECT TOP 1 ISNULL(rsTarget.F05162,'') FROM UNM_CNExTCases.dbo.DxStg rsTarget WHERE rsSource.uk = rsTarget.fk2 Order By rsTarget.UK ASC) AS PROVIDER_ID     /*2460*/
 		   ,rsSource.uk AS VISIT_OCCURRENCE_ID
-           ,rsSource.uk AS VISIT_DETAIL_ID 
+           ,'' AS VISIT_DETAIL_ID 
            ,ISNULL(STUFF(rsSource.F00152,4,0,'.'),'') AS OBSERVATION_SOURCE_VALUE    /*400*/
 		   ,'' AS OBSERVATION_SOURCE_CONCEPT_ID
            ,'' AS UNIT_SOURCE_VALUE	   

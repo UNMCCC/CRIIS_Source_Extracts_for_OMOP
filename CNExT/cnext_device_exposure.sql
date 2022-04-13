@@ -91,7 +91,7 @@ SELECT  'CNEXT RADIATION(OMOP_DEVICE_EXPOSURE)' AS IDENTITY_CONTEXT
         ,ISNULL(RAD.F07797, '') AS QUANTITY                                                                        /*1533*/
         ,ISNULL(RAD.F05156, '') AS PROVIDER_ID                                                                     /*2480*/
         ,TUM.UK AS VISIT_OCCURRENCE_ID
-		,RAD.uk AS VISIT_DETAIL_ID
+		,concat('RAD-', RAD.uk) AS VISIT_DETAIL_ID
         ,RAD.F07799 AS DEVICE_SOURCE_VALUE                                                                         /*1502*/
 	    ,'1506@'  + RAD.F07799 AS DEVICE_SOURCE_CONCEPT_ID
         ,ISNULL(HSP.F00006, '') AS MRN
