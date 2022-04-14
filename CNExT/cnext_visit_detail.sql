@@ -541,4 +541,58 @@ UNION
 WHERE ((HExt.F00427 is not null and HExt.F00427 != '' and HExt.F00427 not in ('00000000','88888888'))
    or (HExt.F00128 is not null and HExt.F00128 != '' and HExt.F00128 not in('00000000','88888888')))
   and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
-  and HSP.F00006 >= 1000 
+  and HSP.F00006 >= 1000
+UNION
+SELECT 'CNEXT DIAGNOSIS/STAGE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
+         ,concat('DXS-', DXS.uk) AS SOURCE_PK
+         ,concat('DXS-', DXS.uk) AS VISIT_DETAIL_ID
+         ,PAT.uk AS PERSON_ID
+		 ,ISNULL(HSG.F05522, '') AS VISIT_DETAIL_CONCEPT_ID
+         ,case
+		     when DXS.F05175 = '99999999'
+		     then ''
+		     when right(DXS.F05175, 4) = '9999'
+		     then FORMAT(TRY_CAST(left(DXS.F05175,4) + '0101' AS DATE), 'yyyy-MM-dd HH:mm:ss')
+		     when right(DXS.F05175,2) = '99'
+             then FORMAT(TRY_CAST(left(DXS.F05175,6) + '01' AS DATE), 'yyyy-MM-dd HH:mm:ss')
+		     else ISNULL(FORMAT(TRY_CAST(DXS.F05175 AS DATE), 'yyyy-MM-dd HH:mm:ss'), '')
+		    END AS VISIT_DETAIL_START_DATE 
+         ,case
+		     when DXS.F05175 = '99999999'
+		     then ''
+		     when right(DXS.F05175, 4) = '9999'
+		     then FORMAT(TRY_CAST(left(DXS.F05175,4) + '0101' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		     when right(DXS.F05175,2) = '99'
+             then FORMAT(TRY_CAST(left(DXS.F05175,6) + '01' AS DATETIME), 'yyyy-MM-dd HH:mm:ss')
+		     else ISNULL(FORMAT(TRY_CAST(DXS.F05175 AS DATETIME),'yyyy-MM-dd HH:mm:ss'), '')
+		    END AS VISIT_DETAIL_START_DATETIME
+		 ,'' VISIT_DETAIL_END_DATE
+		 ,'' VISIT_DETAIL_END_DATETIME
+    	 ,'1791@32' AS VISIT_DETAIL_TYPE_CONCEPT_ID
+		 ,ISNULL(DXS.F05162, '') AS PROVIDER_ID
+         ,ISNULL(DXS.F05083, '') AS CARE_SITE_ID
+         ,DXS.F05084 AS VISIT_DETAIL_SOURCE_VALUE
+	    ,'740@' + DXS.F05084 AS VISIT_DETAIL_SOURCE_CONCEPT_ID
+		,ISNULL(HExt.F01684, '') AS ADMITTING_SOURCE_VALUE
+	    ,ISNULL(HExt.F03715, '') AS ADMITTING_SOURCE_CONCEPT_ID
+	    ,ISNULL(HExt.F01685, '') AS DISCHARGE_TO_SOURCE_VALUE
+	    ,ISNULL(HExt.F03716, '') AS DISCHARGE_TO_CONCEPT_ID
+		,ISNULL(HSP.fk2, '') AS PRECEDING_VISIT_DETAIL_ID		
+		,'' AS VISIT_DETAIL_PARENT_ID
+	    ,rsSource.UK AS VISIT_OCCURRENCE_ID                               /*10*/
+		,ISNULL(HSP.F00006, '') AS MRN
+		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS CONDITION_CONCEPT_ID_SITE
+   	    ,CASE
+    		WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+            then format(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	        else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss')
+		 end AS modified_dtTm
+  FROM UNM_CNExTCases.dbo.Tumor rsSource
+  JOIN UNM_CNExTCases.dbo.DxStg DXS on DXS.fk2 = rsSource.uk
+  JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
+  JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2 = rsSource.UK
+  JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+ where DXS.F05084 NOT IN ('00','09')
+   and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
+   and HSP.F00006 >= 1000
+   and DXS.F05175 != '00000000'  
