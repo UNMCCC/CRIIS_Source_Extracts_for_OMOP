@@ -592,6 +592,7 @@ SELECT 'CNEXT DIAGNOSIS/STAGE(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.Hospital HSP on HSP.FK2 = rsSource.UK
   JOIN UNM_CNExTCases.dbo.HospExtended HExt on HSP.UK = HExt.UK
+   JOIN UNM_CNExTCases.dbo.HospSupp HSG ON HSG.UK = HSP.UK
  where DXS.F05084 NOT IN ('00','09')
    and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
    and HSP.F00006 >= 1000
