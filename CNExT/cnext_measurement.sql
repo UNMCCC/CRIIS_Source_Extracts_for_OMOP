@@ -52,7 +52,7 @@ SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
     	,PAT.UK AS PERSON_ID  /*20*/ 
 		,ISNULL(STUFF(rsSource.F00152,4,0,'.'), '') AS MEASUREMENT_CONCEPT_ID_SITE                                                                                        /*400*/ 
         ,ISNULL(STUFF(rsSource.F02503,5,0,'/'), '') AS MEASUREMENT_CONCEPT_ID_MORPH                                                                                       /*521*/ 
-        ,ISNULL(rsTarget.F00034, '') AS MEASUREMENT_CONCEPT_ID_GRADE_PATHOLOGICAL
+        ,ISNULL(rsSource.F00034, '') AS MEASUREMENT_CONCEPT_ID_GRADE_PATHOLOGICAL
 		,case
 		   when rsSource.F00029 = '00000000'
 		   then ''
@@ -92,7 +92,7 @@ SELECT  'CNEXT TUMOR(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
         ,'' AS VISIT_DETAIL_ID 
         ,ISNULL(rsTarget.F07625, '') AS MEASUREMENT_SOURCE_VALUE  		/*3844*/ 
 		,CASE 
-			WHEN rsTarget.F00034 <> ''
+			WHEN rsSource.F00034 <> ''
 			THEN '440@' + F00034
 			ELSE ''
 		 END AS MEASUREMENT_SOURCE_CONCEPT_ID		
