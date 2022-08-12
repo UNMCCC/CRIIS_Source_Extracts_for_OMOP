@@ -118,8 +118,7 @@ SELECT  'MOSAIQ REF_PATIENT_MEASUREMENTS(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
 	  ,isNULL(CONVERT(varchar(20),rsource.Obs_Float), '')				AS Obs_Float -- Each observation will be expressed as either a Float or a String-- if null, will set to zero which may be mistaken as a results ?
 	  ,REPLACE(rsource.Obs_String,'|','-' )			AS Obs_String -- Each observation will be expressed as either a Float or a String  
 	  ,rsource.Observation_Bucket				AS Observation_Bucket  -- 'LAB RESULTS' or 'VITAL SIGNS'
-	  ,isNULL(FORMAT(run_date,'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm
+	  ,isNULL(FORMAT(Modified_DtTm,'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm
   FROM MosaiqAdmin.dbo.Ref_Observation_Measurements rsource
-  --INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on rsource.pat_id1 = pat.pat_id1 -- subset 
   WHERE rsource.obx_id is NOT NULL
   AND rsource.measurement_DtTm >= '2010-01-01'
