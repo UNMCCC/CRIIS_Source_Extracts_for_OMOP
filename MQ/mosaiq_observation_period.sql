@@ -50,7 +50,7 @@ SELECT  'MosaiqAdmin Ref_SchSets (OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
 	  ,'EHR note' AS PERIOD_TYPE_CONCEPT_ID
       ,isNULL(rsource.Duration_HrMin,'') as Duration_HrMin
       ,isNULL(rsource.activity_desc,'') as Activity
-	  ,isNULL(Format(rsource.run_date,'yyyy-MM-dd HH:mm:ss'),'') AS modified_DtTm
+	  ,isNULL(Format(rsource.schSet_create_dtTm,'yyyy-MM-dd HH:mm:ss'),'') AS modified_DtTm
   FROM MosaiqAdmin.dbo.Ref_SchSets rsource
  -- INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on rsource.pat_id1 = pat.pat_id1 -- subset 
   WHERE sch_set_id is not null
