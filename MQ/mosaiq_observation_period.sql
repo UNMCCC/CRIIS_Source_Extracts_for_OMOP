@@ -38,6 +38,8 @@ Notes:
 /* CONFIDENCE LEVEL 75% -- is this the correct interpretation?
 EXECUTION CHECK SUCCESSFUL -- DAH 01/20/2022
 Added Modified DtTm -- DAH 01/20/2022
+modded mod-dttm on Aug 2022
+added param to pull full or incremental
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_PERIOD_ID|PERSON_ID|OBSERVATION_PERIOD_START_DATE|OBSERVATION_PERIOD_END_DATE|PERIOD_TYPE_CONCEPT_ID|Duration_HrMin|Activity|modified_DtTm';
@@ -46,12 +48,12 @@ SELECT  'MosaiqAdmin Ref_SchSets (OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
       ,rsource.sch_Set_Id	AS OBSERVATION_PERIOD_ID
       ,rsource.Pat_ID1		AS PERSON_ID
       ,Format(rsource.Appt_DtTm,'yyyy-MM-dd HH:mm:ss')  AS OBSERVATION_PERIOD_START_DATE
-	  ,''					AS OBSERVATION_PERIOD_END_DATE
+	  ,''		    AS OBSERVATION_PERIOD_END_DATE
 	  ,'EHR note' AS PERIOD_TYPE_CONCEPT_ID
       ,isNULL(rsource.Duration_HrMin,'') as Duration_HrMin
       ,isNULL(rsource.activity_desc,'') as Activity
 	  ,isNULL(Format(rsource.schSet_create_dtTm,'yyyy-MM-dd HH:mm:ss'),'') AS modified_DtTm
-  FROM MosaiqAdmin.dbo.Ref_SchSets rsource
+  FROM MosaiqAdmin.dbo.$(varSrcTable) rsource
  -- INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on rsource.pat_id1 = pat.pat_id1 -- subset 
   WHERE sch_set_id is not null
   ;
