@@ -155,10 +155,10 @@ SELECT 'MOSAIQ PATIENT(OMOP_PERSON)'								AS IDENTITY_CONTEXT
 		END Modified_DtTm
   FROM Mosaiq.dbo.Patient pat
   INNER JOIN mosaiqAdmin.dbo.Ref_Patients on pat.pat_id1 = Ref_Patients.pat_id1 and Ref_Patients.is_valid <> 'N'  -- eliminate sample patients 
-  --INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review Subset on pat.pat_id1 = Subset.pat_id1			-- Subset of patients for Security Review
   LEFT JOIN Mosaiq.dbo.admin adm on pat.pat_id1 = adm.pat_id1
   LEFT JOIN Mosaiq.dbo.Prompt proEth on adm.Ethnicity_PRO_ID = proEth.Pro_ID
   WHERE pat.Pat_ID1 IS NOT NULL
+  and Adm.Edit_DtTm >= DATEADD(day,$(varDaysLookback),GETDATE())
   order by Expired_DtTm desc
  
   ;
