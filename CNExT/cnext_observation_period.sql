@@ -44,6 +44,17 @@ LTV - 2/4/2022 - handled NULL values with the ISNULL function. I am removing the
 
 */
 SET NOCOUNT ON;
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(week, -5, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate = 
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
+-- TEST this param
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_PERIOD_ID|PERSON_ID|OBSERVATION_PERIOD_START_DATE|OBSERVATION_PERIOD_END_DATE|PERIOD_TYPE_CONCEPT_ID|MRN|Modified_DtTm';
 SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
       ,rsSource.UK  AS SOURCE_PK
@@ -77,6 +88,7 @@ SELECT  'CNEXT HOSPITAL(OMOP_OBSERVATION_PERIOD)' AS IDENTITY_CONTEXT
   JOIN UNM_CNExTCases.dbo.Tumor TUM on TUM.uk = rsSource.fk2
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = TUM.fk1
  INNER JOIN  UNM_CNExTCases.dbo.HospExtended HExt on rsSource.uk=HExt.UK
-   and rsSource.F00006 not in (999999998, 9999998, 999999, 9999)
-   and rsSource.F00006 >= 1000
-
+  WHERE
+     rsSource.F00006 not in (999999998, 9999998, 999999, 9999)
+     and rsSource.F00006 >= 1000
+     and HExt.F00084 >= @fromDate
