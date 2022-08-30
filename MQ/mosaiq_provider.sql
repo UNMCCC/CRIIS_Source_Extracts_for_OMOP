@@ -34,7 +34,7 @@ Notes:
     performed.
 	
 9)  This script is to be run and is written to be run in MS SQL Server and will generate errors if run in other DB platforms
-
+Note: Log of changes better followed on github
 Changes to Script by Debbie Healy 11/4/2021
 	 Removed: (SELECT TOP 1 MDName_FML_SFX FROM Mosaiq.dbo.vw_Rpt_Pnp_Info rsTarget WHERE rsTarget.Staff_ID=rsSource.Staff_ID) AS PROVIDER_NAME, 	Reason: derives name from either Staff or External Tables -- these will ordering/visit providers be from Staff Table
 	 Changed: 1306 AS CARE_SITE_ID,					Reason: Wrong Zip; Picked Facility.Fac_id = 5 because it has the correct address for the location table
@@ -61,6 +61,16 @@ EXECUTION CHECK SUCCESSFUL -- DAH 01/10/2022
 2/18/22 -- Relaxed Provider exclusions to preserve integrity of joins between visits and providers for visits with "dirty data" (test providers)
 */
 SET NOCOUNT ON;
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(week, -5, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate =
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PROVIDER_ID|PROVIDER_NAME|NPI|DEA|SPECIALTY_CONCEPT_ID|CARE_SITE_ID|YEAR_OF_BIRTH|GENDER_CONCEPT_ID|PROVIDER_SOURCE_VALUE|SPECIALTY_SOURCE_VALUE|SPECIALTY_SOURCE_CONCEPT_ID|GENDER_SOURCE_VALUE|GENDER_SOURCE_CONCEPT_ID|modified_dtTm';
 SELECT DISTINCT  -- added DH
 	  'MOSAIQ STAFF(OMOP_PROVIDER)' AS IDENTITY_CONTEXT,
@@ -84,22 +94,5 @@ LEFT JOIN Mosaiq.dbo.EXT_ID NPI on RsSource.Staff_ID = NPI.Staff_ID and NPI.Ext_
 LEFT JOIN Mosaiq.dbo.EXT_ID DEA on RsSource.Staff_ID = NPI.Staff_ID and NPI.Ext_Type = 'DEA'
 WHERE rsSource.Staff_id is not null
 	and	rsSource.Type <> 'Location'				-- To select people and exclude places and machines
---   and rsSource.Type <> '*Do Not Delete*'		 
---	and rsSource.First_Name not in ('Template', 'Sample')	
---	and rsSource.Last_Name not like '%ZZ%'	
---	and rsSource.Last_Name not in  ('Auditor', 'Unknown', 'Unknown Doctor', 'Unlisted', 'zBilling', 'Himaudit')
-
-
+    and CONVERT(VARCHAR(8),rsSource.edit_DtTm,112) >= @fromDate
 ;
-
-/* these have captured appts
-last_name	first_name	type	 
-Infusion     (0-1)		Template
-Infusion     (5.5+		Template
-Infusion     (2.5-3)	Template
-Infusion     (3.5-5)	Template
-Infusion     Add On		Template
-Infusion     (1.5-2)	Template
-TEST         MD			*Do Not Delete*	
-*DIAMOND    TEMPLATE 	*Do Not Delete*	
-*/

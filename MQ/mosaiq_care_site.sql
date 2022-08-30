@@ -49,6 +49,16 @@ Notes:
 Addressed NULLS 01/12/2022
 */
 SET NOCOUNT ON;
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(week, -5, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate =
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|CARE_SITE_ID|CARE_SITE_NAME|PLACE_OF_SERVICE_CONCEPT_ID|LOCATION_ID|CARE_SITE_SOURCE_VALUE|PLACE_OF_SERVICE_SOURCE_VALUE|modified_dtTm';
 SELECT 'MOSAIQ FACILITY(OMOP_CARESITE)' AS IDENTITY_CONTEXT,
        fac.FAC_ID						AS SOURCE_PK,
@@ -59,8 +69,10 @@ SELECT 'MOSAIQ FACILITY(OMOP_CARESITE)' AS IDENTITY_CONTEXT,
        fac.FAC_ID						AS CARE_SITE_SOURCE_VALUE,
        isNULL(fac.Name,'')				AS PLACE_OF_SERVICE_SOURCE_VALUE,
 	   isNULL(FORMAT(fac.edit_dtTm,'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
- FROM Mosaiq.dbo.Facility AS fac
+ FROM  Mosaiq.dbo.Facility AS fac
  WHERE fac.FAC_ID IS NOT NULL
  and   fac.FAC_ID in (5, 51, 77, 89, 102) -- 5=UNMCC 1201, 51='UNMCC 715', 77='UNMCC SF', 89='UNMMG Lovelace Medical Center OP',102='UNM CRTC II Radiation Oncology'
+ and   CONVERT(VARCHAR(8),fac.edit_DtTm,112) >= @fromDate
+
 ;
 

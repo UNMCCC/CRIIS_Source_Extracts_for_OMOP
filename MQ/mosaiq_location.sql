@@ -39,7 +39,9 @@ Notes:
 
 11) Include record modified Date-Time at end of field list
 */
-/*Changes to Script by Debbie Healy 11/8/2021
+/*True log of changes better followed on github
+
+Changes to Script by Debbie Healy 11/8/2021
 1) NOTE:	FOR PATIENT ADDRESSES and UNMCCC FACILITY ONLY
 12/20/21
 1)  Added additional facilities to be mapped using scheduling activity and location
@@ -66,8 +68,17 @@ ADDED MISSING FIELD Location_ID  DAH 01/12/2022
 2/3/22 -- Removed criteria limiting admin-location to sample patients
 
 */
-
 SET NOCOUNT ON;
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(week, -5, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate =
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
 SELECT 'IDENTIY_CONTEXT|SOURCE_PK|LOCATION_ID|ADDRESS_1|ADDRESS_2|CITY|STATE|ZIP|COUNTY|COUNTRY|LOCATION_SOURCE_VALUE|LATITUDE|LONGITUDE|Modified_dTm';
 
 SELECT  --  Get Address for Valid Patients
@@ -87,11 +98,11 @@ SELECT  --  Get Address for Valid Patients
 	isNULL(FORMAT(adm.edit_DtTm, 'yyyy-MM-dd HH:mm:ss'),'')	AS Modified_dTm
 FROM
   Mosaiq.dbo.Admin as adm
- -- INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review Subset on adm.pat_id1 = Subset.pat_id1  -- Subset of patients for Security Review
   INNER join mosaiqAdmin.dbo.Ref_Patients on adm.pat_id1 = Ref_Patients.pat_id1 and Ref_Patients.is_valid <> 'N' -- eliminate sample patients 
 WHERE
     adm.Pat_Adr1 IS NOT NULL
     AND adm.Pat_Adr1 <> ''
+    and CONVERT(VARCHAR(8),adm.edit_DtTm,112) >= @fromDate
 UNION ALL
 SELECT
     'MOSAIQ FACILITY(OMOP_LOCATION)' AS IDENTITY_CONTEXT,
@@ -115,6 +126,8 @@ WHERE
     AND Fac.Adr1 IS NOT NULL
     AND Fac.Adr1 <> ''
 	and Fac.FAC_ID in (5, 51, 77, 89, 102  ) -- 5=UNMCC 1201, 51='UNMCC 715', 77='UNMCC SF', 89='UNMMG Lovelace Medical Center OP',102='UNM CRTC II Radiation Oncology'
+    and CONVERT(VARCHAR(8),Fac.edit_DtTm,112) >= @fromDate
+
   -- Note that this table is free-text entry -- there are multiple entries for MO (fac=5) and RO (fac= 102) so I picked the "best" one
 
 ;
