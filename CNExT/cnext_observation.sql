@@ -44,6 +44,17 @@ LTV - 2/4/2022 - handled NULL values with the ISNULL function. Removed the ISNUL
 
 */
 SET NOCOUNT ON;
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(week, -5, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate = 
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
+   
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|OBSERVATION_ID|PERSON_ID|OBSERVATION_CONCEPT_ID_1|OBSERVATION_CONCEPT_ID_2|OBSERVATION_CONCEPT_ID_3|OBSERVATION_CONCEPT_ID_4|OBSERVATION_CONCEPT_ID_5|OBSERVATION_CONCEPT_ID_6|OBSERVATION_CONCEPT_ID_7|OBSERVATION_CONCEPT_ID_8|OBSERVATION_CONCEPT_ID_9|OBSERVATION_CONCEPT_ID_10|OBSERVATION_DATE|OBSERVATION_DATETIME|OBSERVATION_TYPE_CONCEPT_ID|VALUE_AS_NUMBER|VALUE_AS_STRING|VALUE_AS_CONCEPT_ID_1|QUALIFIER_CONCEPT_ID_1|VALUE_AS_CONCEPT_ID_2|QUALIFIER_CONCEPT_ID_2|VALUE_AS_CONCEPT_ID_3|QUALIFIER_CONCEPT_ID_3|UNIT_CONCEPT_ID|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|OBSERVATION_SOURCE_VALUE|OBSERVATION_SOURCE_CONCEPT_ID|UNIT_SOURCE_VALUE|QUALIFIER_SOURCE_VALUE|OBSERVATION_EVENT_ID|OBS_EVENT_FIELD_CONCEPT_ID|VALUE_AS_DATETIME|MRN|OBSERVATION_TYPE|Modified_DtTm';
 SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*Family History*/
         ,rsSource.uk AS SOURCE_PK
@@ -112,6 +123,7 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
   WHERE F06433 IS NOT NULL
     and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
     and HSP.F00006 >= 1000
+	and HExt.F00084 >= @fromDate
 UNION
 SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                     /*'TUMOR REGISTRY COMORBIDITY RECORD'*/
             ,rsSource.uk AS SOURCE_PK
@@ -167,7 +179,10 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
 	       ,'' AS VALUE_AS_DATETIME
            ,ISNULL(HSP.F00006,'') AS MRN
 	       ,'Comorbidity' AS OBSERVATION_TYPE		   
-		   ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+		   ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+              then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	          else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	        AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.Hospital HSP ON HSP.fk2 = rsSource.uk
@@ -177,6 +192,7 @@ SELECT 'CNEXT TUMOR(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                     
     AND F03442 <> ''
 	and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
     and HSP.F00006 >= 1000
+	and HExt.F00084 >= @fromDate
 UNION
 SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY FOLLOWUP RECURRENCE'*/
         ,rsSource.uk AS SOURCE_PK
@@ -232,7 +248,10 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
 	    ,'' AS VALUE_AS_DATETIME
 		,ISNULL(HSP.F00006,'') AS MRN
 	    ,'Follow_Up' AS OBSERVATION_TYPE
-        ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+        ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+           then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	       else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	     AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
@@ -242,6 +261,7 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
    AND F00070 != ''
    and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
    and HSP.F00006 >= 1000
+   and HExt.F00084 >= @fromDate
 UNION
 SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                                                                                         /*'TUMOR REGISTRY SECONDARY DX RECORD'*/
            ,rsSource.uk AS SOURCE_PK
@@ -297,7 +317,10 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
 	       ,'' AS VALUE_AS_DATETIME
 		   ,ISNULL(HSP.F00006,'') AS MRN
 	      ,'Secondary_Dx' AS OBSERVATION_TYPE
-          ,isNULL(format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss'),'')  AS modified_dtTm
+          ,CASE WHEN format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') is NULL
+             then FORmat(GETDATE(), 'yyyy-MM-dd HH:mm:ss')  
+	         else format(TRY_CAST(HExt.F00084 as datetime),'yyyy-MM-dd HH:mm:ss') end
+	       AS modified_dtTm
   FROM UNM_CNExTCases.dbo.Tumor rsSource
   JOIN UNM_CNExTCases.dbo.Patient PAT on PAT.uk = rsSource.fk1
   JOIN UNM_CNExTCases.dbo.FollowUp rsTarget ON rsTarget.uk = rsSource.uk
@@ -308,5 +331,6 @@ SELECT 'CNEXT FOLLOWUP(OMOP_OBSERVATIONS)' AS IDENTITY_CONTEXT                  
    AND F06117 <> ''
    and HSP.F00006 not in (999999998, 9999998, 999999, 9999)
    and HSP.F00006 >= 1000
+   and HExt.F00084 >= @fromDate
 ORDER BY OBSERVATION_TYPE_CONCEPT_ID
          ,rsSource.UK DESC
