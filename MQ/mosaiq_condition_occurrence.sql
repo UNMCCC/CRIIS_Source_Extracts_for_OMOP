@@ -26,6 +26,17 @@ EXECUTION CHECK SUCCESSFUL 01/20/2022
 -- Cast tpg_id as char(5) -- current max tpg_id is 40111
 */
 SET NOCOUNT ON;
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(month, -2, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate = 
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
+   
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|CONDITION_OCCURRENCE_ID|PERSON_ID|CONDITION_CONCEPT_ID|CONDITION_START_DATE|CONDITION_START_DATETIME|CONDITION_END_DATE|CONDITION_END_DATETIME|CONDITION_TYPE_CONCEPT_ID|CONDITION_STATUS_CONCEPT_ID|STOP_REASON|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|CONDITION_SOURCE_VALUE|CONDITION_SOURCE_CONCEPT_ID|CONDITION_STATUS_SOURCE_VALUE|Modified_DtTm';
 SELECT DISTINCT 'MosaiqAdmin Ref_Patient_Diagnoses(OMOP_CONDITION_OCCURRENCE)' AS IDENTITY_CONTEXT  -- 1st Diag on charge
   		    ,rtrim(DX.apptDt_PatID) + '-' + cast(DX.tpg_id  as char(5))		AS SOURCE_PK  -- need to populate with GROUP_CHG_ID ?
@@ -45,8 +56,9 @@ SELECT DISTINCT 'MosaiqAdmin Ref_Patient_Diagnoses(OMOP_CONDITION_OCCURRENCE)' A
 			,DX.Diag_Code				AS CONDITION_SOURCE_VALUE		-- should this be ICD-code 
             ,'Outpatient'				AS CONDITION_SOURCE_CONCEPT_ID  -- why is this outpatient --see DD
             ,''						AS CONDITION_STATUS_SOURCE_VALUE  
-			,isNULL(FORMAT(run_date, 'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm
+			,isNULL(FORMAT(appt_date, 'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm
 FROM MosaiqAdmin.dbo.Ref_Patient_Diagnoses DX	
 WHERE DX.Diag_Code is not null
   AND DX.Diag_Code  <> ' '
+  and appt_date >= @fromDate
 ;

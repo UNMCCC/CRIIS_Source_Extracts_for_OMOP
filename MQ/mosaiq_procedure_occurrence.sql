@@ -63,6 +63,17 @@ EXECUTION CHECK SUCCESSFUL -- DAH 01/20/22
 
 */
 SET NOCOUNT ON;
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(month, -2, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate = 
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
+   
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PROCEDURE_OCCURRENCE_ID|PERSON_ID|PROCEDURE_CONCEPT_ID|PROCEDURE_DATE|PROCEDURE_DATE_DATETIME|PROCEDURE_TYPE_CONCEPT_ID|MODIFIER_CONCEPT_ID|QUANTITY|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|PROCEDURE_SOURCE_VALUE|PROCEDURE_SOURCE_CONCEPT_ID|MODIFIER_SOURCE_VALUE|Modified_DtTm';
 
 SELECT distinct  'Mosaiq Ref_SchSet_Charges(OMOP_PROCEDURE_OCCURRENCE)' AS IDENTITY_CONTEXT
@@ -81,12 +92,13 @@ SELECT distinct  'Mosaiq Ref_SchSet_Charges(OMOP_PROCEDURE_OCCURRENCE)' AS IDENT
 			,isNULL(chg.cpt_code,'')		AS PROCEDURE_SOURCE_VALUE 
 		 	,''						AS PROCEDURE_SOURCE_CONCEPT_ID 
 			,chg.Modifier1			AS MODIFIER_SOURCE_VALUE
-			,isNULL(FORMAT(chg.run_date,'yyyy-MM-dd HH:mm:ss'),'')		AS Modified_DtTm
+			,isNULL(FORMAT(chg.appt_date,'yyyy-MM-dd HH:mm:ss'),'')		AS Modified_DtTm
 FROM  MosaiqAdmin.dbo.Ref_SchSet_Charges chg
 INNER JOIN MosaiqAdmin.dbo.Ref_CPTs_and_Activities cpt on chg.cpt_code = cpt.cpt_code 
 --INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on chg.pat_id1 = pat.pat_id1 -- subset 
 WHERE chg.CHG_ID IS NOT NULL
 AND   cpt.is_billing = 'Y'  
 AND   cpt.is_drug_cpt = 'N'  -- 12/2/21 -- this will still include DEVICES -- need to figure out how to exclude those
+and chg.appt_date >= @fromDate
 ;
 
