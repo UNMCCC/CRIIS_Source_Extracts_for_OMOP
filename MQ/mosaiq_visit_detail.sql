@@ -92,6 +92,17 @@ EXECUTION CHECK SUCESSFUL -- DAH 01/12/2022
 1/20/22 -- changed format of apptDt_PatID (yyyymmdd-nnnnnn)
 */
 SET NOCOUNT ON;
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(month, -2, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate = 
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
+   
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|VISIT_DETAIL_ID|PERSON_ID|VISIT_DETAIL_CONCEPT_ID|VISIT_DETAIL_START_DATE|VISIT_DETAIL_START_DATETIME|VISIT_DETAIL_END_DATE|VISIT_END_DETAIL_DATETIME|VISIT_DETAIL_TYPE_CONCEPT_ID|PROVIDER_ID|CARE_SITE_ID|VISIT_DETAIL_SOURCE_VALUE|VISIT_DETAIL_SOURCE_CONCEPT_ID|ADMITTED_FROM_SOURCE_VALUE|ADMITTED_FROM_CONCEPT_ID|DISCHARGE_TO_SOURCE_VALUE|DISCHARGE_TO_CONCEPT_ID|PRECEDING_VISIT_DETAIL_ID|VISIT_DETAIL_PARENT_ID|VISIT_OCCURRENCE_ID|modified_dtTm';
 SELECT DISTINCT
 	  'MOSAIQ MosaiqAdmin Ref_SchSets(OMOP_VISIT_DETAIL)' AS IDENTITY_CONTEXT,
@@ -115,11 +126,12 @@ SELECT DISTINCT
        ''							AS PRECEDING_VISIT_DETAIL_ID, -- RS21 will programmatically set this
        ''							AS VISIT_DETAIL_PARENT_ID,      
        Ref_SchSets.apptDt_PatID		AS VISIT_OCCURRENCE_ID,  -- sch_set_ID of 1st patient appt of the day 
-	   isNULL(FORMAT(Ref_SchSets.run_date,'yyyy-MM-dd HH:mm:ss'),'') AS modified_dtTm 
+	   isNULL(FORMAT(Ref_SchSets.appt_date,'yyyy-MM-dd HH:mm:ss'),'') AS modified_dtTm 
 FROM MosaiqAdmin.dbo.Ref_SchSets 
 --INNER JOIN MosaiqAdmin.dbo.RS21_Patient_List_for_Security_Review pat on Ref_SchSets.pat_id1 = pat.pat_id1 -- subset 
 WHERE Ref_SchSets.Pat_ID1 IS NOT NULL  
 and Ref_SchSets.SCH_SET_ID	IS NOT NULL
+and Ref_SchSets.appt_date >= @fromDate
 ;
 
 
