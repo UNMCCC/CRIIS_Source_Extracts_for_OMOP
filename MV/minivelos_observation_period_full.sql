@@ -23,7 +23,6 @@
 -- 03/30/2022 Added Distinct (source DM has multiple rows due to data we are not collecting here) DAH
 -- 03/30/2022 Added code to remove carriage returns and '|' from title  DAH
 -- 3/30/2022 added -- ,src.PKSTUDY_ST as Study_PK    
-SET @IncDate = DATE_FORMAT(DATE_ADD(curDate(),INTERVAL -3 MONTH),'%Y%m%d'  );
 SELECT 'IDENTITY_CONTEXT','SOURCE_PK'	,'OBSERVATION_PERIOD_ID','PERSON_ID','OBSERVATION_PERIOD_START_DATE','OBSERVATION_PERIOD_END_DATE','PERIOD_TYPE_CONCEPT_ID','Study_PK','modified_DtTm' 
 UNION ALL
 SELECT DISTINCT
@@ -39,18 +38,15 @@ SELECT DISTINCT
    END OBSERVATION_PERIOD_END_DATE 
    ,'surrogate for CTMS EVELOS' AS PERIOD_TYPE_CONCEPT_ID -- Questionable, but consistent with other extracts
    ,src.PKSTUDY_ST as Study_PK    -- added 3/30/2022
-     ,DATE_FORMAT(src.statusDt_pss,'%Y-%m-%d %H:%i:%s') As modified_DtTm
---   ,DATE_FORMAT(curDate(),'%Y-%m-%d %H:%i:%s') As modified_DtTm  
+   ,DATE_FORMAT(curDate(),'%Y-%m-%d %H:%i:%s') As modified_DtTm  
 FROM MINIVELOS.DM_PATIENT_ENROLLMENTS  src
-WHERE 
-    DATE_FORMAT(src.statusDt_pss,'%Y%m%d')>= @IncDate 
-    AND src.PkStudy_St is not null and src.PersonCode_P is not null
-    AND src.Enroll_dt_pp >= '2010-01-01'
-    AND  (		
-	src.treatmentOrg_pp_lu ='UNM - CRTC'   
-        OR (src.treatmentOrg_pp_lu is null and src.enrollOrg_pp_lu = 'UNM - CRTC')
-     )   
-    AND src.PERSONCODE_P <> '00001234 TestPatient'
+WHERE src.PkStudy_St is not null and src.PersonCode_P is not null
+	and src.Enroll_dt_pp >= '2010-01-01'
+and  (		
+		src.treatmentOrg_pp_lu ='UNM - CRTC'   
+    or (src.treatmentOrg_pp_lu is null and src.enrollOrg_pp_lu = 'UNM - CRTC')
+    )   
+and src.PERSONCODE_P <> '00001234 TestPatient'
 INTO OUTFILE 'D:\\KRIIS_ETLs\\Sources\\mv\\minivelos_observation_period.dat' FIELDS TERMINATED BY '|'
 ESCAPED BY "" 
 LINES TERMINATED BY '\r\n'
