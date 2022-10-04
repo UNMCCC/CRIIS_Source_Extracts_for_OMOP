@@ -81,6 +81,17 @@ LABS -- Date-TM the LAB RESULTS were entered into MOSAIQ VIA the Inbound Interfa
 */
 SET NOCOUNT ON;
 
+DECLARE @IncDate VARCHAR(8);
+SET @IncDate = CONVERT(VARCHAR(8),DateAdd(month, -2, GETDATE()),112);
+DECLARE @AllDates VARCHAR(8);
+SET @AllDates = '20100101';
+DECLARE @fromDate VARCHAR(8);
+SET @fromDate = 
+   CASE $(isInc)
+     WHEN 'Y' THEN  @IncDate
+     WHEN 'N' THEN  @AllDates
+   END
+
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|MEASUREMENT_ID|PERSON_ID|MEASUREMENT_CONCEPT_ID|MEASUREMENT_DATE|MEASUREMENT_DATETIME|MEASUREMENT_TIME|MEASUREMENT_TYPE_CONCEPT_ID|OPERATOR_CONCEPT_ID|VALUE_AS_NUMBER|VALUE_AS_CONCEPT_ID|UNIT_CONCEPT_ID|RANGE_LOW|RANGE_HIGH|PROVIDER_ID|VISIT_OCCURRENCE_ID|VISIT_DETAIL_ID|MEASUREMENT_SOURCE_VALUE|MEASUREMENT_SOURCE_CONCEPT_ID|UNIT_SOURCE_VALUE|VALUE_SOURCE_VALUE|Obs_Float|Obs_String|Observation_Bucket|Modified_DtTm';
 
 
@@ -117,7 +128,8 @@ SELECT  'MOSAIQ REF_PATIENT_MEASUREMENTS(OMOP_MEASUREMENT)' AS IDENTITY_CONTEXT
 	  ,isNULL(CONVERT(varchar(20),rsource.Obs_Float), '')	AS Obs_Float -- Each observation will be expressed as either a Float or a String-- if null, will set to zero which may be mistaken as a results ?
 	  ,REPLACE(rsource.Obs_String,'|','-' )			AS Obs_String -- Each observation will be expressed as either a Float or a String  
 	  ,rsource.Observation_Bucket				AS Observation_Bucket  -- 'LAB RESULTS' or 'VITAL SIGNS'
-	  ,isNULL(FORMAT(Modified_DtTm,'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm
+          ,isNULL(FORMAT(rsource.measurement_DtTm,'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm
+--	  ,isNULL(FORMAT(Modified_DtTm,'yyyy-MM-dd HH:mm:ss'),'') AS Modified_DtTm  -- changes to a meaningful incremental date-tm
   FROM MosaiqAdmin.dbo.Ref_Observation_Measurements rsource
   WHERE rsource.obx_id is NOT NULL
-  AND rsource.measurement_DtTm >= '2010-01-01'
+  AND rsource.measurement_DtTm >= @fromDate
