@@ -3,6 +3,11 @@
 --  However, a PI has multiple entries in the User table based on the site at which the study is being conducted.  
 -- Ex: Dr McGuire User-ID= 2292 for care-site 50 (UNM), but she has id = 472 for care-site 58 (Veteran's admin)
 -- Solution:  added  usr.FK_siteID = 50 to Join between MINIVELOS.DM_PATIENT_STATUSES and MINIVELOS.ER_USER (usr)
+
+-- 2022-11-1 (RCC) Per Kevin: Duplicates being returned for unique Study-id, person-code (MRN) and Patient-Study_status-id due to multiple PI numbers being 
+-- returned.  The problem is that there is more than in MINIVELOS.ER_USER;  
+-- Ex: Michael Davis User IDs 271 and 2508, Sangeetha Prabhakaran User IDs 2737 and 2966
+-- Solution: added limit for job type of Investigator (usr.FK_CODELST_JOBTYPE = 149), will exclude IDs 2508 and 2966 since job type is not populated
 SELECT 'IDENTITY_CONTEXT','SOURCE_PK','OBSERVATION_ID','PERSON_ID','OBSERVATION_CONCEPT_ID','OBSERVATION_DATE','OBSERVATION_DATETIME','OBSERVATION_TYPE_CONCEPT_ID','VALUE_AS_NUMBER','VALUE_AS_CONCEPT_ID','QUALIFIER_CONCEPT_ID','UNIT_CONCEPT_ID','PROVIDER_ID','VISIT_OCCURRENCE_ID','VISIT_DETAIL_ID','OBSERVATION_SOURCE_VALUE','OBSERVATION_SOURCE_CONCEPT_ID','UNIT_SOURCE_VALUE','QUALIFIER_SOURCE_VALUE','OBSERVATION_EVENT_ID','OBS_EVENT_FIELD_CONCEPT_ID','VALUE_AS_DATETIME','Study_PK','modified_DtTm'
 UNION ALL
 SELECT DISTINCT
@@ -18,7 +23,7 @@ SELECT DISTINCT
        ,'' AS VALUE_AS_CONCEPT_ID 
        ,'' AS QUALIFIER_CONCEPT_ID 
        ,'' AS UNIT_CONCEPT_ID
-	  , ifNULL(usr.PK_User,'') as PROVIDER_ID    
+	   ,ifNULL(usr.PK_User,'') as PROVIDER_ID
        ,'' AS VISIT_OCCURRENCE_ID 
        ,'' AS VISIT_DETAIL_ID
        ,ifNULL(status_pss_lu,'') AS OBSERVATION_SOURCE_VALUE   
@@ -33,6 +38,7 @@ SELECT DISTINCT
 FROM MINIVELOS.DM_PATIENT_STATUSES  src
 LEFT JOIN MINIVELOS.ER_USER usr on src.StudyPI_st = concat(usr.usr_lastName, ', ', usr.usr_firstName) 
 	and usr.FK_siteID = 50 -- 'UNM - CRTC' -- added 4/21/22 to remove dups
+	and usr.FK_CODELST_JOBTYPE = 149 -- 'Investigator' -- added 11/2/2022 to remove dups
 WHERE src.PkStudy_St is not null 
 	and src.PersonCode_P is not null
 	and src.StudyPI_st is not null
