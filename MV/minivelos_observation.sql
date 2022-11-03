@@ -34,6 +34,8 @@ SELECT DISTINCT
 --    ,DATE_FORMAT(curDate(),'%Y-%m-%d %H:%i:%s') As modified_DtTm  
 FROM MINIVELOS.DM_PATIENT_STATUSES  src
 LEFT JOIN MINIVELOS.ER_USER usr on src.StudyPI_st = concat(usr.usr_lastName, ', ', usr.usr_firstName) 
+     and usr.FK_CODELST_JOBTYPE = 149 -- 'Investigator' 
+     and usr.FK_siteID = 50 -- 'UNM - CRTC' 
 WHERE   
         DATE_FORMAT(statusDt_pss,'%Y%m%d')>= @IncDate 
         and src.PkStudy_St is not null 
