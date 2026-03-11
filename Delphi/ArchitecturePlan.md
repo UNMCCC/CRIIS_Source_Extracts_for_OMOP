@@ -28,11 +28,10 @@
   Each step follows a three-phase pattern:
 
   Phase A — Extract: Run a SELECT on the source server to pull only the rows needed (filtered by the 14-day lookback
-  window). Fetch results into Python (raw cursor batches). The source table and column name will have to be updated to 
-  correspond to the new source (SERVER = "MGBBRPSQLDBS1\\UNMMGSQLDWPROD" DATABASE = "unmmgdss")
+  window). Fetch results into Python (raw cursor batches). The source table and column names will have to be updated to correspond to the new source (SERVER = "MGBBRPSQLDBS1\\UNMMGSQLDWPROD" DATABASE = "unmmgdss")
 
   Phase B — Stage: Write those rows into a staging table on the destination server (e.g.,
-  STG_MD_F_ENCOUNTER) using fast_executemany with pyodbc.
+  @omopDatabaseSchema.STG_VISIT_OCCURRENCE) using fast_executemany with pyodbc.
 
   Phase C — Transform & Load: Run the existing transformation SQL on the destination server, but rewritten to read from
   the staging tables instead of the original source schemas. The JOINs to other OMOP tables work natively since they're
@@ -41,7 +40,7 @@
   ### 3. Source Table Inventory
 
   Build a manifest that maps each workflow step to:
-  - Which source tables it needs (e.g., UNMHSC_EDW_MILL_CDS.MD_F_ENCOUNTER)
+  - Which source tables it needs (e.g., unmmgdss.mill_cds.encounter)
   - What filter to apply during extraction (the lookback DATEDIFF clause)
   - What columns are needed (to minimize data transfer)
 
