@@ -32,7 +32,7 @@ WITH person_address AS (
             ROW_NUMBER() OVER (
                 PARTITION BY LOCATION_ID
                 ORDER BY UPDT_DT_TM DESC
-            )                                              AS current_updt,
+            )                                     AS current_updt,
             LOCATION_ID,
             ADDRESS_1,
             address_2,
@@ -56,7 +56,7 @@ WITH person_address AS (
                 LEFT(pa.POSTAL_CODE, 5)                         AS zip,
                 NULL                                            AS county,
                 pa.address_id                                   AS LOCATION_SOURCE_VALUE,
-                TRY_CAST(pa.COUNTRY_RAW_CODE AS VARCHAR(MAX))  AS COUNTRY_CONCEPT_ID,
+                TRY_CAST(pa.COUNTRY_RAW_CODE AS VARCHAR(MAX))   AS COUNTRY_CONCEPT_ID,
                 pa.COUNTRY_RAW_DISPLAY                          AS COUNTRY_SOURCE_VALUE,
                 0.0                                             AS LATITUDE,
                 0.0                                             AS LONGITUDE,

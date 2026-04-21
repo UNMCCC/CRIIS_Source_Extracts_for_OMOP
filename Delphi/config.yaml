@@ -1,0 +1,40 @@
+# Configuration for the unmmgdss → Delphi OMOP incremental ETL.
+# Connections use Kerberos / Trusted Connection — no credentials live here.
+
+source:
+  driver: "ODBC Driver 18 for SQL Server"
+  server: "MGBBRPSQLDBS1\\UNMMGSQLDWPROD"
+  database: "unmmgdss"
+
+destination:
+  driver: "ODBC Driver 18 for SQL Server"
+  server: "unmmg-sql-ccc\\unmmgsqlunmccc"
+  database: "Delphi"
+
+# Substituted into transform SQL for the @omopDatabaseSchema placeholder.
+# Two-part (database.schema) keeps the SQL portable if the connection's default
+# database is ever changed.
+omop_database_schema: "Delphi.dbo"
+
+# Days of source history to re-process on each run. Seeded into OMOP_INCR_CONFIG
+# by step_01_config and read by every incremental step's WHERE clause.
+lookback_days: 14
+
+# Enable / disable individual steps for selective reruns. Order here is informational;
+# the orchestrator's registry is the source of truth for execution order.
+steps:
+  step_01_config: true
+  step_02_care_site: true
+  step_03_location: true
+  step_04_provider: true
+  step_05_person: true
+  step_06_visit_occurrence: true
+  step_07_visit_detail: true
+  step_08_condition: true
+  step_09_procedure: true
+  step_10_drug_exposure: true
+  step_11_observation: true
+  step_12_observation_final: true
+  step_13_specimen: true
+  step_14_measurement: true
+  step_code_value: true

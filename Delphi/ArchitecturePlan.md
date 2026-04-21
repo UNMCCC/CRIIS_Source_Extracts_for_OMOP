@@ -16,7 +16,7 @@
 
   ## Components
 
-  ### 1. Python Orchestrator (omop_etl.py)
+  ### 1. Python Orchestrator (unmmgdss_omop_etl.py)
 
   - Uses pyodbc with two connection objects — one per server
   - Reads the lookback config value first, then passes it to all steps
@@ -28,7 +28,8 @@
   Each step follows a three-phase pattern:
 
   Phase A — Extract: Run a SELECT on the source server to pull only the rows needed (filtered by the 14-day lookback
-  window). Fetch results into Python (raw cursor batches). The source table and column names will have to be updated to correspond to the new source (SERVER = "MGBBRPSQLDBS1\\UNMMGSQLDWPROD" DATABASE = "unmmgdss")
+  window). Fetch results into Python (raw cursor batches). The source table and column names will have to be updated 
+  to correspond to the new source (SERVER = "MGBBRPSQLDBS1\\UNMMGSQLDWPROD" DATABASE = "unmmgdss")
 
   Phase B — Stage: Write those rows into a staging table on the destination server (e.g.,
   @omopDatabaseSchema.STG_VISIT_OCCURRENCE) using fast_executemany with pyodbc.

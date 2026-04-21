@@ -1,17 +1,17 @@
 -- sql server DDL Specification for OMOP tables
 -- These tables are the final destination for transformed Cerner Extracts destined for CRIIS
-
-CREATE TABLE @omopDatabaseSchema.OMOP_CARE_SITE (
+DROP TABLE Delphi.dbo.OMOP_CARE_SITE;
+CREATE TABLE Delphi.dbo.OMOP_CARE_SITE (
             identity_context               VARCHAR(255) NOT NULL,
-			care_site_id                   INTEGER NOT NULL,
+			care_site_id                   BIGINT NOT NULL,
 			care_site_name                 VARCHAR(255) NULL,
 			place_of_service_concept_id    INTEGER NULL,
 			location_id                    INTEGER NULL,
 			care_site_source_value         VARCHAR(50) NULL,
 			place_of_service_source_value  VARCHAR(50) NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_LOCATION (
+CREATE TABLE Delphi.dbo.OMOP_LOCATION (
 			identity_context               VARCHAR(255) NOT NULL,
 			location_id                    INTEGER NOT NULL,
 			address_1                      VARCHAR(50) NULL,
@@ -25,16 +25,16 @@ CREATE TABLE @omopDatabaseSchema.OMOP_LOCATION (
 			country_source_value           VARCHAR(80) NULL,
 			latitude                       FLOAT NULL,
 			longitude                      FLOAT NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_PROVIDER (
+CREATE TABLE Delphi.dbo.OMOP_PROVIDER (
 			identity_context               VARCHAR(255) NOT NULL,
 			provider_id                    INTEGER NOT NULL,
 			provider_name                  VARCHAR(255) NULL,
 			npi                            VARCHAR(20) NULL,
 			dea                            VARCHAR(20) NULL,
 			specialty_concept_id           INTEGER NULL,
-			care_site_id                   INTEGER NULL,
+			care_site_id                   BIGINT NULL,
 			year_of_birth                  INTEGER NULL,
 			gender_concept_id              INTEGER NULL,
 			provider_source_value          VARCHAR(50) NULL,
@@ -42,9 +42,9 @@ CREATE TABLE @omopDatabaseSchema.OMOP_PROVIDER (
 			specialty_source_concept_id    INTEGER NULL,
 			gender_source_value            VARCHAR(50) NULL,
 			gender_source_concept_id       INTEGER NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_PERSON (
+CREATE TABLE Delphi.dbo.OMOP_PERSON (
 			identity_context               VARCHAR(255) NOT NULL,
 			person_id                      INTEGER NOT NULL,
 			gender_concept_id              INTEGER NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE @omopDatabaseSchema.OMOP_PERSON (
 			ethnicity_concept_id           INTEGER NOT NULL,
 			location_id                    INTEGER NULL,
 			provider_id                    INTEGER NULL,
-			care_site_id                   INTEGER NULL,
+			care_site_id                   BIGINT NULL,
 			person_source_value            VARCHAR(50) NULL,
 			gender_source_value            VARCHAR(50) NULL,
 			gender_source_concept_id       INTEGER NULL,
@@ -64,9 +64,9 @@ CREATE TABLE @omopDatabaseSchema.OMOP_PERSON (
 			race_source_concept_id         INTEGER NULL,
 			ethnicity_source_value         VARCHAR(50) NULL,
 			ethnicity_source_concept_id    INTEGER NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_VISIT_OCCURRENCE (
+CREATE TABLE Delphi.dbo.OMOP_INCR_VISIT_OCCURRENCE (
 			identity_context               VARCHAR(255) NOT NULL,
 			visit_occurrence_id            INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_VISIT_OCCURRENCE (
 			visit_end_datetime             DATETIME NULL,
 			visit_type_concept_id          INTEGER NOT NULL,
 			provider_id                    INTEGER NULL,
-			care_site_id                   INTEGER NULL,
+			care_site_id                   BIGINT NULL,
 			visit_source_value             VARCHAR(50) NULL,
 			visit_source_concept_id        INTEGER NULL,
 			admitted_from_concept_id       INTEGER NULL,
@@ -85,9 +85,9 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_VISIT_OCCURRENCE (
 			discharged_to_concept_id       INTEGER NULL,
 			discharged_to_source_value     VARCHAR(50) NULL,
 			preceding_visit_occurrence_id  INTEGER NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_VISIT_DETAIL (
+CREATE TABLE Delphi.dbo.OMOP_INCR_VISIT_DETAIL (
 			identity_context               VARCHAR(255) NOT NULL,
 			visit_detail_id                INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -98,7 +98,7 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_VISIT_DETAIL (
 			visit_detail_end_datetime      DATETIME NULL,
 			visit_detail_type_concept_id   INTEGER NOT NULL,
 			provider_id                    INTEGER NULL,
-			care_site_id                   INTEGER NULL,
+			care_site_id                   BIGINT NULL,
 			visit_detail_source_value      VARCHAR(50) NULL,
 			visit_detail_source_concept_id INTEGER NULL,
 			admitted_from_concept_id       INTEGER NULL,
@@ -108,9 +108,9 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_VISIT_DETAIL (
 			preceding_visit_detail_id      INTEGER NULL,
 			parent_visit_detail_id         INTEGER NULL,
 			visit_occurrence_id            INTEGER NOT NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_CONDITION_OCCURRENCE (
+CREATE TABLE Delphi.dbo.OMOP_INCR_CONDITION_OCCURRENCE (
 			identity_context               VARCHAR(255) NOT NULL,
 			condition_occurrence_id        INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -128,9 +128,9 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_CONDITION_OCCURRENCE (
 			condition_source_value         VARCHAR(50) NULL,
 			condition_source_concept_id    INTEGER NULL,
 			condition_status_source_value  VARCHAR(50) NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_PROCEDURE_OCCURRENCE (
+CREATE TABLE Delphi.dbo.OMOP_INCR_PROCEDURE_OCCURRENCE (
 			identity_context               VARCHAR(255) NOT NULL,
 			procedure_occurrence_id        INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -148,9 +148,9 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_PROCEDURE_OCCURRENCE (
 			procedure_source_value         VARCHAR(50) NULL,
 			procedure_source_concept_id    INTEGER NULL,
 			modifier_source_value          VARCHAR(50) NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_DRUG_EXPOSURE (
+CREATE TABLE Delphi.dbo.OMOP_INCR_DRUG_EXPOSURE (
 			identity_context               VARCHAR(255) NOT NULL,
 			drug_exposure_id               INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -175,65 +175,65 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_DRUG_EXPOSURE (
 			drug_source_concept_id         INTEGER NULL,
 			route_source_value             VARCHAR(50) NULL,
 			dose_unit_source_value         VARCHAR(50) NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_OBSERVATION (
-                        identity_context               VARCHAR(25),
-                        observation_id                 VARCHAR(100),
-                        person_id                      INTEGER,
-                        event_cd                       INTEGER,
-                        observation_date               DATE,
-                        observation_DATETIME           DATETIMEOFFSET, -- TIMESTAMPTZ equivalent
-                        observation_type_concept_id    INTEGER,
-                        form_description               VARCHAR(400),
-                        section_description            VARCHAR(400),
-                        description                    VARCHAR(712),
-                        value_as_number                INTEGER,
-                        value_as_string                VARCHAR(510),
-                        value_as_concept_id            INTEGER,
-                        qualifier_concept_id           INTEGER,
-                        unit_concept_id                INTEGER,
-                        provider_id                    INTEGER,
-                        visit_occurrence_id            INTEGER,
-                        visit_detail_id                VARCHAR(100),
-                        observation_source_value       VARCHAR(100),
-                        observation_source_concept_id  VARCHAR(100),
-                        unit_source_value              VARCHAR(100),
-                        qualifier_source_id            VARCHAR(100),
-                        value_source_value             VARCHAR(100),
-                        observation_event_id           VARCHAR(100),
-                        obs_event_field_concept_id     VARCHAR(100),
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+CREATE TABLE Delphi.dbo.OMOP_INCR_OBSERVATION (
+             identity_context               VARCHAR(25),
+            observation_id                 VARCHAR(100),
+            person_id                      INTEGER,
+            event_cd                       INTEGER,
+            observation_date               DATE,
+            observation_DATETIME           DATETIMEOFFSET, -- TIMESTAMPTZ equivalent
+            observation_type_concept_id    INTEGER,
+            form_description               VARCHAR(400),
+            section_description            VARCHAR(400),
+            description                    VARCHAR(712),
+            value_as_number                INTEGER,
+            value_as_string                VARCHAR(510),
+            value_as_concept_id            INTEGER,
+            qualifier_concept_id           INTEGER,
+            unit_concept_id                INTEGER,
+            provider_id                    INTEGER,
+            visit_occurrence_id            INTEGER,
+            visit_detail_id                VARCHAR(100),
+            observation_source_value       VARCHAR(100),
+            observation_source_concept_id  VARCHAR(100),
+            unit_source_value              VARCHAR(100),
+            qualifier_source_id            VARCHAR(100),
+            value_source_value             VARCHAR(100),
+            observation_event_id           VARCHAR(100),
+            obs_event_field_concept_id     VARCHAR(100),
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_OBSERVATION_FINAL (
-                        identity_context               VARCHAR(25),
-                        observation_id                 VARCHAR(100),
-                        person_id                      INTEGER,
-                        event_cd                       INTEGER,
-                        observation_date               DATE,
-                        observation_datetime           DATETIMEOFFSET(0), -- TIMESTAMPTZ equivalent
-                        observation_type_concept_id    INTEGER,
-                        form_description               VARCHAR(400),
-                        section_description            VARCHAR(400),
-                        description                    VARCHAR(712),
-                        value_as_number                INTEGER,
-                        value_as_string                VARCHAR(510),
-                        value_as_concept_id            INTEGER,
-                        qualifier_concept_id           INTEGER,
-                        unit_concept_id                INTEGER,
-                        provider_id                    INTEGER,
-                        visit_occurrence_id            INTEGER,
-                        visit_detail_id                VARCHAR(100),
-                        observation_source_value       VARCHAR(100),
-                        observation_source_concept_id  VARCHAR(100),
-                        unit_source_value              VARCHAR(100),
-                        qualifier_source_id            VARCHAR(100),
-                        value_source_value             VARCHAR(100),
-                        observation_event_id           VARCHAR(100),
-                        obs_event_field_concept_id     VARCHAR(100),
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+CREATE TABLE Delphi.dbo.OMOP_INCR_OBSERVATION_FINAL (
+            identity_context               VARCHAR(25),
+            observation_id                 VARCHAR(100),
+            person_id                      INTEGER,
+            event_cd                       INTEGER,
+            observation_date               DATE,
+            observation_datetime           DATETIMEOFFSET(0), -- TIMESTAMPTZ equivalent
+            observation_type_concept_id    INTEGER,
+            form_description               VARCHAR(400),
+            section_description            VARCHAR(400),
+            description                    VARCHAR(712),
+            value_as_number                INTEGER,
+            value_as_string                VARCHAR(510),
+            value_as_concept_id            INTEGER,
+            qualifier_concept_id           INTEGER,
+            unit_concept_id                INTEGER,
+            provider_id                    INTEGER,
+            visit_occurrence_id            INTEGER,
+            visit_detail_id                VARCHAR(100),
+            observation_source_value       VARCHAR(100),
+            observation_source_concept_id  VARCHAR(100),
+            unit_source_value              VARCHAR(100),
+            qualifier_source_id            VARCHAR(100),
+            value_source_value             VARCHAR(100),
+            observation_event_id           VARCHAR(100),
+            obs_event_field_concept_id     VARCHAR(100),
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_SPECIMEN (
+CREATE TABLE Delphi.dbo.OMOP_INCR_SPECIMEN (
 			identity_context               VARCHAR(255) NOT NULL,
 			specimen_id                    INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -250,9 +250,9 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_SPECIMEN (
 			unit_source_value              VARCHAR(50) NULL,
 			anatomic_site_source_value     VARCHAR(50) NULL,
 			disease_status_source_value    VARCHAR(50) NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.OMOP_INCR_MEASUREMENT (
+CREATE TABLE Delphi.dbo.OMOP_INCR_MEASUREMENT (
 			identity_context               VARCHAR(255) NOT NULL,
 			measurement_id                 INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -277,12 +277,12 @@ CREATE TABLE @omopDatabaseSchema.OMOP_INCR_MEASUREMENT (
 			value_source_value             VARCHAR(50) NULL,
 			measurement_event_id           BIGINT NULL,
 			meas_event_field_concept_id    INTEGER NULL,
-                        updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0) );
 
 -- TODO: Datatypes for this table need to be checked/verified
-CREATE TABLE @omopDatabaseSchema.OMOP_CODE_VALUE (
-                        code_id                        INTEGER,
-                        code_display                   VARCHAR(100),
-                        code_type                      VARCHAR(100),
-                        table_used                     VARCHAR(100),
-                        column_used                    VARCHAR(400) );
+CREATE TABLE Delphi.dbo.OMOP_CODE_VALUE (
+            code_id                        INTEGER,
+            code_display                   VARCHAR(100),
+            code_type                      VARCHAR(100),
+            table_used                     VARCHAR(100),
+            column_used                    VARCHAR(400) );

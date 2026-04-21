@@ -1,17 +1,18 @@
 -- sql server DDL Specification for OMOP staging tables
 -- These tables are the temporary destination for Cerner Extracts prior to transformation steps
-
-CREATE TABLE @omopDatabaseSchema.STG_CARE_SITE (
-                        identity_context               VARCHAR(255) NOT NULL,
-			care_site_id                   INTEGER NOT NULL,
+DROP TABLE Delphi.dbo.STG_CARE_SITE;
+CREATE TABLE Delphi.dbo.STG_CARE_SITE (
+            identity_context               VARCHAR(255) NOT NULL,
+			care_site_id                   BIGINT NOT NULL,
 			care_site_name                 VARCHAR(255) NULL,
 			place_of_service_concept_id    INTEGER NULL,
+			street_addr                    VARCHAR(50) NOT NULL,
 			location_id                    INTEGER NULL,
 			care_site_source_value         VARCHAR(50) NULL,
 			place_of_service_source_value  VARCHAR(50) NULL,
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_LOCATION (
+CREATE TABLE Delphi.dbo.STG_LOCATION (
 			identity_context               VARCHAR(255) NOT NULL,
 			location_id                    INTEGER NOT NULL,
 			address_1                      VARCHAR(50) NULL,
@@ -27,14 +28,14 @@ CREATE TABLE @omopDatabaseSchema.STG_LOCATION (
 			longitude                      FLOAT NULL,
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_PROVIDER (
+CREATE TABLE Delphi.dbo.STG_PROVIDER (
 			identity_context               VARCHAR(255) NOT NULL,
 			provider_id                    INTEGER NOT NULL,
 			provider_name                  VARCHAR(255) NULL,
 			npi                            VARCHAR(20) NULL,
 			dea                            VARCHAR(20) NULL,
 			specialty_concept_id           INTEGER NULL,
-			care_site_id                   INTEGER NULL,
+			care_site_id                   BIGINT NULL,
 			year_of_birth                  INTEGER NULL,
 			gender_concept_id              INTEGER NULL,
 			provider_source_value          VARCHAR(50) NULL,
@@ -44,7 +45,7 @@ CREATE TABLE @omopDatabaseSchema.STG_PROVIDER (
 			gender_source_concept_id       INTEGER NULL,
         	updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_PERSON (
+CREATE TABLE Delphi.dbo.STG_PERSON (
 			identity_context               VARCHAR(255) NOT NULL,
 			person_id                      INTEGER NOT NULL,
 			gender_concept_id              INTEGER NOT NULL,
@@ -56,7 +57,7 @@ CREATE TABLE @omopDatabaseSchema.STG_PERSON (
 			ethnicity_concept_id           INTEGER NOT NULL,
 			location_id                    INTEGER NULL,
 			provider_id                    INTEGER NULL,
-			care_site_id                   INTEGER NULL,
+			care_site_id                   BIGINT NULL,
 			person_source_value            VARCHAR(50) NULL,
 			gender_source_value            VARCHAR(50) NULL,
 			gender_source_concept_id       INTEGER NULL,
@@ -66,7 +67,7 @@ CREATE TABLE @omopDatabaseSchema.STG_PERSON (
 			ethnicity_source_concept_id    INTEGER NULL,
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_VISIT_OCCURRENCE (
+CREATE TABLE Delphi.dbo.STG_VISIT_OCCURRENCE (
 			identity_context               VARCHAR(255) NOT NULL,
 			visit_occurrence_id            INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -77,7 +78,7 @@ CREATE TABLE @omopDatabaseSchema.STG_VISIT_OCCURRENCE (
 			visit_end_datetime             DATETIME NULL,
 			visit_type_concept_id          INTEGER NOT NULL,
 			provider_id                    INTEGER NULL,
-			care_site_id                   INTEGER NULL,
+			care_site_id                   BIGINT NULL,
 			visit_source_value             VARCHAR(50) NULL,
 			visit_source_concept_id        INTEGER NULL,
 			admitted_from_concept_id       INTEGER NULL,
@@ -87,7 +88,7 @@ CREATE TABLE @omopDatabaseSchema.STG_VISIT_OCCURRENCE (
 			preceding_visit_occurrence_id  INTEGER NULL,
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_VISIT_DETAIL (
+CREATE TABLE Delphi.dbo.STG_VISIT_DETAIL (
 			identity_context               VARCHAR(255) NOT NULL,
 			visit_detail_id                INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -98,7 +99,7 @@ CREATE TABLE @omopDatabaseSchema.STG_VISIT_DETAIL (
 			visit_detail_end_datetime      DATETIME NULL,
 			visit_detail_type_concept_id   INTEGER NOT NULL,
 			provider_id                    INTEGER NULL,
-			care_site_id                   INTEGER NULL,
+			care_site_id                   BIGINT NULL,
 			visit_detail_source_value      VARCHAR(50) NULL,
 			visit_detail_source_concept_id INTEGER NULL,
 			admitted_from_concept_id       INTEGER NULL,
@@ -110,7 +111,7 @@ CREATE TABLE @omopDatabaseSchema.STG_VISIT_DETAIL (
 			visit_occurrence_id            INTEGER NOT NULL,
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_CONDITION_OCCURRENCE (
+CREATE TABLE Delphi.dbo.STG_CONDITION_OCCURRENCE (
 			identity_context               VARCHAR(255) NOT NULL,
 			condition_occurrence_id        INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -130,7 +131,7 @@ CREATE TABLE @omopDatabaseSchema.STG_CONDITION_OCCURRENCE (
 			condition_status_source_value  VARCHAR(50) NULL,
                         updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_PROCEDURE_OCCURRENCE (
+CREATE TABLE Delphi.dbo.STG_PROCEDURE_OCCURRENCE (
 			identity_context               VARCHAR(255) NOT NULL,
 			procedure_occurrence_id        INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -150,7 +151,7 @@ CREATE TABLE @omopDatabaseSchema.STG_PROCEDURE_OCCURRENCE (
 			modifier_source_value          VARCHAR(50) NULL,
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_DRUG_EXPOSURE (
+CREATE TABLE Delphi.dbo.STG_DRUG_EXPOSURE (
 			identity_context               VARCHAR(255) NOT NULL,
 			drug_exposure_id               INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -177,7 +178,7 @@ CREATE TABLE @omopDatabaseSchema.STG_DRUG_EXPOSURE (
 			dose_unit_source_value         VARCHAR(50) NULL,
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_OBSERVATION (
+CREATE TABLE Delphi.dbo.STG_OBSERVATION (
             identity_context               VARCHAR(25),
             observation_id                 VARCHAR(100),
             person_id                      INTEGER,
@@ -205,7 +206,7 @@ CREATE TABLE @omopDatabaseSchema.STG_OBSERVATION (
             obs_event_field_concept_id     VARCHAR(100),
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_OBSERVATION_FINAL (
+CREATE TABLE Delphi.dbo.STG_OBSERVATION_FINAL (
             identity_context               VARCHAR(25),
             observation_id                 VARCHAR(100),
             person_id                      INTEGER,
@@ -233,7 +234,7 @@ CREATE TABLE @omopDatabaseSchema.STG_OBSERVATION_FINAL (
             obs_event_field_concept_id     VARCHAR(100),
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_SPECIMEN (
+CREATE TABLE Delphi.dbo.STG_SPECIMEN (
 			identity_context               VARCHAR(255) NOT NULL,
 			specimen_id                    INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -252,7 +253,7 @@ CREATE TABLE @omopDatabaseSchema.STG_SPECIMEN (
 			disease_status_source_value    VARCHAR(50) NULL,
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
-CREATE TABLE @omopDatabaseSchema.STG_MEASUREMENT (
+CREATE TABLE Delphi.dbo.STG_MEASUREMENT (
 			identity_context               VARCHAR(255) NOT NULL,
 			measurement_id                 INTEGER NOT NULL,
 			person_id                      INTEGER NOT NULL,
@@ -280,7 +281,7 @@ CREATE TABLE @omopDatabaseSchema.STG_MEASUREMENT (
             updt_dt_tm                     DATETIMEOFFSET(0) );
 
 -- TODO: Datatypes for this table need to be checked/verified
-CREATE TABLE @omopDatabaseSchema.OMOP_CODE_VALUE (
+CREATE TABLE Delphi.dbo.OMOP_CODE_VALUE (
             code_id                        INTEGER,
             code_display                   VARCHAR(100),
             code_type                      VARCHAR(100),

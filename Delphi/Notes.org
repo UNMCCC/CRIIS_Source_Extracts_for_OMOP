@@ -1,0 +1,251 @@
+* 1. Config
+* 2. CareSite
+** HealtheIntent Source Tables/Columns
+UNMHSC_P126.ENCOUNTER
+    LOC_FACILITY_CD,
+UNMHSC_P126.ADDRESS
+    STREET_ADDR,
+    STREET_ADDR2,
+    ZIPCODE,
+    CITY,
+    STATE,
+    PARENT_ENTITY_ID,
+    ADDRESS_TYPE_SEQ,
+    PARENT_ENTITY_NAME,
+    ADDRESS_TYPE_CD,
+    ACTIVE_IND,
+    updt_dt_tm,
+UNMHSC_P126.CODE_VALUE
+    CODE_VALUE,
+    DESCRIPTION,
+*** Vertica SQL
+#+begin_src
+SELECT
+    'UNMHSC_P126.ADDRESS' as Identity_Context
+    ,PARENT_ENTITY_ID AS CARE_SITE_ID
+    ,DESCRIPTION AS care_site_name
+    ,0 AS place_of_service_concept_id
+    ,STREET_ADDR
+    ,cast(HASH ((PARENT_ENTITY_ID) || (STREET_ADDR)) AS INT) AS LOCATION_ID
+    ,description AS care_site_source_value
+    ,CASE DESCRIPTION
+		WHEN 'UNMHSC/Cancer Center'
+			THEN 'Outpatient'
+		WHEN 'UNMHSC/CASAA + Milagro Programs'
+			THEN 'Outpatient'
+		ELSE null
+	END AS place_of_service_source_value
+    ,updt_dt_tm::TIMESTAMP AS UPDT_DT_TM
+FROM (
+	SELECT e.LOC_FACILITY_CD
+		,cv.DESCRIPTION
+		,a.STREET_ADDR
+		,a.STREET_ADDR2
+		,a.ZIPCODE
+		,a.CITY
+		,a.STATE
+		,a.PARENT_ENTITY_ID
+		,a.updt_dt_tm
+	FROM UNMHSC_P126.ENCOUNTER e
+	LEFT JOIN (
+		SELECT *
+			,ROW_NUMBER() OVER (
+				PARTITION BY a.PARENT_ENTITY_ID ORDER BY a.ADDRESS_TYPE_SEQ,a.updt_dt_tm DESC
+				) AS updt_ord
+		FROM UNMHSC_P126.ADDRESS a
+		WHERE PARENT_ENTITY_NAME = 'LOCATION'
+			AND ADDRESS_TYPE_CD = '405134056'
+			AND PARENT_ENTITY_ID NOT IN ('1133767')
+		) a ON e.LOC_FACILITY_CD = a.PARENT_ENTITY_ID
+		AND a.ACTIVE_IND = 1
+		AND a.updt_ord = 1
+	LEFT JOIN UNMHSC_P126.CODE_VALUE cv ON e.LOC_FACILITY_CD = cv.CODE_VALUE
+	WHERE STREET_ADDR ILIKE 'PO%'
+		OR LEFT(STREET_ADDR, 1) BETWEEN '1'
+			AND '9'
+	GROUP BY e.LOC_FACILITY_CD
+		,cv.DESCRIPTION
+		,a.STREET_ADDR
+		,a.STREET_ADDR2
+		,a.ZIPCODE
+		,a.CITY
+		,a.STATE
+		,a.PARENT_ENTITY_ID
+		,a.updt_dt_tm
+	ORDER BY e.LOC_FACILITY_CD
+	) csite
+GROUP BY 1
+	,2
+	,3
+	,4
+	,5
+	,6
+	,7
+	,8
+  ,9
+#+end_src
+Query results exported to P:\...\Steve\P126_ETL\OMOP_CARESITE_FROM_EDW.csv
+** unmmgdss extract query
+None. Use data in OMOP_CARESITE_FROM_EDW.csv
+
+* 3. Location
+** HealtheIntent Source Tables/Columns
+UNMHSC_EDW_MILL_CDS.MD_D_PERSON_ADDRESS
+    address_id,
+    ADDRESS_LINE_1,
+    ADDRESS_LINE_2,
+    city,
+    STATE_RAW_DISPLAY,
+    POSTAL_CODE,
+    county,
+    address_id,
+    COUNTRY_RAW_CODE,
+    COUNTRY_RAW_DISPLAY,
+    updt_raw_dt_tm,
+    ADDRESS_TYPE_RAW_DISPLAY,
+    current_ind,
+UNMHSC_EDW_MILL_CDS.MD_D_PERSON
+    person_id
+UNMHSC_EDW_OMOP.OMOP_CARE_SITE
+UNMHSC_P126.ADDRESS
+*** Vertica SQL
+Runs on HealtheIntent (https://unmhsc.analyticsquerytool.healtheintent.com/)
+#+begin_src
+SELECT DISTINCT
+    pa.address_id                         AS "LOCATION_ID",
+    pa.ADDRESS_LINE_1                     AS "ADDRESS_1",
+    pa.ADDRESS_LINE_2                     AS "ADDRESS_2",
+    pa.city,
+    pa.STATE_RAW_DISPLAY                  AS "STATE",
+    LEFT(pa.POSTAL_CODE, 5)               AS "zip",
+    NULL                                  AS "county",
+    pa.address_id                         AS "LOCATION_SOURCE_VALUE",
+    pa.COUNTRY_RAW_CODE::VARCHAR(65000)   AS "COUNTRY_CONCEPT_ID",
+    pa.COUNTRY_RAW_DISPLAY                AS "COUNTRY_SOURCE_VALUE",
+    0.0                                   AS "LATITUDE",
+    0.0                                   AS "LONGITUDE",
+    pa.updt_raw_dt_tm                     AS "UPDT_DT_TM"
+FROM UNMHSC_EDW_MILL_CDS.MD_D_PERSON_ADDRESS AS pa
+JOIN UNMHSC_EDW_MILL_CDS.MD_D_PERSON AS p
+    ON pa.person_id = p.person_id
+WHERE pa.ADDRESS_TYPE_RAW_DISPLAY IN ('home', 'mailing', 'billing', 'Bill To')
+AND pa.current_ind = 1;
+#+end_src
+** unmmgdss extract query
+#+begin_src
+SELECT
+    'UNMMGDSS_DSS_PT_DIM_V'              AS IDENTITY_CONTEXT,
+    CHECKSUM(pt_corrected_mrn, pt_addr1) AS LOCATION_ID,
+    pt_addr1                             AS ADDRESS_1,
+    pt_addr2                             AS ADDRESS_2,
+    pt_city                              AS CITY,
+    pt_state                             AS STATE,
+    LEFT(pt_zip, 5)                      AS ZIP,
+    pt_county                            AS COUNTY,
+    CHECKSUM(pt_corrected_mrn, pt_addr1) AS LOCATION_SOURCE_VALUE,
+    NULL                                 AS COUNTRY_CONCEPT_ID,
+    NULL                                 AS COUNTRY_SOURCE_VALUE,
+    0.0                                  AS LATITUDE,
+    0.0                                  AS LONGITUDE,
+    pt_edit_date                         AS UPDT_DT_TM,
+    pt_corrected_mrn
+FROM [unmmgdss].[dss].[pt_dim_v]
+WHERE pt_addr1 <> '?'
+#+end_src
+
+Info on pt_dim_v View: There are two mrn fields in the view.  pt_mrn and
+pt_corrected_mrn.  If you have other data you're joining on, you join on pt_mrn and
+disply/output pt_corrected_mrn.  So if a patient had five different mrns due to how they
+were registered for different encounters, there will be five records with different
+pt_mrn but the pt_corrected_mrn will be their correct one.
+
+**NB.** Need to add care_site addresses to location table
+
+* 4. Provider
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 5. Person
+** HealtheIntent Source Tables/Columns
+UNMHSC_EDW_MILL_CDS.MD_D_PERSON
+    person_id,
+    mrn,
+    GENDER_CODE
+    birth_date
+    BIRTH_DT_TM                             AS BIRTH_DATETIME,
+    DECEASED_DATE
+    RACE_RAW_CODE                           AS RACE_CONCEPT_ID,
+    ETHNICITY_raw_CODE
+    mill_update_dt_tm
+** unmmgdss extract query
+#+begin_src
+SELECT DISTINCT TOP (1000)
+    'UNMMGDSS_P126_RAW_PERSON' AS IDENTITY_CONTEXT,
+    PERSON_ID,
+    [unmmgdss].p126_reporting.get_mrn_from_person_id([person_id]) AS MRN,
+    CASE
+        WHEN [sex_cd] = 358
+            THEN 'F'
+        WHEN [sex_cd] = 359
+            THEN 'M'
+        ELSE ''
+    END AS GENDER_CONCEPT_ID,
+    YEAR([birth_dt_tm]) AS YEAR_OF_BIRTH,
+    MONTH([birth_dt_tm]) AS MONTH_OF_BIRTH,
+    DAY([birth_dt_tm]) AS DAY_OF_BIRTH,
+    FORMAT(TRY_CAST([birth_dt_tm] AS DATETIME), 'yyyy-MM-dd HH:mm:ss') AS BIRTH_DATETIME,
+    ISNULL(FORMAT(TRY_CAST([deceased_dt_tm] AS DATETIME), 'yyyy-MM-dd HH:mm:ss'), '') AS DECEASED_DATE,
+    [race_cd] AS RACE_CONCEPT_ID,
+    [ethnic_grp_cd] AS ETHNICITY_CONCEPT_ID,
+    0 AS LOCATION_ID,
+    0 AS PROVIDER_ID,
+    0 AS CARE_SITE_ID,
+    [person_id] AS PERSON_SOURCE_VALUE,
+    CASE
+        WHEN [sex_cd] = 358
+            THEN 'F'
+        WHEN [sex_cd] = 359
+            THEN 'M'
+        ELSE ''
+    END AS GENDER_SOURCE_VALUE,
+    CASE
+        WHEN [sex_cd] = 358
+            THEN 'F'
+        WHEN [sex_cd] = 359
+            THEN 'M'
+        ELSE ''
+    END AS GENDER_SOURCE_CONCEPT_ID,
+    [race_cd] AS RACE_SOURCE_VALUE,
+    [race_cd] AS RACE_SOURCE_CONCEPT_ID,
+    [ethnic_grp_cd] AS ETHNICITY_SOURCE_VALUE,
+    [ethnic_grp_cd] AS ETHNICITY_SOURCE_CONCEPT_ID,
+    [updt_dt_tm] AS UPDT_DT_TM
+FROM [unmmgdss].[p126_raw].[person] p
+JOIN [unmmgdss].dss.pt_dim_v pdv ON [unmmgdss].p126_reporting.get_mrn_from_person_id(p.person_id) = pdv.pt_corrected_mrn
+#+end_src
+* 6. Visit Occurrence
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 7. Visit Detail
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 8. Condition
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 9. Proceedure
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 10. Drug Exposure
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 11. Observation
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 12. Observation Final
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 13. Specimen
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
+* 14. Measurement
+** HealtheIntent Source Tables/Columns
+** unmmgdss extract query
