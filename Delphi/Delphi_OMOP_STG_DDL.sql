@@ -16,7 +16,7 @@ CREATE TABLE Delphi.dbo.STG_LOCATION (
 			identity_context               VARCHAR(255) NOT NULL,
 			location_id                    INTEGER NOT NULL,
 			address_1                      VARCHAR(50) NULL,
-			address_2                      VARCHAR(50) NULL,
+			address_2                      VARCHAR(100) NULL,
 			city                           VARCHAR(50) NULL,
 			state                          VARCHAR(2) NULL,
 			zip                            VARCHAR(9) NULL,
@@ -26,7 +26,8 @@ CREATE TABLE Delphi.dbo.STG_LOCATION (
 			country_source_value           VARCHAR(80) NULL,
 			latitude                       FLOAT NULL,
 			longitude                      FLOAT NULL,
-            updt_dt_tm                     DATETIMEOFFSET(0) );
+            updt_dt_tm                     DATETIMEOFFSET(0),
+			pt_corrected_mrn               VARCHAR(20) NULL );
 
 CREATE TABLE Delphi.dbo.STG_PROVIDER (
 			identity_context               VARCHAR(255) NOT NULL,

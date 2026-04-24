@@ -26,7 +26,9 @@ CONFIG_PATH = pathlib.Path(__file__).parent / "config.yaml"
 # Dependency-ordered registry. Empty until per-step modules are implemented;
 # see ArchitecturePlan.md §4 and the plan in /home/smathias/.claude/plans/.
 STEPS: list[str] = [
+    "step_01_config",
     "step_02_care_site",
+    "step_03_location",
 ]
 
 
@@ -52,10 +54,15 @@ def main() -> int:
                 log.info("[%s] disabled in config — skipping", name)
                 continue
 
+            try:
+                module = importlib.import_module(name)
+            except ModuleNotFoundError:
+                log.info("[%s] not implemented yet — skipping", name)
+                continue
+
             log.info("[%s] starting", name)
             start = time.perf_counter()
             try:
-                module = importlib.import_module(name)
                 rows = module.run(src_conn, dst_conn, cfg)
             except Exception:
                 elapsed = time.perf_counter() - start

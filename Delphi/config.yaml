@@ -24,8 +24,8 @@ lookback_days: 14
 # the orchestrator's registry is the source of truth for execution order.
 steps:
   step_01_config: true
-  step_02_care_site: true
-  step_03_location: true
+  step_02_care_site: false
+  step_03_location: false
   step_04_provider: true
   step_05_person: true
   step_06_visit_occurrence: true

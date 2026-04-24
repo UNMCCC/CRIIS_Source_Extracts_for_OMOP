@@ -40,6 +40,23 @@ Architectural Decision Records (ADRs) for the Delphi OMOP incremental ETL projec
 - ✅ Staging tables give a debuggable intermediate.
 - ❌ Extra DDL surface (`STG_*` + `OMOP_INCR_*`) and TRUNCATE/INSERT discipline per run.
 
+### ADR-003: Location is a full refresh — no lookback filter (2026-04-22)
+
+**Context:**
+- The default per-step pattern filters extracts by `DATEDIFF(DAY, updt_dt_tm, GETDATE()) <= lookback_days`.
+- Step 3 (Location) sources person addresses from `unmmgdss.dss.pt_dim_v` (`pt_edit_date`) and care-site addresses from a static CSV (`OMOP_CARESITE_LOCATION.csv`, UTF-16, pipe-delimited). Location volume is low and addresses can shift for historical patients outside the 14-day window.
+
+**Decision:**
+- Step 3 does **not** apply the lookback window. Every run pulls all eligible person addresses (`pt_addr1 <> '?'`) plus every care-site row from the CSV, `TRUNCATE`s `STG_LOCATION`, and reloads.
+- Care-site `location_id` values are read from the CSV as-is (no CHECKSUM recomputation). They must continue to equal step_02_care_site's `CHECKSUM(CAST(care_site_id AS VARCHAR(MAX)) + street_addr)` so `CARE_SITE.LOCATION_ID` resolves against `LOCATION.LOCATION_ID` — this is now a data invariant of the CSV rather than a code invariant.
+
+**Alternatives Considered:**
+- Incremental by `pt_edit_date` like the default pattern → Rejected: would miss address corrections applied outside the 14-day window.
+
+**Consequences:**
+- ✅ Simple and always-correct for this low-volume table.
+- ❌ Every run rehydrates the full table; fine given row counts but worth revisiting if person-address volume grows.
+
 ### ADR-002: Use `CHECKSUM()` as the HealtheIntent `HASH()` substitute (seeded from ArchitecturePlan.md)
 
 **Context:**

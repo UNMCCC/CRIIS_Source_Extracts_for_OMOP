@@ -82,7 +82,7 @@ GROUP BY 1
 	,6
 	,7
 	,8
-  ,9
+      ,9
 #+end_src
 Query results exported to P:\...\Steve\P126_ETL\OMOP_CARESITE_FROM_EDW.csv
 ** unmmgdss extract query
@@ -163,7 +163,49 @@ pt_mrn but the pt_corrected_mrn will be their correct one.
 
 * 4. Provider
 ** HealtheIntent Source Tables/Columns
+UNMHSC_EDW_MILL_CDS.md_d_Personnel
+
 ** unmmgdss extract query
+#+begin_src
+SELECT
+    'UNMMGDSS_P126_RAW.PRSNL'             AS IDENTITY_CONTEXT,
+    person_id                             AS PROVIDER_ID,
+    name_full_formatted                   AS PROVIDER_NAME,
+    [unmmgdss].[p126_reporting].get_npi_from_prsnl_id(person_id) AS NPI,
+    NULL                                  AS DEA,
+    0                                     AS SPECIALTY_CONCEPT_ID,
+    0                                     AS CARE_SITE_ID,
+    0                                     AS YEAR_OF_BIRTH,
+    0                                     AS GENDER_CONCEPT_ID,
+    person_id                             AS PROVIDER_SOURCE_VALUE,
+    NULL                                  AS SPECIALTY_SOURCE_VALUE,
+    0                                     AS SPECIALTY_SOURCE_CONCEPT_ID,
+    NULL                                  AS GENDER_SOURCE_VALUE,
+    0                                     AS GENDER_SOURCE_CONCEPT_ID,
+    upd_dt_tm                             AS UPDT_DT_TM
+#+end_src
+
+*** update for DEA
+#+begin_src
+SELECT
+    person_id,
+    alias AS DEA
+FROM [unmmgdss].[p126_raw].[prsnl_alias]
+WHERE prsnl_alias_type_cd = 851 -- DOCDEA
+    AND active_ind = 1
+    AND person_id = ?
+#+end_src
+
+*** update for specialty fields
+- dss.prov_unq_dim.prov_unq_dob -> has DOB as datetime2(7)
+- dss.prov_unq_dim.prov_unq_mpv_spec_name -> has something similar to
+  TAXONOMY_CLASSIFICATION but there's nothing like TAXONOMY_SPECIALIZATION
+- also nothing like TAXONOMY_CODE
+  Voss 207R0000
+
+*** update for care site
+
+
 * 5. Person
 ** HealtheIntent Source Tables/Columns
 UNMHSC_EDW_MILL_CDS.MD_D_PERSON
@@ -181,7 +223,7 @@ UNMHSC_EDW_MILL_CDS.MD_D_PERSON
 SELECT DISTINCT TOP (1000)
     'UNMMGDSS_P126_RAW_PERSON' AS IDENTITY_CONTEXT,
     PERSON_ID,
-    [unmmgdss].p126_reporting.get_mrn_from_person_id([person_id]) AS MRN,
+    [unmmgdss].[p126_reporting].get_mrn_from_person_id([person_id]) AS MRN,
     CASE
         WHEN [sex_cd] = 358
             THEN 'F'
