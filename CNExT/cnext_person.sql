@@ -46,6 +46,20 @@ LTV - 2/8/2022 - wrapped the hard-coded values + a table column (i.e., '160@' + 
 */
 SET NOCOUNT ON;
 SELECT 'IDENTITY_CONTEXT|SOURCE_PK|PERSON_ID|GENDER_CONCEPT_ID|YEAR_OF_BIRTH|MONTH_OF_BIRTH|DAY_OF_BIRTH|BIRTH_DATETIME|DEATH_DATETIME|RACE_CONCEPT_ID|ETHNICITY_CONCEPT_ID|LOCATION_ID|PROVIDER_ID|CARE_SITE_ID|PERSON_SOURCE_VALUE|GENDER_SOURCE_VALUE|GENDER_SOURCE_CONCEPT_ID|RACE_SOURCE_VALUE|RACE_SOURCE_CONCEPT_ID|ETHNICITY_SOURCE_VALUE|ETHNICITY_SOURCE_CONCEPT_ID|MRN|Modified_DtTm';
+-- A patient can have several Hospital records with different providers, which
+-- produced duplicate person rows. Pick one per patient: the provider on the most
+-- recent Hospital record (by Date First Contact, then UK) that has a real value.
+-- Computed once for all patients here (a correlated TOP 1 sub-select was too slow).
+WITH Provider AS (
+    SELECT t.fk1 AS patient_uk
+          ,he.F00675
+          ,ROW_NUMBER() OVER (PARTITION BY t.fk1 ORDER BY h.F00024 DESC, h.uk DESC) AS rn
+      FROM UNM_CNExTCases.dbo.Tumor t WITH (NOLOCK)
+      JOIN UNM_CNExTCases.dbo.Hospital h WITH (NOLOCK) ON h.fk2 = t.uk
+      JOIN UNM_CNExTCases.dbo.HospExtended he WITH (NOLOCK) ON he.uk = h.uk
+     WHERE he.F00675 IS NOT NULL
+       AND he.F00675 <> '00000000'
+)
 SELECT DISTINCT 'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
       ,rsSource.uk AS SOURCE_PK
       ,rsSource.uk AS PERSON_ID                                       /*10*/
@@ -93,17 +107,7 @@ SELECT DISTINCT 'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
       ,ISNULL(PatExtended.F00138, '') AS ETHNICITY_CONCEPT_ID                            /*190*/
       ,PatExtended.UK AS LOCATION_ID                                                     /*1830*/
 	  -- PROVIDER_ID filtering added 20261119 -SLM
-	  -- A patient can have several Hospital records with different providers, which
-	  -- produced duplicate person rows. Pick one: the provider on the most recent
-	  -- Hospital record (by Date First Contact, then UK) that has a real value.
-	  ,ISNULL((SELECT TOP 1 he.F00675
-	             FROM UNM_CNExTCases.dbo.Tumor t WITH (NOLOCK)
-	             JOIN UNM_CNExTCases.dbo.Hospital h WITH (NOLOCK) ON h.fk2 = t.uk
-	             JOIN UNM_CNExTCases.dbo.HospExtended he WITH (NOLOCK) ON he.uk = h.uk
-	            WHERE t.fk1 = rsSource.uk
-	              AND he.F00675 IS NOT NULL
-	              AND he.F00675 <> '00000000'
-	            ORDER BY h.F00024 DESC, h.uk DESC), '') AS PROVIDER_ID               /*2460*/
+	  ,ISNULL(Provider.F00675, '') AS PROVIDER_ID                                    /*2460*/ -- see Provider CTE above
       ,ISNULL(PatExtended.F00003, '') AS CARE_SITE_ID                                    /*21*/
 	  ,ISNULL(PatExtended.F00004, '') AS PERSON_SOURCE_VALUE                         /*20*/
       ,ISNULL(rsSource.F00022, '') AS GENDER_SOURCE_VALUE                                /*220*/
@@ -118,5 +122,6 @@ SELECT DISTINCT 'CNEXT PATIENT(OMOP_PERSON)' AS IDENTITY_CONTEXT
   JOIN UNM_CNExTCases.dbo.PatExtended WITH (NOLOCK) on PatExtended.uk = rsSource.uk
   JOIN UNM_CNExTCases.dbo.Tumor WITH (NOLOCK) on rsSource.uk = Tumor.fk1
   JOIN UNM_CNExTCases.dbo.Hospital WITH (NOLOCK) on Tumor.uk = Hospital.fk2
+  LEFT JOIN Provider ON Provider.patient_uk = rsSource.uk AND Provider.rn = 1
  where Hospital.F00006 not in (999999998, 9999998, 999999, 9999)
    and Hospital.F00006 >= 1000
